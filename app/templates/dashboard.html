@@ -1,161 +1,202 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Labyrinth AI Enginer</title>
+    <title>Labyrinth Engine — Dark Forest</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-    <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
 
     <style>
         * {
-            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Inter', sans-serif;
+            box-sizing: border-box;
         }
 
         body {
-            background: radial-gradient(circle at top, #1a0000, #000);
-            color: white;
-            overflow-x: hidden;
+            background: radial-gradient(circle at center, #0a0f0a 0%, #000000 80%);
+            color: #b8c6b8;
+            font-family: "Georgia", serif;
+            overflow: hidden;
+            position: relative;
         }
 
-        header {
-            padding: 25px 40px;
-            font-size: 32px;
-            font-family: 'Creepster', cursive;
-            color: #e50914;
+        /* =============================
+           FOG LAYER
+        ============================== */
+
+        .fog {
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle at 50% 60%, rgba(40,50,40,0.3), transparent 70%);
+            animation: fogMove 20s infinite alternate ease-in-out;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        @keyframes fogMove {
+            from { transform: translateX(-20px); }
+            to   { transform: translateX(20px); }
+        }
+
+        /* =============================
+           TREES
+        ============================== */
+
+        .tree {
+            position: fixed;
+            bottom: 0;
+            font-size: 180px;
+            color: #0f1a0f;
+            opacity: 0.8;
+            transform-origin: bottom center;
+            animation: sway 6s infinite ease-in-out alternate;
+            pointer-events: none;
+        }
+
+        .tree:nth-child(1) { left: 5%; animation-duration: 7s; }
+        .tree:nth-child(2) { left: 25%; animation-duration: 6s; }
+        .tree:nth-child(3) { left: 50%; animation-duration: 8s; }
+        .tree:nth-child(4) { left: 75%; animation-duration: 7s; }
+        .tree:nth-child(5) { left: 90%; animation-duration: 6s; }
+
+        @keyframes sway {
+            from { transform: rotate(-2deg); }
+            to   { transform: rotate(2deg); }
+        }
+
+        /* =============================
+           FALLING LEAVES
+        ============================== */
+
+        .leaf {
+            position: fixed;
+            top: -20px;
+            font-size: 20px;
+            color: #3a4d3a;
+            pointer-events: none;
+            animation: fall linear forwards;
+        }
+
+        @keyframes fall {
+            to {
+                transform: translateY(110vh) rotate(360deg);
+                opacity: 0.2;
+            }
+        }
+
+        /* =============================
+           UI PANEL
+        ============================== */
+
+        .panel {
+            position: relative;
+            width: 90%;
+            max-width: 1000px;
+            margin: 60px auto;
+            padding: 40px;
+            background: rgba(10,15,10,0.9);
+            border: 1px solid #1f2a1f;
+            box-shadow: 0 0 60px rgba(0,0,0,0.9);
+            z-index: 3;
+        }
+
+        h1 {
+            font-weight: normal;
+            margin-bottom: 20px;
+            font-size: 42px;
+            color: #e6f2e6;
             letter-spacing: 2px;
         }
 
-        .hero {
-            padding: 60px 40px;
-            text-align: left;
-        }
-
-        .hero h1 {
-            font-size: 46px;
-            margin-bottom: 15px;
-            color: #fff;
-        }
-
-        .hero p {
-            opacity: 0.8;
-            margin-bottom: 20px;
+        p {
+            margin-bottom: 30px;
+            font-style: italic;
+            font-size: 20px;
+            color: #9fb09f;
         }
 
         select {
+            background: #0b140b;
+            color: #cdd8cd;
+            border: 1px solid #1f2a1f;
             padding: 12px;
-            border-radius: 6px;
-            border: none;
-            min-width: 250px;
+            min-width: 320px;
+            font-size: 18px;
+            height: 180px;
+        }
+
+        select option {
+            padding: 6px;
         }
 
         button {
-            background: #e50914;
-            color: white;
-            border: none;
+            background: #141f14;
+            color: #d8e0d8;
+            border: 1px solid #2d3d2d;
             padding: 12px 20px;
-            border-radius: 6px;
-            font-weight: 600;
+            margin-left: 15px;
             cursor: pointer;
-            transition: 0.3s;
-            margin-left: 10px;
+            font-size: 18px;
         }
 
         button:hover {
-            background: #ff1a1a;
-            transform: scale(1.08);
-            box-shadow: 0 0 15px red;
-        }
-
-        .section {
-            padding: 40px;
+            background: #1c2a1c;
         }
 
         .cards {
+            margin-top: 40px;
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
             gap: 25px;
         }
 
         .card {
-            position: relative;
-            height: 340px;
-            border-radius: 12px;
-            overflow: hidden;
-            cursor: pointer;
-            transition: transform 0.4s ease;
+            background: rgba(15,20,15,0.95);
+            padding: 15px;
+            border: 1px solid #1f2a1f;
         }
 
         .card img {
             width: 100%;
-            height: 100%;
+            height: 220px;
             object-fit: cover;
-            transition: transform 0.6s ease, filter 0.6s ease;
+            filter: grayscale(30%) brightness(0.8);
+            margin-bottom: 10px;
         }
 
-        .card:hover img {
-            transform: scale(1.15);
-            filter: brightness(0.7) contrast(1.2);
+        .card h3 {
+            font-size: 16px;
+            color: #e6f2e6;
         }
 
-        .card:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 25px rgba(255, 0, 0, 0.6);
+        .card p {
+            font-size: 14px;
+            color: #9fb09f;
         }
 
-        .overlay {
-            position: absolute;
-            bottom: 0;
-            width: 100%;
-            padding: 25px;
-            background: linear-gradient(to top, rgba(0,0,0,0.95), transparent);
-            transform: translateY(30%);
-            transition: transform 0.4s ease;
+        @media (max-width:600px) {
+            h1 { font-size: 28px; }
+            p { font-size: 16px; }
+            select { width: 100%; min-width: unset; }
+            button { width: 100%; margin: 15px 0 0 0; }
+            .cards { grid-template-columns: 1fr; }
         }
 
-        .card:hover .overlay {
-            transform: translateY(0);
-        }
-
-        .overlay h3 {
-            font-size: 20px;
-            margin-bottom: 8px;
-        }
-
-        .overlay p {
-            font-size: 13px;
-            opacity: 0.8;
-        }
-
-        .badge {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background: #e50914;
-            padding: 5px 10px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: bold;
-            box-shadow: 0 0 10px red;
-        }
-
-        @media (max-width: 600px) {
-            .hero h1 {
-                font-size: 30px;
-            }
-        }
     </style>
 </head>
 
 <body>
 
-<header>Labyrinth AI Enginer</header>
+<div class="fog"></div>
 
-<section class="hero">
-    <h1>Choose Your Nightmare</h1>
-    <p>Select your fears. We’ll handle the rest.</p>
+<div class="tree">🌲</div>
+<div class="tree">🌲</div>
+<div class="tree">🌲</div>
+<div class="tree">🌲</div>
+<div class="tree">🌲</div>
+
+<div class="panel">
+    <h1>Enter the Dark Forest</h1>
+    <p>Select your path... if you dare.</p>
 
     <select id="themes" multiple>
         <option value="horror">Horror</option>
@@ -164,55 +205,69 @@
         <option value="thriller">Thriller</option>
         <option value="mystery">Mystery</option>
         <option value="coming-of-age">Coming of Age</option>
+        <option value="history">History</option>
+        <option value="science">Science</option>
     </select>
 
     <button onclick="getRecommendations()">Summon</button>
-</section>
 
-<section class="section">
     <div class="cards" id="results"></div>
-</section>
+</div>
 
 <script>
+
+/* Recommender unchanged */
+
 async function getRecommendations() {
     const select = document.getElementById("themes");
-    const selected = Array.from(select.selectedOptions).map(option => option.value);
+    const selected = [...select.selectedOptions].map(o => o.value);
 
-    if (selected.length === 0) {
-        alert("Select at least one fear...");
+    if (!selected.length) {
+        alert("Choose your fate...");
         return;
     }
 
-    const response = await fetch("/recommend", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            preferences: selected
-        })
-    });
+    try {
+        const response = await fetch("/recommend", {
+            method: "POST",
+            headers: {"Content-Type":"application/json"},
+            body: JSON.stringify({ preferences: selected })
+        });
 
-    const data = await response.json();
-    const resultsDiv = document.getElementById("results");
-    resultsDiv.innerHTML = "";
+        const data = await response.json();
+        const results = document.getElementById("results");
+        results.innerHTML = "";
 
-    data.forEach(book => {
-        const card = document.createElement("div");
-        card.className = "card";
-
-        card.innerHTML = `
-            <img src="${book.image}" alt="${book.title}">
-            <div class="badge">Recommended</div>
-            <div class="overlay">
+        data.forEach(book => {
+            const card = document.createElement("div");
+            card.className = "card";
+            card.innerHTML = `
+                <img src="${book.image}">
                 <h3>${book.title}</h3>
                 <p>${book.themes.join(", ")}</p>
-            </div>
-        `;
+            `;
+            results.appendChild(card);
+        });
 
-        resultsDiv.appendChild(card);
-    });
+    } catch {
+        alert("The forest rejects your request.");
+    }
 }
+
+/* Leaves */
+
+function spawnLeaf() {
+    const leaf = document.createElement("div");
+    leaf.className = "leaf";
+    leaf.innerHTML = "🍂";
+    leaf.style.left = Math.random() * window.innerWidth + "px";
+    leaf.style.animationDuration = (5 + Math.random() * 5) + "s";
+    document.body.appendChild(leaf);
+    setTimeout(() => leaf.remove(), 10000);
+}
+
+setInterval(spawnLeaf, 500);
+
 </script>
 
 </body>
