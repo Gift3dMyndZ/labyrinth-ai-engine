@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Stephen King Horror Stream</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: radial-gradient(circle at top, #1a0000, #000);
+            color: white;
+            overflow-x: hidden;
+        }
+
+        header {
+            padding: 25px 40px;
+            font-size: 32px;
+            font-family: 'Creepster', cursive;
+            color: #e50914;
+            letter-spacing: 2px;
+        }
+
+        .hero {
+            padding: 60px 40px;
+            text-align: left;
+        }
+
+        .hero h1 {
+            font-size: 46px;
+            margin-bottom: 15px;
+            color: #fff;
+        }
+
+        .hero p {
+            opacity: 0.8;
+            margin-bottom: 20px;
+        }
+
+        select {
+            padding: 12px;
+            border-radius: 6px;
+            border: none;
+            min-width: 250px;
+        }
+
+        button {
+            background: #e50914;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-left: 10px;
+        }
+
+        button:hover {
+            background: #ff1a1a;
+            transform: scale(1.08);
+            box-shadow: 0 0 15px red;
+        }
+
+        .section {
+            padding: 40px;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 25px;
+        }
+
+        .card {
+            position: relative;
+            height: 340px;
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.4s ease;
+        }
+
+        .card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.6s ease, filter 0.6s ease;
+        }
+
+        .card:hover img {
+            transform: scale(1.15);
+            filter: brightness(0.7) contrast(1.2);
+        }
+
+        .card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 25px rgba(255, 0, 0, 0.6);
+        }
+
+        .overlay {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            padding: 25px;
+            background: linear-gradient(to top, rgba(0,0,0,0.95), transparent);
+            transform: translateY(30%);
+            transition: transform 0.4s ease;
+        }
+
+        .card:hover .overlay {
+            transform: translateY(0);
+        }
+
+        .overlay h3 {
+            font-size: 20px;
+            margin-bottom: 8px;
+        }
+
+        .overlay p {
+            font-size: 13px;
+            opacity: 0.8;
+        }
+
+        .badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #e50914;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            box-shadow: 0 0 10px red;
+        }
+
+        @media (max-width: 600px) {
+            .hero h1 {
+                font-size: 30px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>Stephen King Horror Stream</header>
+
+<section class="hero">
+    <h1>Choose Your Nightmare</h1>
+    <p>Select your fears. We’ll handle the rest.</p>
+
+    <select id="themes" multiple>
+        <option value="horror">Horror</option>
+        <option value="psychological">Psychological</option>
+        <option value="supernatural">Supernatural</option>
+        <option value="thriller">Thriller</option>
+        <option value="mystery">Mystery</option>
+        <option value="coming-of-age">Coming of Age</option>
+    </select>
+
+    <button onclick="getRecommendations()">Summon</button>
+</section>
+
+<section class="section">
+    <div class="cards" id="results"></div>
+</section>
+
+<script>
+async function getRecommendations() {
+    const select = document.getElementById("themes");
+    const selected = Array.from(select.selectedOptions).map(option => option.value);
+
+    if (selected.length === 0) {
+        alert("Select at least one fear...");
+        return;
+    }
+
+    const response = await fetch("/recommend", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            preferences: selected
+        })
+    });
+
+    const data = await response.json();
+    const resultsDiv = document.getElementById("results");
+    resultsDiv.innerHTML = "";
+
+    data.forEach(book => {
+        const card = document.createElement("div");
+        card.className = "card";
+
+        card.innerHTML = `
+            <img src="${book.image}" alt="${book.title}">
+            <div class="badge">Recommended</div>
+            <div class="overlay">
+                <h3>${book.title}</h3>
+                <p>${book.themes.join(", ")}</p>
+            </div>
+        `;
+
+        resultsDiv.appendChild(card);
+    });
+}
+</script>
+
+</body>
+</html>

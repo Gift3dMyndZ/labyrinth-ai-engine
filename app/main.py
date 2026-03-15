@@ -6,7 +6,7 @@ from typing import List
 import json
 import os
 
-from app.ml_engine import recommend_books_by_preferences
+from .ml_engine import recommend_books_by_preferences
 
 app = FastAPI(title="Stephen King Survival API")
 

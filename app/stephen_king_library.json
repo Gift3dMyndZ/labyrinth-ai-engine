@@ -1999,4 +1999,30 @@
     "is_small_town": false,
     "cover_id": 12823955
   }
+
+  {
+    "title": "The Shining",
+    "themes": ["horror", "psychological"],
+    "image": "https://images.unsplash.com/photo-1509248961158-e54f6934749c"
+  },
+  {
+    "title": "IT",
+    "themes": ["horror", "coming-of-age"],
+    "image": "https://images.unsplash.com/photo-1508704019882-f9cf40e475b4"
+  },
+  {
+    "title": "Pet Sematary",
+    "themes": ["horror", "supernatural"],
+    "image": "https://images.unsplash.com/photo-1496347646636-ea47f7d6b37b"
+  },
+  {
+    "title": "Misery",
+    "themes": ["thriller", "psychological"],
+    "image": "https://images.unsplash.com/photo-1519681393784-d120267933ba"
+  },
+  {
+    "title": "The Stand",
+    "themes": ["supernatural", "thriller"],
+    "image": "https://images.unsplash.com/photo-1478147427282-58a87a120781"
+  }
 ]
