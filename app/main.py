@@ -56,8 +56,8 @@ def recommend(theme: str):
 # ==============================
 # STORY MODE ROUTE
 # ==============================
-@app.get("/story/{book}", response_class=HTMLResponse)
-def story_page(book: str):
+@app.get("/play/{book}", response_class=HTMLResponse)
+def play_page(book: str):
     story = get_character_story(book)
 
     if not story:

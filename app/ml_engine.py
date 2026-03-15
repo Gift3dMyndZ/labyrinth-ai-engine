@@ -4,7 +4,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
 # Load books
-with open("app/stephen_king_library.json") as f:
+with open("app/library.json") as f:
     books = json.load(f)
 
 df = pd.DataFrame(books)

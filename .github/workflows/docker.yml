@@ -32,5 +32,5 @@ jobs:
           push: true
           platforms: linux/amd64,linux/arm64
           tags: |
-            ${{ secrets.DOCKER_USERNAME }}/stephen-king-mlops:latest
-            ${{ secrets.DOCKER_USERNAME }}/stephen-king-mlops:${{ github.sha }}cle
+            ${{ secrets.DOCKER_USERNAME }}/labyrinth-ai-engine:latest
+            ${{ secrets.DOCKER_USERNAME }}/labyrinth-ai-engine:${{ github.sha }}cle
