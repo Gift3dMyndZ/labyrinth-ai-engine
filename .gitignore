@@ -211,3 +211,6 @@ __pycache__/
 .gitignore
 *.pyc
 .DS_Store
+venv/
+__pycache__/
+*.pyc
