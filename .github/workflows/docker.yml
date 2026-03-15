@@ -22,12 +22,12 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-          - name: Build and Push Docker Image
-          uses: docker/build-push-action@v5
-          with:
-            context: .
-            push: true
-            platforms: linux/amd64,linux/arm64
-            tags: |
-              ${{ secrets.DOCKER_USERNAME }}/stephen-king-mlops:latest
-              ${{ secrets.DOCKER_USERNAME }}/stephen-king-mlops:${{ github.sha }}
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          platforms: linux/amd64,linux/arm64
+          tags: |
+            ${{ secrets.DOCKER_USERNAME }}/stephen-king-mlops:latest
+            ${{ secrets.DOCKER_USERNAME }}/stephen-king-mlops:${{ github.sha }}
