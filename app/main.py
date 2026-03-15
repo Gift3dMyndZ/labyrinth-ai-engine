@@ -61,282 +61,151 @@ def story_page(book: str):
     story = get_character_story(book)
 
     if not story:
-        return "<h1 style='color:white;background:black;padding:40px;'>Story not found</h1>"
+        return "<h1>Story not found</h1>"
 
     html = f"""
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <title>{book} - Advanced Dungeon</title>
-        <style>
-            body {{
-                margin: 0;
-                background: black;
-                color: white;
-                font-family: Arial;
-                padding: 30px;
+<!DOCTYPE html>
+<html>
+<head>
+<title>{book} - Retro Maze</title>
+<style>
+body {{
+    margin: 0;
+    background: #222;
+    color: white;
+    font-family: monospace;
+    overflow: hidden;
+}}
+
+#ui {{
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 10;
+}}
+
+canvas {{
+    display: block;
+}}
+</style>
+</head>
+<body>
+
+<div id="ui">
+    <div>Health: <span id="health">100</span></div>
+    <div>Madness: <span id="madness">0</span></div>
+    <div>Use Arrow Keys or WASD</div>
+</div>
+
+<canvas id="game"></canvas>
+
+<script>
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let health = 100;
+let madness = 0;
+
+const map = [
+  [1,1,1,1,1,1,1,1],
+  [1,0,0,0,0,0,0,1],
+  [1,0,1,0,1,0,0,1],
+  [1,0,1,0,1,0,0,1],
+  [1,0,0,0,0,0,2,1],
+  [1,1,1,1,1,1,1,1]
+];
+
+let player = {{
+    x: 2,
+    y: 2,
+    dir: 0
+}};
+
+const FOV = Math.PI / 3;
+const DEPTH = 20;
+
+function castRays() {{
+    ctx.fillStyle = "#555";
+    ctx.fillRect(0, 0, canvas.width, canvas.height / 2);
+
+    ctx.fillStyle = "#777";
+    ctx.fillRect(0, canvas.height / 2, canvas.width, canvas.height / 2);
+
+    for (let i = 0; i < canvas.width; i++) {{
+        let rayAngle = (player.dir - FOV/2) + (i / canvas.width) * FOV;
+
+        for (let depth = 0; depth < DEPTH; depth += 0.1) {{
+            let targetX = player.x + Math.cos(rayAngle) * depth;
+            let targetY = player.y + Math.sin(rayAngle) * depth;
+
+            if (map[Math.floor(targetY)][Math.floor(targetX)] === 1) {{
+                let wallHeight = canvas.height / (depth * 0.5);
+
+                ctx.fillStyle = "rgb(" + (200 - depth*15) + ",0,0)";
+                ctx.fillRect(i, (canvas.height - wallHeight)/2, 1, wallHeight);
+                break;
             }}
 
-            .bar {{
-                height: 20px;
-                background: #222;
-                border-radius: 10px;
-                margin-bottom: 10px;
-                overflow: hidden;
+            if (map[Math.floor(targetY)][Math.floor(targetX)] === 2) {{
+                alert("You escaped the maze!");
+                location.reload();
             }}
+        }}
+    }}
+}}
 
-            .fill {{
-                height: 100%;
-                transition: width 0.4s ease;
-            }}
+function move(dx, dy) {{
+    let newX = player.x + dx;
+    let newY = player.y + dy;
 
-            .health {{ background: linear-gradient(90deg, darkgreen, lime); }}
-            .madness {{ background: linear-gradient(90deg, purple, red); }}
+    if (map[Math.floor(newY)][Math.floor(newX)] === 0) {{
+        player.x = newX;
+        player.y = newY;
 
-            .map {{
-                display: grid;
-                grid-template-columns: repeat(5, 60px);
-                gap: 8px;
-                margin-top: 20px;
-            }}
+        if (Math.random() > 0.8) {{
+            health -= 5;
+            madness += 5;
+        }}
 
-            .tile {{
-                width: 60px;
-                height: 60px;
-                background: #111;
-                border: 1px solid #333;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                cursor: pointer;
-                font-size: 12px;
-            }}
+        document.getElementById("health").innerText = health;
+        document.getElementById("madness").innerText = madness;
 
-            .hidden {{ background: #000; border: 1px solid #000; }}
-            .player {{ background: darkred !important; }}
-            .exit {{ background: darkgreen !important; }}
-            .boss {{ background: purple !important; }}
+        if (health <= 0 || madness >= 100) {{
+            alert("You succumbed...");
+            location.reload();
+        }}
+    }}
+}}
 
-            .inventory {{
-                margin-top: 20px;
-                padding: 10px;
-                background: #111;
-                border-radius: 8px;
-            }}
+document.addEventListener("keydown", e => {{
+    if (e.key === "ArrowUp" || e.key === "w") {{
+        move(Math.cos(player.dir)*0.2, Math.sin(player.dir)*0.2);
+    }}
+    if (e.key === "ArrowDown" || e.key === "s") {{
+        move(-Math.cos(player.dir)*0.2, -Math.sin(player.dir)*0.2);
+    }}
+    if (e.key === "ArrowLeft" || e.key === "a") {{
+        player.dir -= 0.1;
+    }}
+    if (e.key === "ArrowRight" || e.key === "d") {{
+        player.dir += 0.1;
+    }}
+}});
 
-            button {{
-                margin: 5px 5px 5px 0;
-                padding: 6px 12px;
-                background: darkred;
-                border: none;
-                color: white;
-                cursor: pointer;
-            }}
+function gameLoop() {{
+    castRays();
+    requestAnimationFrame(gameLoop);
+}}
 
-            .log {{
-                margin-top: 20px;
-                background: #111;
-                padding: 15px;
-                border-radius: 8px;
-                min-height: 100px;
-            }}
-        </style>
-    </head>
-    <body>
+gameLoop();
+</script>
 
-        <h1>{story['character']['character']} - Dungeon</h1>
-
-        <strong>Health</strong>
-        <div class="bar"><div id="healthBar" class="fill health" style="width:100%"></div></div>
-
-        <strong>Madness</strong>
-        <div class="bar"><div id="madnessBar" class="fill madness" style="width:0%"></div></div>
-
-        <div class="inventory">
-            <strong>Inventory:</strong>
-            <div id="inventoryDisplay"></div>
-        </div>
-
-        <div class="map" id="map"></div>
-
-        <div id="choices"></div>
-
-        <div class="log" id="log">You enter the darkness...</div>
-
-        <script>
-            const size = 5;
-            let playerPos = 0;
-            let health = 100;
-            let madness = 0;
-
-            let discovered = new Set([0]);
-
-            const bossTile = 18;
-            const exitTile = 24;
-
-            let inventory = {{
-                medkit: 1,
-                potion: 1,
-                key: 0
-            }};
-
-            function updateBars() {{
-                health = Math.min(100, health);
-                madness = Math.max(0, madness);
-                document.getElementById("healthBar").style.width = health + "%";
-                document.getElementById("madnessBar").style.width = madness + "%";
-                updateInventory();
-            }}
-
-            function updateInventory() {{
-                document.getElementById("inventoryDisplay").innerHTML =
-                    "Medkits: " + inventory.medkit +
-                    " | Sanity Potions: " + inventory.potion +
-                    " | Keys: " + inventory.key;
-            }}
-
-            function log(text) {{
-                document.getElementById("log").innerHTML =
-                    text + "<br><br>" + document.getElementById("log").innerHTML;
-            }}
-
-            function createMap() {{
-                const map = document.getElementById("map");
-                map.innerHTML = "";
-
-                for (let i = 0; i < size * size; i++) {{
-                    const tile = document.createElement("div");
-                    tile.classList.add("tile");
-
-                    if (!discovered.has(i)) {{
-                        tile.classList.add("hidden");
-                    }}
-
-                    if (i === playerPos) tile.classList.add("player");
-                    if (i === bossTile) tile.classList.add("boss");
-                    if (i === exitTile) tile.classList.add("exit");
-
-                    tile.onclick = () => movePlayer(i);
-                    map.appendChild(tile);
-                }}
-            }}
-
-            function movePlayer(target) {{
-                const row = Math.floor(playerPos / size);
-                const col = playerPos % size;
-
-                const targetRow = Math.floor(target / size);
-                const targetCol = target % size;
-
-                const isAdjacent =
-                    (Math.abs(row - targetRow) === 1 && col === targetCol) ||
-                    (Math.abs(col - targetCol) === 1 && row === targetRow);
-
-                if (!isAdjacent) return;
-
-                playerPos = target;
-                discovered.add(target);
-                createMap();
-                encounter();
-            }}
-
-            function encounter() {{
-                if (playerPos === bossTile) {{
-                    log("The Boss emerges!");
-                    showChoices("boss");
-                    return;
-                }}
-
-                if (playerPos === exitTile) {{
-                    if (inventory.key > 0) {{
-                        alert("You escaped the dungeon!");
-                        location.reload();
-                    }} else {{
-                        log("The exit is locked. You need a key.");
-                    }}
-                    return;
-                }}
-
-                const chance = Math.random();
-
-                if (chance > 0.6) {{
-                    log("A creature appears!");
-                    showChoices("enemy");
-                }} else if (chance > 0.3) {{
-                    inventory.key += 1;
-                    log("You found a key!");
-                }} else {{
-                    log("The hallway is silent...");
-                }}
-
-                updateBars();
-            }}
-
-            function showChoices(type) {{
-                const div = document.getElementById("choices");
-                div.innerHTML = `
-                    <button onclick="resolveChoice('fight', '${type}')">⚔️ Fight</button>
-                    <button onclick="resolveChoice('hide', '${type}')">🫥 Hide</button>
-                    <button onclick="resolveChoice('flee', '${type}')">🏃 Flee</button>
-                `;
-            }}
-
-            function resolveChoice(choice, type) {{
-                const roll = Math.floor(Math.random() * 20) + 1;
-                log("You rolled " + roll);
-
-                if (choice === "fight") {{
-                    if (roll > 12) {{
-                        log("You defeated it!");
-                    }} else {{
-                        health -= 20;
-                        madness += 15;
-                        log("You were injured!");
-                    }}
-                }}
-
-                if (choice === "hide") {{
-                    if (roll > 10) {{
-                        log("You remain unseen.");
-                    }} else {{
-                        madness += 20;
-                        log("It senses you...");
-                    }}
-                }}
-
-                if (choice === "flee") {{
-                    if (roll > 8) {{
-                        log("You escape safely.");
-                    }} else {{
-                        health -= 15;
-                        log("You stumble while escaping.");
-                    }}
-                }}
-
-                document.getElementById("choices").innerHTML = "";
-                checkState();
-                updateBars();
-            }}
-
-            function checkState() {{
-                if (health <= 0) {{
-                    alert("You died.");
-                    location.reload();
-                }}
-                if (madness >= 100) {{
-                    alert("Madness consumes you.");
-                    location.reload();
-                }}
-            }}
-
-            updateBars();
-            createMap();
-        </script>
-
-    </body>
-    </html>
-    """
-
+</body>
+</html>
+"""
     return html
     story = get_character_story(book)
 
