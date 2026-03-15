@@ -33,4 +33,4 @@ jobs:
           platforms: linux/amd64,linux/arm64
           tags: |
             ${{ secrets.DOCKER_USERNAME }}/stephen-king-mlops:latest
-            ${{ secrets.DOCKER_USERNAME }}/stephen-king-mlops:${{ github.sha }}
+            ${{ secrets.DOCKER_USERNAME }}/stephen-king-mlops:${{ github.sha }}cle
