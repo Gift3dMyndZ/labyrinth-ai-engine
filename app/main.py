@@ -67,7 +67,7 @@ def story_page(book: str):
     <!DOCTYPE html>
     <html>
     <head>
-        <title>{book} - Dungeon Map</title>
+        <title>{book} - Advanced Dungeon</title>
         <style>
             body {{
                 margin: 0;
@@ -75,14 +75,6 @@ def story_page(book: str):
                 color: white;
                 font-family: Arial;
                 padding: 30px;
-            }}
-
-            h1 {{
-                text-shadow: 0 0 15px red;
-            }}
-
-            .stats {{
-                margin-bottom: 20px;
             }}
 
             .bar {{
@@ -98,19 +90,14 @@ def story_page(book: str):
                 transition: width 0.4s ease;
             }}
 
-            .health {{
-                background: linear-gradient(90deg, darkgreen, lime);
-            }}
-
-            .madness {{
-                background: linear-gradient(90deg, purple, red);
-            }}
+            .health {{ background: linear-gradient(90deg, darkgreen, lime); }}
+            .madness {{ background: linear-gradient(90deg, purple, red); }}
 
             .map {{
                 display: grid;
                 grid-template-columns: repeat(5, 60px);
-                grid-gap: 10px;
-                margin-top: 30px;
+                gap: 8px;
+                margin-top: 20px;
             }}
 
             .tile {{
@@ -122,31 +109,36 @@ def story_page(book: str):
                 align-items: center;
                 justify-content: center;
                 cursor: pointer;
-                transition: 0.2s;
+                font-size: 12px;
             }}
 
-            .tile:hover {{
-                background: #222;
-            }}
+            .hidden {{ background: #000; border: 1px solid #000; }}
+            .player {{ background: darkred !important; }}
+            .exit {{ background: darkgreen !important; }}
+            .boss {{ background: purple !important; }}
 
-            .player {{
-                background: darkred !important;
-            }}
-
-            .exit {{
-                background: darkgreen !important;
-            }}
-
-            .boss {{
-                background: purple !important;
-            }}
-
-            .event-log {{
-                margin-top: 30px;
+            .inventory {{
+                margin-top: 20px;
+                padding: 10px;
                 background: #111;
-                padding: 20px;
-                border-radius: 10px;
-                min-height: 120px;
+                border-radius: 8px;
+            }}
+
+            button {{
+                margin: 5px 5px 5px 0;
+                padding: 6px 12px;
+                background: darkred;
+                border: none;
+                color: white;
+                cursor: pointer;
+            }}
+
+            .log {{
+                margin-top: 20px;
+                background: #111;
+                padding: 15px;
+                border-radius: 8px;
+                min-height: 100px;
             }}
         </style>
     </head>
@@ -154,23 +146,22 @@ def story_page(book: str):
 
         <h1>{story['character']['character']} - Dungeon</h1>
 
-        <div class="stats">
-            <strong>Health</strong>
-            <div class="bar">
-                <div id="healthBar" class="fill health" style="width:100%"></div>
-            </div>
+        <strong>Health</strong>
+        <div class="bar"><div id="healthBar" class="fill health" style="width:100%"></div></div>
 
-            <strong>Madness</strong>
-            <div class="bar">
-                <div id="madnessBar" class="fill madness" style="width:0%"></div>
-            </div>
+        <strong>Madness</strong>
+        <div class="bar"><div id="madnessBar" class="fill madness" style="width:0%"></div></div>
+
+        <div class="inventory">
+            <strong>Inventory:</strong>
+            <div id="inventoryDisplay"></div>
         </div>
 
         <div class="map" id="map"></div>
 
-        <div class="event-log" id="eventLog">
-            Click adjacent tiles to move through the dungeon.
-        </div>
+        <div id="choices"></div>
+
+        <div class="log" id="log">You enter the darkness...</div>
 
         <script>
             const size = 5;
@@ -178,17 +169,35 @@ def story_page(book: str):
             let health = 100;
             let madness = 0;
 
+            let discovered = new Set([0]);
+
             const bossTile = 18;
             const exitTile = 24;
 
+            let inventory = {{
+                medkit: 1,
+                potion: 1,
+                key: 0
+            }};
+
             function updateBars() {{
+                health = Math.min(100, health);
+                madness = Math.max(0, madness);
                 document.getElementById("healthBar").style.width = health + "%";
                 document.getElementById("madnessBar").style.width = madness + "%";
+                updateInventory();
+            }}
+
+            function updateInventory() {{
+                document.getElementById("inventoryDisplay").innerHTML =
+                    "Medkits: " + inventory.medkit +
+                    " | Sanity Potions: " + inventory.potion +
+                    " | Keys: " + inventory.key;
             }}
 
             function log(text) {{
-                const logBox = document.getElementById("eventLog");
-                logBox.innerHTML = text + "<br><br>" + logBox.innerHTML;
+                document.getElementById("log").innerHTML =
+                    text + "<br><br>" + document.getElementById("log").innerHTML;
             }}
 
             function createMap() {{
@@ -198,6 +207,10 @@ def story_page(book: str):
                 for (let i = 0; i < size * size; i++) {{
                     const tile = document.createElement("div");
                     tile.classList.add("tile");
+
+                    if (!discovered.has(i)) {{
+                        tile.classList.add("hidden");
+                    }}
 
                     if (i === playerPos) tile.classList.add("player");
                     if (i === bossTile) tile.classList.add("boss");
@@ -209,71 +222,107 @@ def story_page(book: str):
             }}
 
             function movePlayer(target) {{
-                const validMoves = [
-                    playerPos - 1,
-                    playerPos + 1,
-                    playerPos - size,
-                    playerPos + size
-                ];
+                const row = Math.floor(playerPos / size);
+                const col = playerPos % size;
 
-                if (!validMoves.includes(target)) return;
+                const targetRow = Math.floor(target / size);
+                const targetCol = target % size;
+
+                const isAdjacent =
+                    (Math.abs(row - targetRow) === 1 && col === targetCol) ||
+                    (Math.abs(col - targetCol) === 1 && row === targetRow);
+
+                if (!isAdjacent) return;
 
                 playerPos = target;
+                discovered.add(target);
                 createMap();
-                encounterCheck();
+                encounter();
             }}
 
-            function encounterCheck() {{
+            function encounter() {{
                 if (playerPos === bossTile) {{
-                    bossFight();
+                    log("The Boss emerges!");
+                    showChoices("boss");
                     return;
                 }}
 
                 if (playerPos === exitTile) {{
-                    alert("You escaped the dungeon!");
-                    location.reload();
+                    if (inventory.key > 0) {{
+                        alert("You escaped the dungeon!");
+                        location.reload();
+                    }} else {{
+                        log("The exit is locked. You need a key.");
+                    }}
                     return;
                 }}
 
                 const chance = Math.random();
 
                 if (chance > 0.6) {{
-                    health -= 15;
-                    madness += 10;
-                    log("A creature attacks you in the dark!");
+                    log("A creature appears!");
+                    showChoices("enemy");
                 }} else if (chance > 0.3) {{
-                    madness += 15;
-                    log("You hear whispers echoing through the halls...");
+                    inventory.key += 1;
+                    log("You found a key!");
                 }} else {{
-                    log("The corridor is eerily quiet.");
+                    log("The hallway is silent...");
                 }}
 
-                checkGameState();
                 updateBars();
             }}
 
-            function bossFight() {{
+            function showChoices(type) {{
+                const div = document.getElementById("choices");
+                div.innerHTML = `
+                    <button onclick="resolveChoice('fight', '${type}')">⚔️ Fight</button>
+                    <button onclick="resolveChoice('hide', '${type}')">🫥 Hide</button>
+                    <button onclick="resolveChoice('flee', '${type}')">🏃 Flee</button>
+                `;
+            }}
+
+            function resolveChoice(choice, type) {{
                 const roll = Math.floor(Math.random() * 20) + 1;
-                log("Boss encounter! You rolled " + roll);
+                log("You rolled " + roll);
 
-                if (roll > 14) {{
-                    log("You defeated the horror!");
-                }} else {{
-                    health -= 30;
-                    madness += 25;
-                    log("The boss mauls you brutally!");
+                if (choice === "fight") {{
+                    if (roll > 12) {{
+                        log("You defeated it!");
+                    }} else {{
+                        health -= 20;
+                        madness += 15;
+                        log("You were injured!");
+                    }}
                 }}
 
-                checkGameState();
+                if (choice === "hide") {{
+                    if (roll > 10) {{
+                        log("You remain unseen.");
+                    }} else {{
+                        madness += 20;
+                        log("It senses you...");
+                    }}
+                }}
+
+                if (choice === "flee") {{
+                    if (roll > 8) {{
+                        log("You escape safely.");
+                    }} else {{
+                        health -= 15;
+                        log("You stumble while escaping.");
+                    }}
+                }}
+
+                document.getElementById("choices").innerHTML = "";
+                checkState();
                 updateBars();
             }}
 
-            function checkGameState() {{
+            function checkState() {{
                 if (health <= 0) {{
-                    alert("You died in the dungeon.");
+                    alert("You died.");
                     location.reload();
                 }}
-
                 if (madness >= 100) {{
                     alert("Madness consumes you.");
                     location.reload();
