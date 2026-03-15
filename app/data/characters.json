@@ -1,0 +1,26 @@
+[
+    {
+      "book": "The Shining",
+      "character": "Jack Torrance",
+      "role": "Tragic Antihero",
+      "starting_location": "Overlook Hotel",
+      "traits": ["unstable", "isolated", "obsessed"],
+      "danger_level": 3
+    },
+    {
+      "book": "IT",
+      "character": "Bill Denbrough",
+      "role": "Reluctant Leader",
+      "starting_location": "Derry",
+      "traits": ["brave", "traumatized", "loyal"],
+      "danger_level": 4
+    },
+    {
+      "book": "The Stand",
+      "character": "Stu Redman",
+      "role": "Survivor",
+      "starting_location": "Texas",
+      "traits": ["resilient", "moral", "leader"],
+      "danger_level": 5
+    }
+  ]
