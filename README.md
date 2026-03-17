@@ -2,10 +2,10 @@
 
 > Adaptive behavioral simulation engine built with FastAPI and machine learning.
 
-![Python](https://pfst.cf2.poecdn.net/base/image/eb0a896e8374c4fd9444d205422f34ab733dea13b665cfdbfcd909ebb940b5bd?pmaid=587828208)
-![FastAPI](https://pfst.cf2.poecdn.net/base/image/3e6659a8a421f5cb805567db450f3617c21b02fc62e3c268e7a86d6e8e33a4cc?pmaid=587828205)
-![Docker](https://pfst.cf2.poecdn.net/base/image/4e93e772f179f77bf00d0a37fb67ffd7969fb109775bd0f56c963ee6ecdb55c0?pmaid=587828206)
-![License](https://pfst.cf2.poecdn.net/base/image/2c89badab92b5ee0afea1a6328677fab597eaa5d90b21f6a29384f9eaac3cbc0?pmaid=587828207)
+![Python]
+![FastAPI]
+![Docker]
+![License]
 
 ---
 
@@ -33,6 +33,53 @@ This project bridges interactive systems engineering and applied machine learnin
 
 ```
 Browser → API → Services → Model → Adaptive Output
+```
+
+---
+
+## 🔌 API Endpoints
+
+### `GET /`
+
+Returns the main dashboard interface.
+
+---
+
+### `POST /recommend`
+
+Generate adaptive recommendations based on user behavioral input.
+
+#### Example Request
+
+```json
+{
+  "fear_level": 7,
+  "aggression": 4,
+  "curiosity": 9
+}
+```
+
+#### Example Response
+
+```json
+{
+  "recommended_path": "stealth",
+  "difficulty_modifier": 1.25
+}
+```
+
+---
+
+### `POST /train`
+
+Trigger model retraining (if enabled in configuration).
+
+#### Example Response
+
+```json
+{
+  "status": "training_started"
+}
 ```
 
 ---
@@ -118,6 +165,13 @@ Responsibilities:
 - Transform input features  
 - Perform inference  
 - Return adaptive recommendations  
+
+This separation ensures:
+
+- ✅ Clean production boundaries  
+- ✅ Reproducible training  
+- ✅ Scalable deployment  
+- ✅ Docker safety  
 
 ---
 
