@@ -97,3 +97,23 @@ models/
 
 # OS
 .DS_Store
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Virtual Environments
+venv/
+backend/venv/
+
+# Database
+data/*.db
+
+# OS
+.DS_Store
+
+# Frontend build artifacts (if any later)
+node_modules/
+
+# IDE
+.vscode/

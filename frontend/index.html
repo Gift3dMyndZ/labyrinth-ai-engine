@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>LABYRINTH 64</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div id="attractScreen" class="screen">
+    <h1 class="title glow">LABYRINTH 64</h1>
+    <h2 class="insert blink">INSERT COIN</h2>
+    <p>PRESS ENTER</p>
+</div>
+
+<div id="resultScreen" class="screen hidden">
+    <h1 class="glow">RESULT</h1>
+    <pre id="resultText"></pre>
+    <p>CONTINUING IN <span id="countdown">10</span></p>
+    <p class="blink">PRESS ENTER</p>
+</div>
+
+<h1 class="title glow">LABYRINTH 64</h1>
+
+<div class="hud">
+    Level: <span id="level">1</span> |
+    Time: <span id="time">0</span>s |
+    Score: <span id="score">0</span> |
+    High: <span id="highScore">0</span>
+</div>
+
+<div class="leaderboard">
+    <h3>TOP SCORES</h3>
+    <ol id="leaderboardList"></ol>
+</div>
+
+<div class="crt-wrapper">
+    <canvas id="game" width="420" height="420"></canvas>
+    <div class="scanlines"></div>
+</div>
+
+<script src="game.js"></script>
+</body>
+</html>

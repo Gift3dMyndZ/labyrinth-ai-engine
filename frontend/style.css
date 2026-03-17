@@ -1,0 +1,78 @@
+body {
+    background: radial-gradient(circle at center, #000 40%, #050505 100%);
+    color: #00ff99;
+    font-family: monospace;
+    text-align: center;
+    margin: 0;
+    overflow: hidden;
+}
+
+.title {
+    font-size: 36px;
+    letter-spacing: 4px;
+}
+
+.glow {
+    text-shadow:
+        0 0 5px #00ff99,
+        0 0 10px #00ff99,
+        0 0 20px #00ffaa;
+}
+
+.insert {
+    color: #ff00cc;
+    text-shadow:
+        0 0 5px #ff00cc,
+        0 0 15px #ff00cc;
+}
+
+canvas {
+    background: black;
+    border: 4px solid #00ff99;
+    box-shadow: 0 0 30px #00ff99;
+    transform: perspective(700px) rotateX(25deg);
+}
+
+.screen {
+    position: absolute;
+    inset: 0;
+    background: black;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+}
+
+.hidden { display: none; }
+
+.blink { animation: blink 1s infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+
+.hud { margin-bottom: 10px; }
+
+.leaderboard {
+    position: absolute;
+    right: 20px;
+    top: 100px;
+    text-align: left;
+    font-size: 14px;
+}
+
+.crt-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.scanlines {
+    pointer-events: none;
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+        to bottom,
+        rgba(0,255,150,0.05),
+        rgba(0,255,150,0.05) 2px,
+        transparent 2px,
+        transparent 4px
+    );
+}
