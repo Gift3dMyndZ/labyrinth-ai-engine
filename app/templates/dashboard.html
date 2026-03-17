@@ -12,150 +12,153 @@
         }
 
         body {
-            background: radial-gradient(circle at center, #0a0f0a 0%, #000000 80%);
-            color: #b8c6b8;
-            font-family: "Georgia", serif;
+            margin: 0;
+            background: radial-gradient(circle at center, #050505 0%, #000 95%);
+            color: #f0f0f0;
+            font-family: "Courier New", monospace;
+            padding: 100px 40px;
             overflow: hidden;
-            position: relative;
             opacity: 0;
-            transition: opacity 0.8s ease;
+            transition: opacity 1s ease;
         }
 
-        body.fade-in {
-            opacity: 1;
+        body.fade-in { opacity: 1; }
+        body.fade-out { opacity: 0; }
+
+        /* Neon Frame */
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 20px;
+            border: 2px solid #00ffff;
+            box-shadow:
+                0 0 10px #00ffff,
+                0 0 25px #ff00ff,
+                inset 0 0 20px rgba(255,0,255,0.2);
+            animation: borderPulse 4s infinite alternate;
+            pointer-events: none;
+            z-index: 10;
         }
 
-        body.fade-out {
-            opacity: 0;
+        @keyframes borderPulse {
+            0% {
+                box-shadow:
+                    0 0 10px #00ffff,
+                    0 0 20px #ff00ff;
+            }
+            100% {
+                box-shadow:
+                    0 0 25px #00ffff,
+                    0 0 40px #ff00ff;
+            }
         }
 
-        /* =============================
-           FOG
-        ============================== */
-
-        .fog {
+        /* VHS Scanlines */
+        body::after {
+            content: "";
             position: fixed;
             inset: 0;
-            background: radial-gradient(circle at 50% 60%, rgba(40,50,40,0.3), transparent 70%);
-            animation: fogMove 20s infinite alternate ease-in-out;
+            background: repeating-linear-gradient(
+                to bottom,
+                rgba(255,255,255,0.03),
+                rgba(255,255,255,0.03) 1px,
+                transparent 1px,
+                transparent 3px
+            );
             pointer-events: none;
-            z-index: 1;
+            z-index: 5;
         }
-
-        @keyframes fogMove {
-            from { transform: translateX(-20px); }
-            to   { transform: translateX(20px); }
-        }
-
-        /* =============================
-           TREES
-        ============================== */
-
-        .tree {
-            position: fixed;
-            bottom: 0;
-            font-size: 180px;
-            color: #0f1a0f;
-            opacity: 0.8;
-            transform-origin: bottom center;
-            animation: sway 6s infinite ease-in-out alternate;
-            pointer-events: none;
-        }
-
-        .tree:nth-of-type(1) { left: 5%; animation-duration: 7s; }
-        .tree:nth-of-type(2) { left: 25%; animation-duration: 6s; }
-        .tree:nth-of-type(3) { left: 50%; animation-duration: 8s; }
-        .tree:nth-of-type(4) { left: 75%; animation-duration: 7s; }
-        .tree:nth-of-type(5) { left: 90%; animation-duration: 6s; }
-
-        @keyframes sway {
-            from { transform: rotate(-2deg); }
-            to   { transform: rotate(2deg); }
-        }
-
-        /* =============================
-           UI PANEL
-        ============================== */
 
         .panel {
-            position: relative;
-            width: 90%;
-            max-width: 900px;
-            margin: 80px auto;
-            padding: 50px;
-            background: rgba(10,15,10,0.95);
-            border: 1px solid #1f2a1f;
-            box-shadow: 0 0 60px rgba(0,0,0,0.9);
-            z-index: 3;
+            max-width: 700px;
+            margin: auto;
+            text-align: center;
         }
 
         h1 {
             font-weight: normal;
-            margin-bottom: 20px;
-            font-size: 42px;
-            color: #e6f2e6;
-            letter-spacing: 2px;
+            letter-spacing: 6px;
+            text-transform: uppercase;
+            margin-bottom: 30px;
+            color: #00ffff;
+            text-shadow:
+                0 0 5px #00ffff,
+                0 0 20px #ff00ff;
+            animation: neonFlicker 3s infinite alternate;
+        }
+
+        @keyframes neonFlicker {
+            0% { opacity: 1; }
+            48% { opacity: 0.95; }
+            50% { opacity: 0.7; }
+            52% { opacity: 1; }
+            100% { opacity: 0.98; }
         }
 
         p {
-            margin-bottom: 30px;
-            font-style: italic;
-            font-size: 20px;
-            color: #9fb09f;
+            margin-bottom: 40px;
+            color: #aaa;
+            letter-spacing: 2px;
         }
 
         select {
-            background: #0b140b;
-            color: #cdd8cd;
-            border: 1px solid #1f2a1f;
-            padding: 12px;
-            min-width: 320px;
-            font-size: 18px;
-            height: 180px;
+            width: 100%;
+            height: 200px;
+            background: #000;
+            color: #fff;
+            border: 2px solid #00ffff;
+            padding: 15px;
+            font-size: 16px;
+            letter-spacing: 1px;
+            box-shadow:
+                0 0 10px rgba(0,255,255,0.4);
         }
 
-        select option {
-            padding: 6px;
+        select:focus {
+            outline: none;
+            box-shadow:
+                0 0 20px #00ffff,
+                0 0 40px #ff00ff;
+        }
+
+        option {
+            background: #000;
+            color: #fff;
         }
 
         button {
-            background: #141f14;
-            color: #d8e0d8;
-            border: 1px solid #2d3d2d;
-            padding: 12px 20px;
-            margin-left: 15px;
+            margin-top: 30px;
+            padding: 15px 40px;
+            background: black;
+            border: 2px solid #ff00ff;
+            color: #fff;
+            font-size: 16px;
+            letter-spacing: 3px;
             cursor: pointer;
-            font-size: 18px;
-            transition: background 0.3s ease;
+            transition: all 0.4s ease;
+            box-shadow:
+                0 0 10px rgba(255,0,255,0.4);
         }
 
         button:hover {
-            background: #1c2a1c;
+            box-shadow:
+                0 0 20px #ff00ff,
+                0 0 40px #00ffff;
+            transform: scale(1.05);
         }
 
-        @media (max-width:600px) {
-            h1 { font-size: 28px; }
-            p { font-size: 16px; }
-            select { width: 100%; min-width: unset; }
-            button { width: 100%; margin: 15px 0 0 0; }
+        @media (max-width: 600px) {
+            body { padding: 60px 20px; }
+            h1 { font-size: 26px; }
         }
-
     </style>
 </head>
 
 <body>
 
-<div class="fog"></div>
-
-<div class="tree">🌲</div>
-<div class="tree">🌲</div>
-<div class="tree">🌲</div>
-<div class="tree">🌲</div>
-<div class="tree">🌲</div>
-
 <div class="panel">
-    <h1>Enter the Dark Forest</h1>
-    <p>Select your path... if you dare.</p>
+    <h1>Enter the Forest</h1>
+    <p>Select your path carefully.</p>
 
     <select id="themes" multiple>
         <option value="horror">Horror</option>
@@ -171,19 +174,22 @@
     <button onclick="navigateToExplore()">Summon</button>
 </div>
 
+<!-- Ambient Synth (Low Volume Placeholder) -->
+<audio autoplay loop>
+    <source src="https://cdn.jsdelivr.net/gh/anars/blank-audio/1-second-of-silence.mp3" type="audio/mpeg">
+</audio>
+
 <script>
-/* Fade In */
 window.addEventListener("load", () => {
     document.body.classList.add("fade-in");
 });
 
-/* Navigation */
 function navigateToExplore() {
     const select = document.getElementById("themes");
     const selected = [...select.selectedOptions].map(o => o.value);
 
     if (!selected.length) {
-        alert("Choose your fate...");
+        alert("Choose your fate.");
         return;
     }
 
@@ -194,7 +200,7 @@ function navigateToExplore() {
 
     setTimeout(() => {
         window.location.href = "/explore?theme=" + theme;
-    }, 600);
+    }, 700);
 }
 </script>
 
