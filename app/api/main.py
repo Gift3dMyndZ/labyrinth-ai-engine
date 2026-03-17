@@ -62,11 +62,23 @@ def get_dashboard(request: Request):
 # RECOMMENDATION
 # ==================================================
 
+from pydantic import BaseModel
+from typing import List
+
+class PreferenceRequest(BaseModel):
+    preferences: List[str]
+
+
+@app.post("/recommend")
+def recommend_post(request: PreferenceRequest):
+    results = recommend_books_by_preferences(request.preferences)
+    return results
+
+
 @app.get("/recommend")
-def recommend(theme: str):
+def recommend_get(theme: str):
     results = recommend_books_by_preferences([theme])
     return {"recommendations": results}
-
 
 # ==================================================
 # TELEMETRY LOGGING
