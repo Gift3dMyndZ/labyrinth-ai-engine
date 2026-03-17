@@ -29,9 +29,9 @@ This project demonstrates production-style ML architecture inside an interactive
 ## 🏗 System Architecture
 
 ### High-Level Flow
-
+```
 Browser → Telemetry → FastAPI → ML Engine → Adaptive Output → Narrative Engine
-
+```
 ### Frontend
 
 - JavaScript raycasting renderer
@@ -146,58 +146,58 @@ Architecture emphasizes:
 ### Offline Training
 
 Located in:
-
+```
 training/
-
+```
 Responsibilities:
-
+```
 - Feature engineering  
 - Data preprocessing  
 - Model training  
 - Model serialization  
 - Artifact saving to /models/model.pkl  
-
+```
 Retrain model:
-
+```
 python training/train.py
-
+```
 ---
 
 ### Online Inference
 
 Located in:
-
+```
 app/services/ml_engine.py
-
+```
 Responsibilities:
-
+```
 - Load trained model  
 - Transform input features  
 - Perform inference  
 - Return adaptive recommendations  
-
+```
 This separation ensures:
-
+```
 - Clean production boundaries  
 - Reproducible training  
 - Scalable deployment  
 - Docker safety  
-
+```
 ---
 
 ## 🎭 LLM Story Engine
 
 Located in:
-
+```
 app/services/story_engine.py
-
+```
 Features:
-
+```
 - Dynamic narrative generation  
 - Character-based survival arcs  
 - Context-aware event creation  
 - Modular story service abstraction  
-
+```
 Narrative logic is isolated from predictive modeling for extensibility.
 
 ---
@@ -205,15 +205,15 @@ Narrative logic is isolated from predictive modeling for extensibility.
 ## ⚙️ Installation
 
 Clone repository:
-
+```
 git clone https://github.com/Gift3dMyndZ/labyrinth-ai-engine.git  
 cd labyrinth-ai-engine  
-
+```
 Create virtual environment:
-
+```
 python3 -m venv venv  
 source venv/bin/activate  
-
+```
 Install dependencies:
 ```
 pip install -r requirements.txt  
@@ -223,9 +223,9 @@ Run application:
 uvicorn app.api.main:app --reload  
 ```
 Visit:
-
+```
 http://127.0.0.1:8000
-
+```
 ---
 
 ## 🐳 Docker Deployment
@@ -241,7 +241,7 @@ docker run -p 8000:8000 labyrinth-ai-engine
 ---
 
 ## 📊 Technologies Used
-
+```
 - Python  
 - FastAPI  
 - Scikit-Learn  
@@ -251,11 +251,11 @@ docker run -p 8000:8000 labyrinth-ai-engine
 - Jinja2  
 - SQLite  
 - Docker  
-
+```
 ---
 
 ## 🔬 Design Principles
-
+```
 - Separation of concerns  
 - Modular architecture  
 - Reproducible ML workflows  
@@ -263,17 +263,17 @@ docker run -p 8000:8000 labyrinth-ai-engine
 - Production-ready folder structure  
 - Clean import safety via __init__.py  
 - Clear ML training vs inference boundary  
-
+```
 ---
 
 ## 🛣 Roadmap
-
+```
 - Behavioral clustering  
 - Hybrid psychological + telemetry modeling  
 - Persistent database integration  
 - Real-time difficulty recalibration  
 - CI/CD automation  
-
+```
 ---
 
 ## 📜 License
