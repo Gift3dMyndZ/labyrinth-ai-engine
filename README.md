@@ -1,32 +1,28 @@
 # 🧠 Labyrinth AI Engine
 
-> AI horror survival predictor built with FastAPI, behavioral modeling, adaptive difficulty systems, and LLM-powered narrative generation.
+> Adaptive AI horror survival predictor built with FastAPI, behavioral telemetry modeling, LLM storytelling, leaderboard tracking, and analytics.
+
+---
+
+## 🚀 Overview
+
+Labyrinth AI Engine is a modular, browser-based simulation platform that dynamically adjusts survival difficulty using live player telemetry and machine learning predictions.
+
+The system blends:
+
 
 ![Python](https://pfst.cf2.poecdn.net/base/image/eb0a896e8374c4fd9444d205422f34ab733dea13b665cfdbfcd909ebb940b5bd?pmaid=587912115)
 ![FastAPI](https://pfst.cf2.poecdn.net/base/image/3e6659a8a421f5cb805567db450f3617c21b02fc62e3c268e7a86d6e8e33a4cc?pmaid=587912116)
 ![SQLite](https://pfst.cf2.poecdn.net/base/image/c31e1e16b33ad45d4492179818eb80d827556269628f8a0fbb82922af611cee0?pmaid=587912117)
 ![Docker](https://pfst.cf2.poecdn.net/base/image/3111f6a8fee083ed1ec8b43f904cc99eb163e57f72afe6a054602142dcc51642?pmaid=587912114)
 ![License](https://pfst.cf2.poecdn.net/base/image/2c89badab92b5ee0afea1a6328677fab597eaa5d90b21f6a29384f9eaac3cbc0?pmaid=587912113)
+![LLM](https://img.shields.io/badge/LLM-Integrated-purple)
+![ML](https://img.shields.io/badge/Machine%20Learning-Enabled-orange)
+![AI Story Engine](https://img.shields.io/badge/AI-Story%20Engine-ff00ff)
 
 ---
 
-## 🚀 Overview
-
-Labyrinth AI Engine is a modular AI simulation platform that dynamically adjusts survival difficulty using behavioral telemetry and machine learning predictions.
-
-It demonstrates production-style ML system design, including:
-
-- ✅ Real-time telemetry ingestion  
-- ✅ Adaptive difficulty modeling  
-- ✅ Survival probability prediction  
-- ✅ LLM-powered story generation  
-- ✅ Service-layer ML architecture  
-- ✅ Offline training pipeline  
-- ✅ Model artifact management  
-- ✅ Dockerized deployment  
-- ✅ Clean FastAPI modular structure  
-
-This project bridges interactive systems engineering and applied machine learning architecture.
+This project demonstrates production-style ML architecture inside an interactive simulation system.
 
 ---
 
@@ -34,43 +30,55 @@ This project bridges interactive systems engineering and applied machine learnin
 
 ### High-Level Flow
 
-Browser → API → Services → Model → Adaptive Output
+Browser → Telemetry → FastAPI → ML Engine → Adaptive Output → Narrative Engine
 
-- Browser collects behavioral input  
-- FastAPI handles API requests  
-- Service layer processes logic  
-- ML model performs inference  
-- Adaptive output modifies difficulty and narrative  
+### Frontend
+
+- JavaScript raycasting renderer
+- Retro hedge-style maze visuals
+- Monster movement logic
+- Telemetry collection (fear, aggression, curiosity, etc.)
+- Dynamic difficulty updates
+
+### Backend (FastAPI)
+
+- REST API endpoints
+- Telemetry ingestion
+- Adaptive difficulty computation
+- ML integration hooks
+- Leaderboard logic
+- Analytics tracking
+
+### Infrastructure
+
+- Dockerized deployment
+- GitHub-based CI-ready structure
+- Cloud-ready configuration
 
 ---
 
 ## 🔌 API Endpoints
 
-### GET /
+### `GET /`
 
-Returns the main dashboard interface.
+Returns main simulation dashboard.
 
 ---
 
-### POST /recommend
+### `POST /telemetry`
 
-Generate adaptive recommendations based on user behavioral input.
+Accepts live player behavioral data.
 
-Example Request:
+Example:
 
+```json
 {
-  "fear_level": 7,
-  "aggression": 4,
-  "curiosity": 9
+  "fear_level": 6,
+  "aggression": 3,
+  "curiosity": 8,
+  "survival_time": 124
 }
-
-Example Response:
-
-{
-  "recommended_path": "stealth",
-  "difficulty_modifier": 1.25
-}
-
+```
 ---
 
 ### POST /train
@@ -78,15 +86,15 @@ Example Response:
 Trigger model retraining (if enabled in configuration).
 
 Example Response:
-
+```josn
 {
   "status": "training_started"
 }
-
+```
 ---
 
 ## 📂 Project Structure
-
+```
 labyrinth-ai-engine/
 │
 ├── app/
@@ -122,6 +130,7 @@ labyrinth-ai-engine/
 ├── Dockerfile
 ├── requirements.txt
 └── README.md
+```
 
 Architecture emphasizes:
 
@@ -206,13 +215,13 @@ python3 -m venv venv
 source venv/bin/activate  
 
 Install dependencies:
-
+```
 pip install -r requirements.txt  
-
+```
 Run application:
-
+```
 uvicorn app.api.main:app --reload  
-
+```
 Visit:
 
 http://127.0.0.1:8000
@@ -222,13 +231,13 @@ http://127.0.0.1:8000
 ## 🐳 Docker Deployment
 
 Build container:
-
+```
 docker build -t labyrinth-ai-engine .
-
+```
 Run container:
-
+```
 docker run -p 8000:8000 labyrinth-ai-engine
-
+```
 ---
 
 ## 📊 Technologies Used
