@@ -4,8 +4,8 @@ from fastapi.middleware.cors import CORSMiddleware
 import json
 import os
 
-from .ml_engine import recommend_books_by_preferences
-from .story_engine import get_character_story
+from ..services.ml_engine import recommend_books_by_preferences
+from ..services.story_engine import get_character_story
 
 app = FastAPI()
 
