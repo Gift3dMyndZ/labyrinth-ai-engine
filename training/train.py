@@ -1,58 +1,145 @@
+import json
 import os
+from pathlib import Path
+from datetime import datetime
+
 import pandas as pd
 import joblib
-from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import classification_report
+from sklearn.metrics import (
+    classification_report,
+    roc_auc_score,
+    accuracy_score
+)
+from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
 
-from app.services.features import build_feature_vector
+from app.services.features import generate_features
 
 
-# ---------------------------------------------------
-# 1. Create synthetic raw questionnaire-style dataset
-# ---------------------------------------------------
+# ==================================================
+# PATH CONFIGURATION
+# ==================================================
 
-raw_data = [
-    {"E1": 4, "E2": 5, "E3": 2, "E4": 4, "C1": 3, "C2": 4, "C3": 2, "C4": 5, "R1": 3, "R2": 4, "R3": 2, "R4": 5, "label": 1},
-    {"E1": 2, "E2": 3, "E3": 4, "E4": 2, "C1": 5, "C2": 4, "C3": 3, "C4": 4, "R1": 5, "R2": 2, "R3": 4, "R4": 1, "label": 0},
-    {"E1": 5, "E2": 5, "E3": 1, "E4": 4, "C1": 2, "C2": 3, "C3": 4, "C4": 3, "R1": 2, "R2": 5, "R3": 1, "R4": 4, "label": 1},
-    {"E1": 1, "E2": 2, "E3": 5, "E4": 1, "C1": 4, "C2": 5, "C3": 2, "C4": 4, "R1": 4, "R2": 1, "R3": 5, "R4": 2, "label": 0}
-]
+RAW_DATA_PATH = Path("data/raw/telemetry_log.csv")
+MODEL_DIR = Path("models")
+MODEL_DIR.mkdir(exist_ok=True)
 
-# ---------------------------------------------------
-# 2. Convert raw responses into feature vectors
-# ---------------------------------------------------
+MODEL_PATH = MODEL_DIR / "model_v1.pkl"
+METADATA_PATH = MODEL_DIR / "metadata_v1.json"
 
-X = []
-y = []
 
-for row in raw_data:
-    features = build_feature_vector(row)
-    X.append(features)
-    y.append(row["label"])
+# ==================================================
+# LOAD DATA
+# ==================================================
 
-# ---------------------------------------------------
-# 3. Train model
-# ---------------------------------------------------
+def load_dataset():
+    if not RAW_DATA_PATH.exists():
+        raise FileNotFoundError(
+            "No telemetry data found. Run the app and generate telemetry first."
+        )
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=42)
+    df = pd.read_csv(RAW_DATA_PATH)
 
-model = LogisticRegression()
-model.fit(X_train, y_train)
+    if df.empty:
+        raise ValueError("Telemetry dataset is empty.")
 
-# ---------------------------------------------------
-# 4. Evaluate
-# ---------------------------------------------------
+    df = generate_features(df)
+    df = df.dropna()
 
-predictions = model.predict(X_test)
-print("\nModel Evaluation:")
-print(classification_report(y_test, predictions))
+    return df
 
-# ---------------------------------------------------
-# 5. Save model
-# ---------------------------------------------------
 
-os.makedirs("models", exist_ok=True)
-joblib.dump(model, "models/model_v1.pkl")
+# ==================================================
+# TRAINING PIPELINE
+# ==================================================
 
-print("\n✅ Model saved to models/model_v1.pkl")
+def train():
+    print("📊 Loading dataset...")
+    df = load_dataset()
+
+    # Drop non-feature columns
+    feature_columns = [
+        col for col in df.columns
+        if col not in ["timestamp", "outcome", "outcome_binary"]
+    ]
+
+    X = df[feature_columns]
+    y = df["outcome_binary"]
+
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y,
+        test_size=0.2,
+        random_state=42,
+        stratify=y if len(y.unique()) > 1 else None
+    )
+
+    # ==================================================
+    # DEFINE MODELS
+    # ==================================================
+
+    models = {
+        "logistic_regression": LogisticRegression(max_iter=1000),
+        "random_forest": RandomForestClassifier(
+            n_estimators=200,
+            random_state=42
+        )
+    }
+
+    results = {}
+
+    print("🚀 Training models...")
+
+    for name, model in models.items():
+        model.fit(X_train, y_train)
+
+        preds = model.predict(X_test)
+        probs = model.predict_proba(X_test)[:, 1]
+
+        accuracy = accuracy_score(y_test, preds)
+        roc_auc = roc_auc_score(y_test, probs)
+
+        results[name] = {
+            "accuracy": accuracy,
+            "roc_auc": roc_auc
+        }
+
+        print(f"\n🔎 {name} Evaluation:")
+        print(classification_report(y_test, preds))
+
+    # ==================================================
+    # SELECT BEST MODEL
+    # ==================================================
+
+    best_model_name = max(results, key=lambda x: results[x]["roc_auc"])
+    best_model = models[best_model_name]
+
+    print(f"\n🏆 Best Model: {best_model_name}")
+
+    # ==================================================
+    # SAVE MODEL
+    # ==================================================
+
+    joblib.dump(best_model, MODEL_PATH)
+
+    metadata = {
+        "model_type": best_model_name,
+        "training_date": datetime.utcnow().isoformat(),
+        "features_used": feature_columns,
+        "metrics": results[best_model_name],
+        "dataset_size": len(df)
+    }
+
+    with open(METADATA_PATH, "w") as f:
+        json.dump(metadata, f, indent=4)
+
+    print(f"\n✅ Model saved to {MODEL_PATH}")
+    print(f"✅ Metadata saved to {METADATA_PATH}")
+
+
+# ==================================================
+# ENTRY POINT
+# ==================================================
+
+if __name__ == "__main__":
+    train()

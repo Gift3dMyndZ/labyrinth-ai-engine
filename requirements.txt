@@ -6,3 +6,9 @@ pandas
 numpy
 scikit-learn
 sentence-transformers
+joblib
+sqlalchemy
+python-dotenv
+matplotlib
+seaborn
+pytest

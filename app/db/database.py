@@ -1,6 +1,7 @@
 import sqlite3
 import os
-
+from contextlib import contextmanager
+from datetime import datetime
 
 # ==================================================
 # PATH CONFIGURATION
@@ -10,8 +11,6 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 DATA_DIR = os.path.join(BASE_DIR, "data")
 DB_PATH = os.path.join(DATA_DIR, "labyrinth.db")
 
-
-# Ensure data directory exists
 os.makedirs(DATA_DIR, exist_ok=True)
 
 
@@ -20,7 +19,19 @@ os.makedirs(DATA_DIR, exist_ok=True)
 # ==================================================
 
 def get_connection():
-    return sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row  # Enables dict-style row access
+    return conn
+
+
+@contextmanager
+def get_db():
+    conn = get_connection()
+    try:
+        yield conn
+        conn.commit()
+    finally:
+        conn.close()
 
 
 # ==================================================
@@ -28,38 +39,98 @@ def get_connection():
 # ==================================================
 
 def initialize_db():
-    conn = get_connection()
-    cursor = conn.cursor()
+    with get_db() as conn:
+        cursor = conn.cursor()
 
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS telemetry (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            fear_level INTEGER,
-            aggression INTEGER,
-            curiosity INTEGER,
-            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
-        )
-    """)
+        # Telemetry table (full ML-ready schema)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS telemetry (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+                fear_level REAL,
+                aggression REAL,
+                curiosity REAL,
+                survival_time REAL,
+                difficulty_modifier REAL,
+                outcome TEXT
+            )
+        """)
 
-    conn.commit()
-    conn.close()
+        # Prediction logging table
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS predictions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+                prediction INTEGER,
+                confidence REAL
+            )
+        """)
+
+        # Leaderboard table
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS leaderboard (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+                survival_time REAL,
+                difficulty_modifier REAL
+            )
+        """)
 
 
 # ==================================================
-# INSERT TELEMETRY
+# TELEMETRY INSERTION
 # ==================================================
 
-def insert_telemetry(fear: int, aggression: int, curiosity: int):
-    conn = get_connection()
-    cursor = conn.cursor()
+def insert_telemetry(data: dict):
+    with get_db() as conn:
+        cursor = conn.cursor()
 
-    cursor.execute("""
-        INSERT INTO telemetry (fear_level, aggression, curiosity)
-        VALUES (?, ?, ?)
-    """, (fear, aggression, curiosity))
+        cursor.execute("""
+            INSERT INTO telemetry (
+                fear_level,
+                aggression,
+                curiosity,
+                survival_time,
+                difficulty_modifier,
+                outcome
+            )
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, (
+            data.get("fear_level"),
+            data.get("aggression"),
+            data.get("curiosity"),
+            data.get("survival_time"),
+            data.get("difficulty_modifier"),
+            data.get("outcome"),
+        ))
 
-    conn.commit()
-    conn.close()
+
+# ==================================================
+# PREDICTION INSERTION
+# ==================================================
+
+def insert_prediction(prediction: int, confidence: float):
+    with get_db() as conn:
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            INSERT INTO predictions (prediction, confidence)
+            VALUES (?, ?)
+        """, (prediction, confidence))
+
+
+# ==================================================
+# LEADERBOARD INSERTION
+# ==================================================
+
+def insert_leaderboard_entry(survival_time: float, difficulty_modifier: float):
+    with get_db() as conn:
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            INSERT INTO leaderboard (survival_time, difficulty_modifier)
+            VALUES (?, ?)
+        """, (survival_time, difficulty_modifier))
 
 
 # ==================================================
@@ -67,30 +138,55 @@ def insert_telemetry(fear: int, aggression: int, curiosity: int):
 # ==================================================
 
 def get_telemetry_averages():
-    conn = get_connection()
-    cursor = conn.cursor()
+    with get_db() as conn:
+        cursor = conn.cursor()
 
-    cursor.execute("""
-        SELECT 
-            AVG(fear_level),
-            AVG(aggression),
-            AVG(curiosity)
-        FROM telemetry
-    """)
+        cursor.execute("""
+            SELECT 
+                AVG(fear_level) AS avg_fear,
+                AVG(aggression) AS avg_aggression,
+                AVG(curiosity) AS avg_curiosity
+            FROM telemetry
+        """)
 
-    result = cursor.fetchone()
-    conn.close()
+        result = cursor.fetchone()
 
-    # If no telemetry exists yet
-    if not result or all(value is None for value in result):
+        if not result or all(result[key] is None for key in result.keys()):
+            return {
+                "fear": 5,
+                "aggression": 5,
+                "curiosity": 5,
+            }
+
         return {
-            "fear": 5,
-            "aggression": 5,
-            "curiosity": 5,
+            "fear": result["avg_fear"] or 0,
+            "aggression": result["avg_aggression"] or 0,
+            "curiosity": result["avg_curiosity"] or 0,
         }
 
-    return {
-        "fear": result[0] or 0,
-        "aggression": result[1] or 0,
-        "curiosity": result[2] or 0,
-    }
+
+# ==================================================
+# LEADERBOARD QUERY
+# ==================================================
+
+def get_top_survivals(limit: int = 10):
+    with get_db() as conn:
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            SELECT survival_time, difficulty_modifier, timestamp
+            FROM leaderboard
+            ORDER BY survival_time DESC
+            LIMIT ?
+        """, (limit,))
+
+        rows = cursor.fetchall()
+
+        return [
+            {
+                "survival_time": row["survival_time"],
+                "difficulty_modifier": row["difficulty_modifier"],
+                "timestamp": row["timestamp"],
+            }
+            for row in rows
+        ]
