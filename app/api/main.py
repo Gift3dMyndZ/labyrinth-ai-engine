@@ -1,13 +1,15 @@
-from fastapi import FastAPI, Body
+from fastapi import FastAPI, Body, Request
 from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.templating import Jinja2Templates
-from fastapi import Request
+from pydantic import BaseModel
+from typing import List
 import os
 
 from app.services.ml_engine import recommend_books_by_preferences
 from app.services.story_engine import get_character_story
 from app.db.database import initialize_db, get_connection
+
 
 # ==================================================
 # APP INITIALIZATION
@@ -15,7 +17,6 @@ from app.db.database import initialize_db, get_connection
 
 app = FastAPI()
 
-# Enable CORS (safe default)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -24,7 +25,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Resolve project root
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 TEMPLATES_DIR = os.path.join(BASE_DIR, "app", "templates")
 
@@ -32,7 +32,7 @@ templates = Jinja2Templates(directory=TEMPLATES_DIR)
 
 
 # ==================================================
-# STARTUP EVENT (Initialize DB)
+# STARTUP
 # ==================================================
 
 @app.on_event("startup")
@@ -50,38 +50,51 @@ def root():
 
 
 # ==================================================
-# DASHBOARD
+# DASHBOARD (UI)
 # ==================================================
 
 @app.get("/dashboard", response_class=HTMLResponse)
 def get_dashboard(request: Request):
-    return templates.TemplateResponse("dashboard.html", {"request": request})
+    return templates.TemplateResponse(
+        "dashboard.html",
+        {"request": request}
+    )
 
 
 # ==================================================
-# RECOMMENDATION
+# API: RECOMMEND (JSON)
 # ==================================================
-
-from pydantic import BaseModel
-from typing import List
 
 class PreferenceRequest(BaseModel):
     preferences: List[str]
 
 
 @app.post("/recommend")
-def recommend_post(request: PreferenceRequest):
+def recommend_api(request: PreferenceRequest):
     results = recommend_books_by_preferences(request.preferences)
     return results
 
 
-@app.get("/recommend")
-def recommend_get(theme: str):
+# ==================================================
+# UI: EXPLORE PAGE (HTML)
+# ==================================================
+
+@app.get("/explore", response_class=HTMLResponse)
+def explore(request: Request, theme: str):
     results = recommend_books_by_preferences([theme])
-    return {"recommendations": results}
+
+    return templates.TemplateResponse(
+        "recommendations.html",
+        {
+            "request": request,
+            "theme": theme,
+            "recommendations": results
+        }
+    )
+
 
 # ==================================================
-# TELEMETRY LOGGING
+# TELEMETRY
 # ==================================================
 
 @app.post("/telemetry")

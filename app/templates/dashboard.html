@@ -17,10 +17,20 @@
             font-family: "Georgia", serif;
             overflow: hidden;
             position: relative;
+            opacity: 0;
+            transition: opacity 0.8s ease;
+        }
+
+        body.fade-in {
+            opacity: 1;
+        }
+
+        body.fade-out {
+            opacity: 0;
         }
 
         /* =============================
-           FOG LAYER
+           FOG
         ============================== */
 
         .fog {
@@ -52,35 +62,15 @@
             pointer-events: none;
         }
 
-        .tree:nth-child(1) { left: 5%; animation-duration: 7s; }
-        .tree:nth-child(2) { left: 25%; animation-duration: 6s; }
-        .tree:nth-child(3) { left: 50%; animation-duration: 8s; }
-        .tree:nth-child(4) { left: 75%; animation-duration: 7s; }
-        .tree:nth-child(5) { left: 90%; animation-duration: 6s; }
+        .tree:nth-of-type(1) { left: 5%; animation-duration: 7s; }
+        .tree:nth-of-type(2) { left: 25%; animation-duration: 6s; }
+        .tree:nth-of-type(3) { left: 50%; animation-duration: 8s; }
+        .tree:nth-of-type(4) { left: 75%; animation-duration: 7s; }
+        .tree:nth-of-type(5) { left: 90%; animation-duration: 6s; }
 
         @keyframes sway {
             from { transform: rotate(-2deg); }
             to   { transform: rotate(2deg); }
-        }
-
-        /* =============================
-           FALLING LEAVES
-        ============================== */
-
-        .leaf {
-            position: fixed;
-            top: -20px;
-            font-size: 20px;
-            color: #3a4d3a;
-            pointer-events: none;
-            animation: fall linear forwards;
-        }
-
-        @keyframes fall {
-            to {
-                transform: translateY(110vh) rotate(360deg);
-                opacity: 0.2;
-            }
         }
 
         /* =============================
@@ -90,10 +80,10 @@
         .panel {
             position: relative;
             width: 90%;
-            max-width: 1000px;
-            margin: 60px auto;
-            padding: 40px;
-            background: rgba(10,15,10,0.9);
+            max-width: 900px;
+            margin: 80px auto;
+            padding: 50px;
+            background: rgba(10,15,10,0.95);
             border: 1px solid #1f2a1f;
             box-shadow: 0 0 60px rgba(0,0,0,0.9);
             z-index: 3;
@@ -136,41 +126,11 @@
             margin-left: 15px;
             cursor: pointer;
             font-size: 18px;
+            transition: background 0.3s ease;
         }
 
         button:hover {
             background: #1c2a1c;
-        }
-
-        .cards {
-            margin-top: 40px;
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            gap: 25px;
-        }
-
-        .card {
-            background: rgba(15,20,15,0.95);
-            padding: 15px;
-            border: 1px solid #1f2a1f;
-        }
-
-        .card img {
-            width: 100%;
-            height: 220px;
-            object-fit: cover;
-            filter: grayscale(30%) brightness(0.8);
-            margin-bottom: 10px;
-        }
-
-        .card h3 {
-            font-size: 16px;
-            color: #e6f2e6;
-        }
-
-        .card p {
-            font-size: 14px;
-            color: #9fb09f;
         }
 
         @media (max-width:600px) {
@@ -178,7 +138,6 @@
             p { font-size: 16px; }
             select { width: 100%; min-width: unset; }
             button { width: 100%; margin: 15px 0 0 0; }
-            .cards { grid-template-columns: 1fr; }
         }
 
     </style>
@@ -209,16 +168,17 @@
         <option value="science">Science</option>
     </select>
 
-    <button onclick="getRecommendations()">Summon</button>
-
-    <div class="cards" id="results"></div>
+    <button onclick="navigateToExplore()">Summon</button>
 </div>
 
 <script>
+/* Fade In */
+window.addEventListener("load", () => {
+    document.body.classList.add("fade-in");
+});
 
-/* Recommender unchanged */
-
-async function getRecommendations() {
+/* Navigation */
+function navigateToExplore() {
     const select = document.getElementById("themes");
     const selected = [...select.selectedOptions].map(o => o.value);
 
@@ -227,47 +187,15 @@ async function getRecommendations() {
         return;
     }
 
-    try {
-        const response = await fetch("/recommend", {
-            method: "POST",
-            headers: {"Content-Type":"application/json"},
-            body: JSON.stringify({ preferences: selected })
-        });
+    const theme = selected[0];
 
-        const data = await response.json();
-        const results = document.getElementById("results");
-        results.innerHTML = "";
+    document.body.classList.remove("fade-in");
+    document.body.classList.add("fade-out");
 
-        data.forEach(book => {
-            const card = document.createElement("div");
-            card.className = "card";
-            card.innerHTML = `
-                <img src="${book.image}">
-                <h3>${book.title}</h3>
-                <p>${book.themes.join(", ")}</p>
-            `;
-            results.appendChild(card);
-        });
-
-    } catch {
-        alert("The forest rejects your request.");
-    }
+    setTimeout(() => {
+        window.location.href = "/explore?theme=" + theme;
+    }, 600);
 }
-
-/* Leaves */
-
-function spawnLeaf() {
-    const leaf = document.createElement("div");
-    leaf.className = "leaf";
-    leaf.innerHTML = "🍂";
-    leaf.style.left = Math.random() * window.innerWidth + "px";
-    leaf.style.animationDuration = (5 + Math.random() * 5) + "s";
-    document.body.appendChild(leaf);
-    setTimeout(() => leaf.remove(), 10000);
-}
-
-setInterval(spawnLeaf, 500);
-
 </script>
 
 </body>

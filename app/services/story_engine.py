@@ -17,7 +17,7 @@ STORY_ARCS_PATH = os.path.join(DATA_DIR, "story_arcs.json")
 
 
 # ==================================================
-# LOAD JSON SAFELY
+# LOAD JSON
 # ==================================================
 
 def load_json(path: str):
@@ -32,13 +32,51 @@ story_arcs = load_json(STORY_ARCS_PATH)
 
 
 # ==================================================
-# ADAPTIVE STORY ENGINE
+# DIFFICULTY CALCULATION
+# ==================================================
+
+def calculate_difficulty_multiplier(telemetry: Dict, character: Dict) -> float:
+    """
+    Combine telemetry + character traits into a final difficulty multiplier.
+    """
+
+    fear = telemetry["fear"]
+    aggression = telemetry["aggression"]
+    curiosity = telemetry["curiosity"]
+
+    traits = character.get("traits", {})
+    courage = traits.get("courage", 5)
+    intellect = traits.get("intellect", 5)
+    stamina = traits.get("stamina", 5)
+
+    multiplier = 1.0
+
+    # Telemetry influence
+    if aggression > 7:
+        multiplier += 0.3
+
+    if curiosity > 7:
+        multiplier += 0.2
+
+    if fear > 7:
+        multiplier -= 0.2
+
+    # Character trait modifiers
+    multiplier -= (courage - 5) * 0.03   # High courage slightly lowers danger
+    multiplier -= (intellect - 5) * 0.02 # Smart characters adapt better
+    multiplier += (5 - stamina) * 0.03   # Low stamina increases danger
+
+    # Clamp multiplier
+    return max(0.6, min(multiplier, 2.0))
+
+
+# ==================================================
+# STORY ENGINE
 # ==================================================
 
 def get_character_story(book_name: str) -> Optional[Dict]:
     """
-    Generate progressive story arc for a given book.
-    Now includes adaptive difficulty scaling based on telemetry.
+    Generate progressive story arc with adaptive difficulty scaling.
     """
 
     character = next((c for c in characters if c["book"] == book_name), None)
@@ -47,41 +85,20 @@ def get_character_story(book_name: str) -> Optional[Dict]:
     if not character or not arc:
         return None
 
-    # --------------------------------------------
-    # ✅ Get Telemetry Averages
-    # --------------------------------------------
+    # Get telemetry
     telemetry = get_telemetry_averages()
 
-    fear = telemetry["fear"]
-    aggression = telemetry["aggression"]
-    curiosity = telemetry["curiosity"]
+    # Calculate multiplier
+    multiplier = calculate_difficulty_multiplier(telemetry, character)
 
-    # --------------------------------------------
-    # ✅ Adaptive Multiplier Logic
-    # --------------------------------------------
-    difficulty_multiplier = 1.0
+    # Starting danger (support old + new format)
+    danger = character.get("base_danger", character.get("danger_level", 0))
 
-    if aggression > 7:
-        difficulty_multiplier += 0.3
-
-    if curiosity > 7:
-        difficulty_multiplier += 0.2
-
-    if fear > 7:
-        difficulty_multiplier -= 0.2
-
-    # Clamp multiplier for safety
-    difficulty_multiplier = max(0.7, min(difficulty_multiplier, 1.8))
-
-    # --------------------------------------------
-    # ✅ Apply Scaling to Story Progression
-    # --------------------------------------------
     progression: List[Dict] = []
-    danger = character.get("danger_level", 0)
 
     for chapter in arc.get("chapters", []):
         base_increase = chapter.get("danger_increase", 0)
-        adjusted_increase = int(base_increase * difficulty_multiplier)
+        adjusted_increase = int(base_increase * multiplier)
 
         danger += adjusted_increase
 
@@ -93,5 +110,6 @@ def get_character_story(book_name: str) -> Optional[Dict]:
 
     return {
         "character": character,
+        "difficulty_multiplier": round(multiplier, 2),
         "progression": progression
     }

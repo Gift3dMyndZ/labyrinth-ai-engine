@@ -3,12 +3,26 @@
       "book": "Haunted Maze",
       "name": "Elias Thorn",
       "role": "Explorer",
-      "danger_level": 2
+      "background": "A former cartographer obsessed with mapping forgotten places.",
+      "starting_location": "Abandoned Stone Gate",
+      "traits": {
+        "courage": 6,
+        "intellect": 8,
+        "stamina": 5
+      },
+      "base_danger": 2
     },
     {
       "book": "Shadow Forest",
       "name": "Mira Vale",
       "role": "Scout",
-      "danger_level": 3
+      "background": "A silent tracker who survived the northern war zones.",
+      "starting_location": "Whispering Pines",
+      "traits": {
+        "courage": 8,
+        "intellect": 5,
+        "stamina": 7
+      },
+      "base_danger": 3
     }
   ]

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Explore the Forest</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <style>
+        body {
+            background: radial-gradient(circle at center, #0a0f0a 0%, #000 80%);
+            color: #e6f2e6;
+            font-family: Georgia, serif;
+            padding: 60px;
+            margin: 0;
+        }
+
+        h1 {
+            margin-bottom: 40px;
+            font-weight: normal;
+            letter-spacing: 2px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 30px;
+        }
+
+        .card {
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card img {
+            width: 100%;
+            height: 320px;
+            object-fit: cover;
+            border-radius: 6px;
+            filter: brightness(0.85);
+            transition: transform 0.3s ease, filter 0.3s ease;
+        }
+
+        .card:hover {
+            transform: scale(1.08);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.7);
+            z-index: 2;
+        }
+
+        .card:hover img {
+            filter: brightness(1);
+        }
+
+        .overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 15px;
+            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+            border-radius: 0 0 6px 6px;
+        }
+
+        .overlay h3 {
+            margin: 0;
+            font-size: 16px;
+            letter-spacing: 1px;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .back {
+            margin-top: 60px;
+            display: inline-block;
+            color: #9fb09f;
+        }
+
+        .back:hover {
+            color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Results for "{{ theme }}"</h1>
+
+<div class="grid">
+    {% for book in recommendations %}
+    <a href="/play/{{ book.book }}">
+        <div class="card">
+            <img src="{{ book.image }}" alt="{{ book.title }}">
+            <div class="overlay">
+                <h3>{{ book.title }}</h3>
+            </div>
+        </div>
+    </a>
+    {% endfor %}
+</div>
+
+<a class="back" href="/dashboard">⬅ Return to the Forest</a>
+
+</body>
+</html>
