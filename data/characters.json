@@ -1,0 +1,14 @@
+[
+    {
+      "book": "Haunted Maze",
+      "name": "Elias Thorn",
+      "role": "Explorer",
+      "danger_level": 2
+    },
+    {
+      "book": "Shadow Forest",
+      "name": "Mira Vale",
+      "role": "Scout",
+      "danger_level": 3
+    }
+  ]

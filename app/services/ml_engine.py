@@ -1,10 +1,15 @@
+import os
 import json
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
-# Load books
-with open("app/library.json") as f:
+# ✅ Build absolute path safely
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+LIBRARY_PATH = os.path.join(BASE_DIR, "data", "library.json")
+
+# ✅ Load books safely
+with open(LIBRARY_PATH, "r") as f:
     books = json.load(f)
 
 df = pd.DataFrame(books)

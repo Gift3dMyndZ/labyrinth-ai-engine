@@ -2,10 +2,11 @@
 
 > Adaptive behavioral simulation engine built with FastAPI and machine learning.
 
-![Python]
-![FastAPI]
-![Docker]
-![License]
+![Python](https://img.shields.io/badge/Python-3.9+-blue)
+![FastAPI](https://img.shields.io/badge/FastAPI-API-green)
+![SQLite](https://img.shields.io/badge/Database-SQLite-lightgrey)
+![Docker](https://img.shields.io/badge/Container-Docker-blue)
+![License](https://img.shields.io/badge/License-MIT-yellow)
 
 ---
 
