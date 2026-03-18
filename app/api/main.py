@@ -13,7 +13,9 @@ try:
     from app.services.recommender import create_recommender
 except ImportError:
     create_recommender = None
+from fastapi import FastAPI
 
+app = FastAPI()
 
 # ==================================================
 # LOGGING CONFIGURATION
