@@ -18,6 +18,15 @@ try:
 except ImportError:
     create_recommender = None
 
+import os
+
+@app.get("/debug-files")
+def debug_files():
+    return {
+        "cwd": os.getcwd(),
+        "files": os.listdir(),
+        "app_dir": os.listdir("app"),
+    }
 
 # ==================================================
 # APP INITIALIZATION
