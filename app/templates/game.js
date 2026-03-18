@@ -1,233 +1,365 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LABYRINTH</title>
+/* =========================================
+SESSION + TELEMETRY SETUP
+========================================= */
 
-<style>
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+const sessionId = crypto.randomUUID();
+let sessionStart = Date.now();
+let eventLog = [];
 
-body {
-    background: #000;
-    color: #00ff66;
-    font-family: "Courier New", monospace;
-    text-align: center;
-    overflow: hidden;
-}
+const API_BASE =
+    window.location.hostname === "localhost" ||
+    window.location.hostname === "127.0.0.1"
+        ? "http://127.0.0.1:8000"
+        : "https://labyrinth-ai-engine.onrender.com"; // ✅ your deployed backend
 
-.title {
-    margin-top: 15px;
-    font-size: 2rem;
-}
 
-.glow {
-    text-shadow:
-        0 0 5px #00ff66,
-        0 0 15px #00ff66,
-        0 0 25px #00ff66;
-}
+/* =========================================
+CANVAS SETUP
+========================================= */
 
-.hud {
-    margin-top: 10px;
-    font-size: 0.9rem;
-}
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
 
-.hidden {
-    display: none;
-}
 
-.screen {
-    position: absolute;
-    inset: 0;
-    background: black;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    z-index: 20;
-}
+/* =========================================
+GAME STATE
+========================================= */
 
-.blink {
-    animation: blink 1s infinite;
-}
+let level = 1;
+let score = 0;
+let survivalTime = 0;
+let gameRunning = false;
+let survivalInterval;
 
-@keyframes blink {
-    50% { opacity: 0; }
-}
+let map = [];
+let MAP_W;
+let MAP_H;
 
-/* CRT */
-.crt-wrapper {
-    position: relative;
-    width: 420px;
-    height: 420px;
-    margin: 30px auto;
-    border: 4px solid #00ff66;
-    box-shadow:
-        0 0 20px #00ff66,
-        inset 0 0 20px #003300;
-    overflow: hidden;
-}
+let player;
+let monster;
+let exitTile;
 
-canvas {
-    display: block;
-    background: black;
-}
+let fear_level = 0;
+let aggression = 0;
+let curiosity = 0;
+let difficultyModifier = 1.0;
 
-.scanlines {
-    position: absolute;
-    inset: 0;
-    background: repeating-linear-gradient(
-        to bottom,
-        rgba(0,255,0,0.05) 0px,
-        rgba(0,255,0,0.05) 2px,
-        transparent 2px,
-        transparent 4px
+
+/* =========================================
+MAZE GENERATION (Recursive Backtracking)
+========================================= */
+
+function generateMaze(width, height) {
+
+    if (width % 2 === 0) width++;
+    if (height % 2 === 0) height++;
+
+    MAP_W = width;
+    MAP_H = height;
+
+    map = Array.from({ length: height }, () =>
+        Array(width).fill("1")
     );
-    pointer-events: none;
-}
 
-/* Demo overlay text */
-#demoLabel {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    font-size: 0.8rem;
-    opacity: 0.6;
-    display: none;
-}
+    function carve(x, y) {
 
-</style>
-</head>
+        const directions = [
+            [0, -2],
+            [0, 2],
+            [-2, 0],
+            [2, 0]
+        ].sort(() => Math.random() - 0.5);
 
-<body>
+        for (let [dx, dy] of directions) {
 
-<!-- ATTRACT SCREEN -->
-<div id="attractScreen" class="screen">
-    <h1 class="title glow">LABYRINTH</h1>
-    <h2 class="blink">INSERT COIN</h2>
-    <p>PRESS ENTER</p>
-</div>
+            const nx = x + dx;
+            const ny = y + dy;
 
-<h1 class="title glow">LABYRINTH</h1>
-
-<div class="hud hidden" id="hud">
-    Level: <span id="level">1</span> |
-    Time: <span id="time">0</span>s |
-    Score: <span id="score">0</span> |
-    High: <span id="highScore">0</span>
-</div>
-
-<div class="crt-wrapper">
-    <canvas id="game" width="420" height="420"></canvas>
-    <div class="scanlines"></div>
-    <div id="demoLabel">DEMO MODE</div>
-</div>
-
-<script>
-/* ===============================
-   MODE CONTROL
-================================ */
-
-let demoMode = true;
-let demoTimer;
-
-/* Elements */
-const attractScreen = document.getElementById("attractScreen");
-const hud = document.getElementById("hud");
-const demoLabel = document.getElementById("demoLabel");
-
-/* ===============================
-   START DEMO AFTER DELAY
-================================ */
-
-function startDemo() {
-
-    demoMode = true;
-    attractScreen.classList.add("hidden");
-    hud.classList.add("hidden");
-    demoLabel.style.display = "block";
-
-    if (window.startGame) {
-        window.startGame({ demo: true });
+            if (
+                nx > 0 && ny > 0 &&
+                nx < width - 1 &&
+                ny < height - 1 &&
+                map[ny][nx] === "1"
+            ) {
+                map[ny][nx] = "0";
+                map[y + dy / 2][x + dx / 2] = "0";
+                carve(nx, ny);
+            }
+        }
     }
+
+    map[1][1] = "0";
+    carve(1, 1);
+    map = map.map(row => row.join(""));
 }
 
-/* ===============================
-   START REAL GAME
-================================ */
 
-function startRealGame() {
+/* =========================================
+RESET GAME
+========================================= */
 
-    demoMode = false;
-    attractScreen.classList.add("hidden");
-    hud.classList.remove("hidden");
-    demoLabel.style.display = "none";
+function resetGame(fullReset = false) {
 
-    if (window.startGame) {
-        window.startGame({ demo: false });
+    if (fullReset) {
+        level = 1;
+        score = 0;
+        sessionStart = Date.now();
     }
+
+    const size = 21 + Math.min(level * 2, 20);
+    generateMaze(size, size);
+
+    player = { x: 1.5, y: 1.5, angle: 0 };
+
+    exitTile = { x: MAP_W - 2, y: MAP_H - 2 };
+
+    monster = {
+        x: MAP_W - 3,
+        y: 1,
+        speed: (0.02 + level * 0.004) * difficultyModifier
+    };
+
+    survivalTime = 0;
+    fear_level = 0;
+    aggression = 0;
+    curiosity = 0;
+
+    updateHUD();
 }
 
-/* ===============================
-   ENTER KEY HANDLER
-================================ */
 
-document.addEventListener("keydown", (e) => {
+/* =========================================
+HUD
+========================================= */
 
-    if (e.key === "Enter") {
+function updateHUD() {
+    document.getElementById("level").innerText = level;
+    document.getElementById("score").innerText = score;
+    document.getElementById("time").innerText = survivalTime;
+}
 
-        startRealGame();
-    }
+
+/* =========================================
+MOVEMENT
+========================================= */
+
+let keys = {};
+
+document.addEventListener("keydown", e => {
+    keys[e.key.toLowerCase()] = true;
 });
 
-/* ===============================
-   AUTO DEMO LOOP
-================================ */
+document.addEventListener("keyup", e => {
+    keys[e.key.toLowerCase()] = false;
+});
 
-function scheduleDemo() {
-
-    clearTimeout(demoTimer);
-
-    demoTimer = setTimeout(() => {
-        if (demoMode) return;
-        startDemo();
-    }, 4000);
+function tryMove(nx, ny) {
+    if (map[Math.floor(ny)][Math.floor(nx)] === "0") {
+        player.x = nx;
+        player.y = ny;
+    }
 }
 
-/* ===============================
-   INITIAL LOAD
-================================ */
+function movePlayer() {
 
-window.onload = () => {
+    const speed = 0.06;
 
-    // Show attract screen first
-    demoMode = false;
-    scheduleDemo();
+    if (keys["w"]) {
+        tryMove(
+            player.x + Math.cos(player.angle) * speed,
+            player.y + Math.sin(player.angle) * speed
+        );
+        logMove("forward");
+    }
+
+    if (keys["s"]) {
+        tryMove(
+            player.x - Math.cos(player.angle) * speed,
+            player.y - Math.sin(player.angle) * speed
+        );
+        logMove("backward");
+    }
+
+    if (keys["a"]) {
+        player.angle -= 0.05;
+        logMove("left");
+    }
+
+    if (keys["d"]) {
+        player.angle += 0.05;
+        logMove("right");
+    }
+
+    curiosity++;
+}
+
+
+/* =========================================
+MONSTER AI
+========================================= */
+
+function moveMonster() {
+
+    const dx = player.x - monster.x;
+    const dy = player.y - monster.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+
+    if (dist < 5) fear_level++;
+    if (dist < 5 && Math.random() < 0.3) aggression++;
+
+    if (dist < 8) {
+        monster.x += Math.sign(dx) * monster.speed;
+        monster.y += Math.sign(dy) * monster.speed;
+    }
+
+    if (dist < 0.5) {
+        endGame();
+    }
+}
+
+
+/* =========================================
+MOVEMENT LOGGING
+========================================= */
+
+function logMove(action) {
+
+    const now = Date.now();
+
+    const distanceToAI = Math.hypot(
+        player.x - monster.x,
+        player.y - monster.y
+    );
+
+    eventLog.push({
+        session_id: sessionId,
+        timestamp: now,
+        level: level,
+        action: action,
+        player_x: player.x,
+        player_y: player.y,
+        player_angle: player.angle,
+        ai_x: monster.x,
+        ai_y: monster.y,
+        distance_to_ai: distanceToAI,
+        time_since_start: now - sessionStart
+    });
+
+    if (eventLog.length >= 25) {
+        sendBatch();
+    }
+}
+
+async function sendBatch() {
+
+    if (eventLog.length === 0) return;
+
+    try {
+        await fetch(`${API_BASE}/collect`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(eventLog)
+        });
+
+        console.log("Batch sent:", eventLog.length);
+        eventLog = [];
+
+    } catch (err) {
+        console.error("Batch send failed:", err);
+    }
+}
+
+
+/* =========================================
+ADAPTIVE TELEMETRY
+========================================= */
+
+async function sendTelemetry(data) {
+    try {
+        await fetch(`${API_BASE}/telemetry`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        });
+    } catch (err) {
+        console.error("Telemetry error:", err);
+    }
+}
+
+async function getAdaptiveDifficulty(data) {
+    try {
+        const response = await fetch(`${API_BASE}/recommend`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+        return result.difficulty_modifier || 1.0;
+
+    } catch (err) {
+        console.error("Recommendation error:", err);
+        return 1.0;
+    }
+}
+
+
+/* =========================================
+GAME LOOP
+========================================= */
+
+function gameLoop() {
+
+    if (!gameRunning) return;
+
+    movePlayer();
+    moveMonster();
+
+    requestAnimationFrame(gameLoop);
+}
+
+
+/* =========================================
+GAME END
+========================================= */
+
+async function endGame() {
+
+    gameRunning = false;
+    clearInterval(survivalInterval);
+
+    const metrics = {
+        fear_level,
+        aggression,
+        curiosity,
+        survival_time: survivalTime
+    };
+
+    await sendTelemetry(metrics);
+
+    difficultyModifier = await getAdaptiveDifficulty(metrics);
+
+    level++;
+    resetGame(false);
+
+    gameRunning = true;
+    gameLoop();
+}
+
+
+/* =========================================
+START GAME
+========================================= */
+
+window.startGame = function () {
+
+    gameRunning = true;
+    resetGame(true);
+
+    survivalInterval = setInterval(() => {
+        survivalTime++;
+        updateHUD();
+    }, 1000);
+
+    gameLoop();
 };
-
-/* ===============================
-   RETURN TO ATTRACT (CALL FROM GAME)
-================================ */
-
-window.returnToAttract = function() {
-
-    demoMode = false;
-
-    attractScreen.classList.remove("hidden");
-    hud.classList.add("hidden");
-    demoLabel.style.display = "none";
-
-    scheduleDemo();
-};
-
-</script>
-
-<script src="game.js"></script>
-
-</body>
-</html>
