@@ -27,12 +27,37 @@ This project demonstrates production-style ML architecture inside an interactive
 ---
 
 ## 🏗 System Architecture
+```
+┌──────────────────────────┐
+                │        Browser UI        │
+                │  Raycasting + Telemetry  │
+                └─────────────┬────────────┘
+                              │
+                              ▼
+                ┌──────────────────────────┐
+                │        FastAPI API       │
+                │  /telemetry  /train      │
+                └─────────────┬────────────┘
+                              │
+          ┌───────────────────┼───────────────────┐
+          ▼                   ▼                   ▼
+┌────────────────┐  ┌────────────────┐  ┌────────────────┐
+│   ML Engine    │  │  Story Engine  │  │  Leaderboard   │
+│ (Inference)    │  │  (LLM Driven)  │  │  & Analytics   │
+└────────────────┘  └────────────────┘  └────────────────┘
+          │
+          ▼
+┌────────────────────┐
+│  Adaptive Output   │
+│ Difficulty + Story │
+└────────────────────┘
+```
 
 ### High-Level Flow
 ```
 Browser → Telemetry → FastAPI → ML Engine → Adaptive Output → Narrative Engine
 ```
-### Frontend
+### 🎮 Frontend
 
 - JavaScript raycasting renderer
 - Retro hedge-style maze visuals
@@ -40,7 +65,7 @@ Browser → Telemetry → FastAPI → ML Engine → Adaptive Output → Narrativ
 - Telemetry collection (fear, aggression, curiosity, etc.)
 - Dynamic difficulty updates
 
-### Backend (FastAPI)
+### ⚙️ Backend (FastAPI)
 
 - REST API endpoints
 - Telemetry ingestion
@@ -49,7 +74,7 @@ Browser → Telemetry → FastAPI → ML Engine → Adaptive Output → Narrativ
 - Leaderboard logic
 - Analytics tracking
 
-### Infrastructure
+### ☁ Infrastructure
 
 - Dockerized deployment
 - GitHub-based CI-ready structure
@@ -141,7 +166,21 @@ Architecture emphasizes:
 
 ---
 
-## 🧠 Machine Learning Pipeline
+## 🧠 Machine Learning Architecture
+located in: 
+```
+traning/
+```
+Pipeline:
+- Feature engineering
+- Data preprocessing
+- Model serialization
+- Artifact saved to /models/model.pkl
+```
+Retrain:
+```
+python training/train.py
+```
 
 ### Offline Training
 
@@ -202,7 +241,7 @@ Narrative logic is isolated from predictive modeling for extensibility.
 
 ---
 
-## ⚙️ Installation
+## ⚙️ Local Installation
 
 Clone repository:
 ```
@@ -272,7 +311,9 @@ docker run -p 8000:8000 labyrinth-ai-engine
 - Hybrid psychological + telemetry modeling  
 - Persistent database integration  
 - Real-time difficulty recalibration  
-- CI/CD automation  
+- CI/CD automation
+- Model versioning and artifact tracking
+- Cloud scaling configuration
 ```
 ---
 
