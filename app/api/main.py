@@ -1,8 +1,12 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, HTMLResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+
 from app.services.player_clustering import PlayerClusteringService
 from app.db.database import get_all_telemetry, initialize_db
+
 import logging
 import time
 
@@ -13,16 +17,6 @@ try:
     from app.services.recommender import create_recommender
 except ImportError:
     create_recommender = None
-from fastapi import FastAPI
-
-app = FastAPI()
-
-# ==================================================
-# LOGGING CONFIGURATION
-# ==================================================
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("labyrinth-ai-engine")
 
 
 # ==================================================
@@ -37,9 +31,23 @@ app = FastAPI(
 
 app.state.start_time = time.time()
 app.state.recommender = None
-
-# ✅ Clustering Service State
 app.state.cluster_service = None
+
+
+# ==================================================
+# STATIC FILES + TEMPLATES
+# ==================================================
+
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
+templates = Jinja2Templates(directory="app/templates")
+
+
+# ==================================================
+# LOGGING CONFIGURATION
+# ==================================================
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("labyrinth-ai-engine")
 
 
 # ==================================================
@@ -88,18 +96,15 @@ def startup_event():
         except Exception as e:
             logger.warning(f"Recommender failed to load: {e}")
 
-    # ✅ Initialize Clustering Service
     app.state.cluster_service = PlayerClusteringService(n_clusters=3)
 
     try:
         telemetry_data = get_all_telemetry()
-
         if telemetry_data:
             trained = app.state.cluster_service.train(telemetry_data)
             logger.info(f"✅ Clustering trained at startup: {trained}")
         else:
             logger.info("ℹ️ No telemetry data available for clustering yet.")
-
     except Exception as e:
         logger.warning(f"Clustering initialization failed: {e}")
 
@@ -107,11 +112,27 @@ def startup_event():
 
 
 # ==================================================
-# HEALTH CHECK
+# ROOT DASHBOARD (HTML)
 # ==================================================
 
-@app.get("/", tags=["Health"])
-def root():
+@app.get("/", response_class=HTMLResponse, tags=["Frontend"])
+def dashboard(request: Request):
+    return templates.TemplateResponse(
+        "dashboard.html",
+        {
+            "request": request,
+            "service": "Labyrinth AI Engine",
+            "version": "1.0.0",
+        },
+    )
+
+
+# ==================================================
+# API STATUS (JSON)
+# ==================================================
+
+@app.get("/api", tags=["Health"])
+def api_status():
     uptime = round(time.time() - app.state.start_time, 2)
     return {
         "status": "running",
@@ -184,7 +205,6 @@ def cluster_player(data: dict):
     }
 
 
-# ✅ Safe Label Mapping
 def map_cluster_to_label(cluster_id):
     labels = {
         0: "Explorer",
@@ -202,7 +222,6 @@ def map_cluster_to_label(cluster_id):
 def model_info():
     return {
         "model_status": "not_loaded",
-        "note": "Model metadata endpoint will be implemented in Phase 2",
         "recommender_initialized": app.state.recommender is not None,
         "clustering_initialized": app.state.cluster_service is not None
     }
