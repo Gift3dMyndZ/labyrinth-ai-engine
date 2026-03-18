@@ -31,9 +31,14 @@ app.state.cluster_service = None
 # STATIC FILES + TEMPLATES
 # ==================================================
 
-app.mount("/static", StaticFiles(directory="app/static"), name="static")
-templates = Jinja2Templates(directory="app/templates")
+from pathlib import Path
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 
+BASE_DIR = Path(__file__).resolve().parent.parent  # points to /app/app
+
+app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
+templates = Jinja2Templates(directory=BASE_DIR / "templates")
 
 # ==================================================
 # MIDDLEWARE
