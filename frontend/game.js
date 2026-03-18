@@ -1,3 +1,11 @@
+// ===== SESSION SYSTEM =====
+
+const sessionId = crypto.randomUUID();
+let sessionStart = Date.now();
+let currentLevel = 1;
+
+let eventLog = [];
+
 /* =========================================
    API BASE DETECTION (DEV vs PROD)
 ========================================= */
@@ -194,6 +202,35 @@ function movePlayer() {
     curiosity++;
 }
 
+function logMove(action) {
+
+    const now = Date.now();
+
+    const distanceToAI = Math.hypot(
+        player.x - monster.x,
+        player.y - monster.y
+    );
+
+    eventLog.push({
+        session_id: sessionId,
+        timestamp: now,
+        level: currentLevel,
+        action: action,
+        player_x: player.x,
+        player_y: player.y,
+        player_angle: player.angle,
+        ai_x: monster.x,
+        ai_y: monster.y,
+        distance_to_ai: distanceToAI,
+        time_since_start: now - sessionStart
+    });
+
+    // Optional: send batch every 25 moves
+    if (eventLog.length >= 25) {
+        sendBatch();
+    }
+}
+
 function moveMonster() {
 
     const dx = player.x - monster.x;
@@ -209,6 +246,34 @@ function moveMonster() {
     }
 }
 
+function logMove(action) {
+
+    const now = Date.now();
+
+    const distanceToAI = Math.hypot(
+        player.x - monster.x,
+        player.y - monster.y
+    );
+
+    eventLog.push({
+        session_id: sessionId,
+        timestamp: now,
+        level: currentLevel,
+        action: action,
+        player_x: player.x,
+        player_y: player.y,
+        player_angle: player.angle,
+        ai_x: monster.x,
+        ai_y: monster.y,
+        distance_to_ai: distanceToAI,
+        time_since_start: now - sessionStart
+    });
+
+    // Optional: send batch every 25 moves
+    if (eventLog.length >= 25) {
+        sendBatch();
+    }
+}
 /* =========================================
    TELEMETRY
 ========================================= */
