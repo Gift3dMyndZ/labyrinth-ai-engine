@@ -117,3 +117,7 @@ node_modules/
 
 # IDE
 .vscode/
+venv/
+__pycache__/
+*.pyc
+labyrinth.db

@@ -1,10 +1,11 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from app.services.player_clustering import PlayerClusteringService
+from app.db.database import get_all_telemetry, initialize_db
 import logging
 import time
 
-from app.db.database import initialize_db
 from app.api.routes import recommend, telemetry, play
 
 # Optional: preload recommender if available
@@ -35,6 +36,9 @@ app = FastAPI(
 app.state.start_time = time.time()
 app.state.recommender = None
 
+# ✅ Clustering Service State
+app.state.cluster_service = None
+
 
 # ==================================================
 # MIDDLEWARE
@@ -50,7 +54,7 @@ app.add_middleware(
 
 
 # ==================================================
-# GLOBAL ERROR HANDLER (NEW – SAFE ADDITION)
+# GLOBAL ERROR HANDLER
 # ==================================================
 
 @app.exception_handler(Exception)
@@ -82,6 +86,21 @@ def startup_event():
         except Exception as e:
             logger.warning(f"Recommender failed to load: {e}")
 
+    # ✅ Initialize Clustering Service
+    app.state.cluster_service = PlayerClusteringService(n_clusters=3)
+
+    try:
+        telemetry_data = get_all_telemetry()
+
+        if telemetry_data:
+            trained = app.state.cluster_service.train(telemetry_data)
+            logger.info(f"✅ Clustering trained at startup: {trained}")
+        else:
+            logger.info("ℹ️ No telemetry data available for clustering yet.")
+
+    except Exception as e:
+        logger.warning(f"Clustering initialization failed: {e}")
+
     logger.info("🚀 Labyrinth AI Engine is running")
 
 
@@ -105,7 +124,8 @@ def health_check():
     return {
         "status": "ok",
         "database": "initialized",
-        "recommender_loaded": app.state.recommender is not None
+        "recommender_loaded": app.state.recommender is not None,
+        "clustering_initialized": app.state.cluster_service is not None
     }
 
 
@@ -133,7 +153,47 @@ app.include_router(
 
 
 # ==================================================
-# MODEL INFO (Phase 2 Ready)
+# CLUSTER PLAYER ENDPOINT
+# ==================================================
+
+@app.post("/cluster-player", tags=["Clustering"])
+def cluster_player(data: dict):
+
+    if not app.state.cluster_service:
+        return {
+            "cluster_id": None,
+            "player_type": "Service Not Initialized",
+            "confidence": 0.0
+        }
+
+    cluster_id = app.state.cluster_service.predict(data)
+
+    if cluster_id is None:
+        return {
+            "cluster_id": None,
+            "player_type": "Insufficient Data",
+            "confidence": 0.0
+        }
+
+    return {
+        "cluster_id": cluster_id,
+        "player_type": map_cluster_to_label(cluster_id),
+        "confidence": 1.0
+    }
+
+
+# ✅ Safe Label Mapping
+def map_cluster_to_label(cluster_id):
+    labels = {
+        0: "Explorer",
+        1: "Aggressor",
+        2: "Survivor"
+    }
+    return labels.get(cluster_id, "Unknown")
+
+
+# ==================================================
+# MODEL INFO
 # ==================================================
 
 @app.get("/model-info", tags=["Model"])
@@ -141,12 +201,13 @@ def model_info():
     return {
         "model_status": "not_loaded",
         "note": "Model metadata endpoint will be implemented in Phase 2",
-        "recommender_initialized": app.state.recommender is not None
+        "recommender_initialized": app.state.recommender is not None,
+        "clustering_initialized": app.state.cluster_service is not None
     }
 
 
 # ==================================================
-# SYSTEM INFO (NEW – NON-DESTRUCTIVE)
+# SYSTEM INFO
 # ==================================================
 
 @app.get("/system-info", tags=["Diagnostics"])
@@ -154,6 +215,6 @@ def system_info():
     return {
         "service": "Labyrinth AI Engine",
         "version": "1.0.0",
-        "routers": ["recommend", "telemetry", "play"],
+        "routers": ["recommend", "telemetry", "play", "cluster-player"],
         "uptime_seconds": round(time.time() - app.state.start_time, 2)
     }
