@@ -171,7 +171,9 @@ located in:
 ```
 traning/
 ```
+
 Pipeline:
+```
 - Feature engineering
 - Data preprocessing
 - Model serialization
@@ -196,6 +198,7 @@ Responsibilities:
 - Model serialization  
 - Artifact saving to /models/model.pkl  
 ```
+
 Retrain model:
 ```
 python training/train.py
@@ -325,6 +328,6 @@ MIT License
 
 ## 👤 Author
 
-Developed by Gift3dMyndz
+Developed by Gift3dMyndz - Joshua Wolfe
 
 If you found this interesting, consider starring the repository ⭐
