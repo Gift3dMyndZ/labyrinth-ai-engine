@@ -7,7 +7,16 @@ from fastapi.templating import Jinja2Templates
 from app.services.player_clustering import PlayerClusteringService
 from app.db.database import get_all_telemetry, initialize_db
 from app.api.routes import recommend, telemetry, play
+import os
+import uvicorn
 
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 10000))
+    uvicorn.run(
+        "main:app",
+        host="0.0.0.0",
+        port=port
+    )
 import logging
 import time
 
