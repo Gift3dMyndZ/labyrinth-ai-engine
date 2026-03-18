@@ -1,62 +1,33 @@
-// ===== SESSION SYSTEM =====
+/* =========================================
+SESSION + TELEMETRY SETUP
+========================================= */
 
 const sessionId = crypto.randomUUID();
 let sessionStart = Date.now();
-let currentLevel = 1;
-
 let eventLog = [];
 
-/* =========================================
-   API BASE DETECTION (DEV vs PROD)
-========================================= */
-
 const API_BASE =
-  window.location.hostname === "localhost" ||
-  window.location.hostname === "127.0.0.1"
-    ? "http://127.0.0.1:8000"
-    : "https://your-backend-url.onrender.com"; // ✅ Replace after deploy
+    window.location.hostname === "localhost" ||
+    window.location.hostname === "127.0.0.1"
+        ? "http://127.0.0.1:8000"
+        : "https://labyrinth-ai-engine.onrender.com"; // ✅ your deployed backend
 
 
 /* =========================================
-   LABYRINTH — PROCEDURAL CORRUPTION EDITION
-   + TELEMETRY + ADAPTIVE AI INTEGRATION
+CANVAS SETUP
 ========================================= */
 
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
-/* ===============================
-   RENDER SETTINGS
-================================ */
 
-const FOV = Math.PI / 3;
-const RAYS = Math.floor(canvas.width / 2);
-const MAX_DEPTH = 30;
-
-/* ===============================
-   FOG SETTINGS
-================================ */
-
-const FOG_DISTANCE = 18;
-const FOG_COLOR = { r: 0, g: 0, b: 25 };
-
-/* ===============================
-   CORRUPTION SETTINGS
-================================ */
-
-let corruptionInterval;
-let corruptionRate = 4000;
-let corruptionFlash = 0;
-
-/* ===============================
-   GAME STATE
-================================ */
+/* =========================================
+GAME STATE
+========================================= */
 
 let level = 1;
 let score = 0;
 let survivalTime = 0;
-
-let demoMode = false;
 let gameRunning = false;
 let survivalInterval;
 
@@ -68,18 +39,14 @@ let player;
 let monster;
 let exitTile;
 
-/* ===============================
-   BEHAVIOR TRACKING
-================================ */
-
 let fear_level = 0;
 let aggression = 0;
 let curiosity = 0;
-
 let difficultyModifier = 1.0;
 
+
 /* =========================================
-   🧠 MAZE GENERATION
+MAZE GENERATION (Recursive Backtracking)
 ========================================= */
 
 function generateMaze(width, height) {
@@ -126,8 +93,9 @@ function generateMaze(width, height) {
     map = map.map(row => row.join(""));
 }
 
+
 /* =========================================
-   RESET GAME
+RESET GAME
 ========================================= */
 
 function resetGame(fullReset = false) {
@@ -135,6 +103,7 @@ function resetGame(fullReset = false) {
     if (fullReset) {
         level = 1;
         score = 0;
+        sessionStart = Date.now();
     }
 
     const size = 21 + Math.min(level * 2, 20);
@@ -151,7 +120,6 @@ function resetGame(fullReset = false) {
     };
 
     survivalTime = 0;
-
     fear_level = 0;
     aggression = 0;
     curiosity = 0;
@@ -159,8 +127,9 @@ function resetGame(fullReset = false) {
     updateHUD();
 }
 
+
 /* =========================================
-   HUD
+HUD
 ========================================= */
 
 function updateHUD() {
@@ -169,82 +138,89 @@ function updateHUD() {
     document.getElementById("time").innerText = survivalTime;
 }
 
+
 /* =========================================
-   MOVEMENT
+MOVEMENT
 ========================================= */
 
 let keys = {};
 
-document.addEventListener("keydown", e=>{
+document.addEventListener("keydown", e => {
     keys[e.key.toLowerCase()] = true;
 });
-document.addEventListener("keyup", e=>{
+
+document.addEventListener("keyup", e => {
     keys[e.key.toLowerCase()] = false;
 });
+
+function tryMove(nx, ny) {
+    if (map[Math.floor(ny)][Math.floor(nx)] === "0") {
+        player.x = nx;
+        player.y = ny;
+    }
+}
 
 function movePlayer() {
 
     const speed = 0.06;
 
-    if (keys["w"]) tryMove(
-        player.x + Math.cos(player.angle)*speed,
-        player.y + Math.sin(player.angle)*speed
-    );
+    if (keys["w"]) {
+        tryMove(
+            player.x + Math.cos(player.angle) * speed,
+            player.y + Math.sin(player.angle) * speed
+        );
+        logMove("forward");
+    }
 
-    if (keys["s"]) tryMove(
-        player.x - Math.cos(player.angle)*speed,
-        player.y - Math.sin(player.angle)*speed
-    );
+    if (keys["s"]) {
+        tryMove(
+            player.x - Math.cos(player.angle) * speed,
+            player.y - Math.sin(player.angle) * speed
+        );
+        logMove("backward");
+    }
 
-    if (keys["a"]) player.angle -= 0.05;
-    if (keys["d"]) player.angle += 0.05;
+    if (keys["a"]) {
+        player.angle -= 0.05;
+        logMove("left");
+    }
+
+    if (keys["d"]) {
+        player.angle += 0.05;
+        logMove("right");
+    }
 
     curiosity++;
 }
 
-function logMove(action) {
 
-    const now = Date.now();
-
-    const distanceToAI = Math.hypot(
-        player.x - monster.x,
-        player.y - monster.y
-    );
-
-    eventLog.push({
-        session_id: sessionId,
-        timestamp: now,
-        level: currentLevel,
-        action: action,
-        player_x: player.x,
-        player_y: player.y,
-        player_angle: player.angle,
-        ai_x: monster.x,
-        ai_y: monster.y,
-        distance_to_ai: distanceToAI,
-        time_since_start: now - sessionStart
-    });
-
-    // Optional: send batch every 25 moves
-    if (eventLog.length >= 25) {
-        sendBatch();
-    }
-}
+/* =========================================
+MONSTER AI
+========================================= */
 
 function moveMonster() {
 
     const dx = player.x - monster.x;
     const dy = player.y - monster.y;
-    const dist = Math.sqrt(dx*dx+dy*dy);
+    const dist = Math.sqrt(dx * dx + dy * dy);
 
     if (dist < 5) fear_level++;
     if (dist < 5 && Math.random() < 0.3) aggression++;
 
     if (dist < 8) {
-        monster.x += Math.sign(dx)*monster.speed;
-        monster.y += Math.sign(dy)*monster.speed;
+        monster.x += Math.sign(dx) * monster.speed;
+        monster.y += Math.sign(dy) * monster.speed;
+    }
+
+    if (dist < 0.5) {
+        endGame();
     }
 }
+
+
+/* =========================================
+MOVEMENT LOGGING
+========================================= */
 
 function logMove(action) {
 
@@ -258,7 +234,7 @@ function logMove(action) {
     eventLog.push({
         session_id: sessionId,
         timestamp: now,
-        level: currentLevel,
+        level: level,
         action: action,
         player_x: player.x,
         player_y: player.y,
@@ -269,18 +245,38 @@ function logMove(action) {
         time_since_start: now - sessionStart
     });
 
-    // Optional: send batch every 25 moves
     if (eventLog.length >= 25) {
         sendBatch();
     }
 }
+
+async function sendBatch() {
+
+    if (eventLog.length === 0) return;
+
+    try {
+        await fetch(`${API_BASE}/collect`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(eventLog)
+        });
+
+        console.log("Batch sent:", eventLog.length);
+        eventLog = [];
+
+    } catch (err) {
+        console.error("Batch send failed:", err);
+    }
+}
+
+
 /* =========================================
-   TELEMETRY
+ADAPTIVE TELEMETRY
 ========================================= */
 
 async function sendTelemetry(data) {
     try {
-        await fetch(`${API_BASE}/telemetry/`, {
+        await fetch(`${API_BASE}/telemetry`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(data)
@@ -307,44 +303,9 @@ async function getAdaptiveDifficulty(data) {
     }
 }
 
-async function evaluatePlayerBehavior(data) {
-    try {
-        const response = await fetch(`${API_BASE}/cluster-player`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(data)
-        });
-
-        const result = await response.json();
-
-        updatePlayerTypeUI(result.player_type);
-        adjustDifficultyByCluster(result.cluster_id);
-
-    } catch (err) {
-        console.error("Cluster error:", err);
-    }
-}
 
 /* =========================================
-   ADAPTIVE DIFFICULTY
-========================================= */
-
-function adjustDifficultyByCluster(clusterId) {
-
-    if (clusterId === 0) difficultyModifier = 0.9;
-    else if (clusterId === 1) difficultyModifier = 1.3;
-    else difficultyModifier = 1.0;
-
-    monster.speed = (0.02 + level * 0.004) * difficultyModifier;
-}
-
-function updatePlayerTypeUI(type) {
-    const el = document.getElementById("player-type");
-    if (el) el.innerText = "Player Type: " + type;
-}
-
-/* =========================================
-   GAME LOOP
+GAME LOOP
 ========================================= */
 
 function gameLoop() {
@@ -357,8 +318,9 @@ function gameLoop() {
     requestAnimationFrame(gameLoop);
 }
 
+
 /* =========================================
-   GAME END
+GAME END
 ========================================= */
 
 async function endGame() {
@@ -374,27 +336,30 @@ async function endGame() {
     };
 
     await sendTelemetry(metrics);
-    await evaluatePlayerBehavior(metrics);
 
-    const modifier = await getAdaptiveDifficulty(metrics);
-    difficultyModifier = modifier;
+    difficultyModifier = await getAdaptiveDifficulty(metrics);
 
+    level++;
     resetGame(false);
+
+    gameRunning = true;
+    gameLoop();
 }
 
+
 /* =========================================
-   START
+START GAME
 ========================================= */
 
-window.startGame = function(){
+window.startGame = function () {
 
     gameRunning = true;
     resetGame(true);
 
-    survivalInterval = setInterval(()=>{
+    survivalInterval = setInterval(() => {
         survivalTime++;
         updateHUD();
-    },1000);
+    }, 1000);
 
     gameLoop();
 };
