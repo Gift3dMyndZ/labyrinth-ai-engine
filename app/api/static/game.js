@@ -1,7 +1,11 @@
 /* =========================================
    CANVAS FULLSCREEN SETUP
 ========================================= */
+console.log("GAME JS LOADED");
 
+document.addEventListener("keydown", (e) => {
+    console.log("Key pressed:", e.key);
+});
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
