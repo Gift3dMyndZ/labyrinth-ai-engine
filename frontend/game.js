@@ -47,11 +47,9 @@ function createBrickTexture({
     const bh = Math.floor(texH / bricksY);
 
     for (let y = 0; y < bricksY; y++) {
-
         const offset = (y % 2) ? Math.floor(bw / 2) : 0;
 
         for (let x = -1; x <= bricksX; x++) {
-
             const bx = x * bw + offset;
             const by = y * bh;
 
@@ -66,19 +64,6 @@ function createBrickTexture({
             const b = clamp255(baseColor.b * shade);
 
             octx.fillStyle = `rgb(${r}, ${g}, ${b})`;
-            octx.fillRect(
-                bx + mortarPx,
-                by + mortarPx,
-                bw - mortarPx * 2,
-                bh - mortarPx * 2
-            );
-
-            const grd = octx.createLinearGradient(bx, by, bx, by + bh);
-            grd.addColorStop(0.0, "rgba(0,0,0,0.10)");
-            grd.addColorStop(0.5, "rgba(0,0,0,0.00)");
-            grd.addColorStop(1.0, "rgba(0,0,0,0.15)");
-
-            octx.fillStyle = grd;
             octx.fillRect(
                 bx + mortarPx,
                 by + mortarPx,
@@ -106,6 +91,7 @@ let survivalInterval = null;
 let map = [];
 let MAP_W;
 let MAP_H;
+let goal;
 
 let player;
 let monster;
@@ -120,7 +106,6 @@ const MAX_DEPTH = 25;
 let keys = {};
 
 document.addEventListener("keydown", (e) => {
-
     keys[e.key.toLowerCase()] = true;
 
     if (e.key === "Enter" && !gameRunning) {
@@ -137,7 +122,7 @@ document.addEventListener("keyup", (e) => {
 });
 
 /* =========================================
-   MAZE GENERATION
+   MAZE GENERATION (WITH ENTRANCE + EXIT)
 ========================================= */
 
 function generateMaze(width, height) {
@@ -153,14 +138,12 @@ function generateMaze(width, height) {
     );
 
     function carve(x, y) {
-
         const dirs = [
             [0, -2], [0, 2],
             [-2, 0], [2, 0]
         ].sort(() => Math.random() - 0.5);
 
         for (let [dx, dy] of dirs) {
-
             const nx = x + dx;
             const ny = y + dy;
 
@@ -179,6 +162,25 @@ function generateMaze(width, height) {
 
     map[1][1] = "0";
     carve(1, 1);
+
+    // Create entrance (top)
+    let entranceX = 1;
+    for (let x = 1; x < width - 1; x += 2) {
+        if (map[1][x] === "0") { entranceX = x; break; }
+    }
+    map[0][entranceX] = "0";
+
+    // Create exit (bottom)
+    let exitX = width - 2;
+    for (let x = width - 2; x >= 1; x -= 2) {
+        if (map[height - 2][x] === "0") { exitX = x; break; }
+    }
+    map[height - 1][exitX] = "0";
+
+    return {
+        start: { x: entranceX + 0.5, y: 1.5 },
+        goal:  { x: exitX + 0.5, y: height - 1.5 }
+    };
 }
 
 /* =========================================
@@ -188,13 +190,19 @@ function generateMaze(width, height) {
 function resetGame() {
 
     const size = 25 + Math.min(level * 2, 20);
-    generateMaze(size, size);
+    const mazeData = generateMaze(size, size);
 
-    player = { x: 1.5, y: 1.5, angle: 0 };
+    player = {
+        x: mazeData.start.x,
+        y: mazeData.start.y,
+        angle: Math.PI / 2
+    };
+
+    goal = mazeData.goal;
 
     monster = {
-        x: MAP_W - 3,
-        y: 1,
+        x: goal.x,
+        y: goal.y - 2,
         vx: 0,
         vy: 0,
         maxSpeed: 3 + level * 0.5,
@@ -221,6 +229,7 @@ function startGame() {
 
     survivalInterval = setInterval(() => {
         survivalTime++;
+        score += 1;
     }, 1000);
 }
 
@@ -258,6 +267,16 @@ function movePlayer(dt) {
 
     if (keys["a"]) player.angle -= 2 * dt;
     if (keys["d"]) player.angle += 2 * dt;
+
+    // WIN CONDITION
+    const dx = player.x - goal.x;
+    const dy = player.y - goal.y;
+
+    if (Math.hypot(dx, dy) < 0.5) {
+        level++;
+        score += 100 * level;
+        resetGame();
+    }
 }
 
 /* =========================================
@@ -310,7 +329,7 @@ function moveMonster(dt) {
 }
 
 /* =========================================
-   FLOOR RENDER (TEXTURED)
+   FLOOR RENDER
 ========================================= */
 
 function drawBrickFloorFromTexture() {
@@ -452,23 +471,6 @@ function gameLoop(timestamp = 0) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     if (!gameRunning) {
-        ctx.fillStyle = "black";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        ctx.fillStyle = "#00ff66";
-        ctx.font = "40px Arial";
-        ctx.textAlign = "center";
-        ctx.fillText("LABYRINTH",
-            canvas.width / 2,
-            canvas.height / 2 - 40
-        );
-
-        ctx.font = "20px Arial";
-        ctx.fillText("Press ENTER to Start",
-            canvas.width / 2,
-            canvas.height / 2 + 20
-        );
-
         requestAnimationFrame(gameLoop);
         return;
     }
