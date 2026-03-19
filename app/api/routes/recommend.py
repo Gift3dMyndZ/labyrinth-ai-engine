@@ -5,6 +5,9 @@ from app.services.recommender import create_recommender
 
 router = APIRouter()
 
+# Create once (better performance)
+recommender = create_recommender()
+
 
 class PreferenceRequest(BaseModel):
     preferences: List[str]
@@ -12,5 +15,4 @@ class PreferenceRequest(BaseModel):
 
 @router.post("/recommend")
 def recommend_api(request: PreferenceRequest):
-    recommender = create_recommender()
     return recommender.recommend(request.preferences)
