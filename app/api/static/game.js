@@ -26,6 +26,8 @@ let MAP_H;
 let player;
 let monster;
 let exitTile;
+let keyItem;
+let hasKey = false;
 
 
 /* =========================================
@@ -33,11 +35,11 @@ RAYCAST SETTINGS
 ========================================= */
 
 const FOV = Math.PI / 3;
-const MAX_DEPTH = 20;
+const MAX_DEPTH = 25;
 
 
 /* =========================================
-MAZE GENERATION
+MAZE GENERATION (Procedural)
 ========================================= */
 
 function generateMaze(width, height) {
@@ -88,17 +90,24 @@ RESET GAME
 
 function resetGame() {
 
-    const size = 21 + Math.min(level * 2, 20);
+    const size = 25 + Math.min(level * 2, 20);
     generateMaze(size, size);
 
     player = { x: 1.5, y: 1.5, angle: 0 };
 
     exitTile = { x: MAP_W - 2, y: MAP_H - 2 };
 
+    keyItem = {
+        x: Math.floor(MAP_W / 2),
+        y: Math.floor(MAP_H / 2)
+    };
+
+    hasKey = false;
+
     monster = {
         x: MAP_W - 3,
         y: 1,
-        speed: 0.02 + level * 0.004
+        speed: 0.015 + level * 0.003
     };
 
     survivalTime = 0;
@@ -118,7 +127,7 @@ function updateHUD() {
 
 
 /* =========================================
-MOVEMENT (WASD + ARROWS)
+MOVEMENT
 ========================================= */
 
 let keys = {};
@@ -127,7 +136,6 @@ document.addEventListener("keydown", e => {
 
     keys[e.key.toLowerCase()] = true;
 
-    // Start game with ENTER
     if (e.key === "Enter" && !gameRunning) {
         gameRunning = true;
         resetGame();
@@ -154,7 +162,6 @@ function movePlayer() {
 
     const speed = 0.08;
 
-    // Forward
     if (keys["w"] || keys["arrowup"]) {
         tryMove(
             player.x + Math.cos(player.angle) * speed,
@@ -162,7 +169,6 @@ function movePlayer() {
         );
     }
 
-    // Backward
     if (keys["s"] || keys["arrowdown"]) {
         tryMove(
             player.x - Math.cos(player.angle) * speed,
@@ -170,20 +176,13 @@ function movePlayer() {
         );
     }
 
-    // Rotate Left
-    if (keys["a"] || keys["arrowleft"]) {
-        player.angle -= 0.05;
-    }
-
-    // Rotate Right
-    if (keys["d"] || keys["arrowright"]) {
-        player.angle += 0.05;
-    }
+    if (keys["a"] || keys["arrowleft"]) player.angle -= 0.05;
+    if (keys["d"] || keys["arrowright"]) player.angle += 0.05;
 }
 
 
 /* =========================================
-MONSTER AI
+MONSTER AI (Slow Lurking)
 ========================================= */
 
 function moveMonster() {
@@ -192,7 +191,7 @@ function moveMonster() {
     const dy = player.y - monster.y;
     const dist = Math.hypot(dx, dy);
 
-    if (dist < 10) {
+    if (dist < 12) {
         monster.x += Math.sign(dx) * monster.speed;
         monster.y += Math.sign(dy) * monster.speed;
     }
@@ -206,17 +205,17 @@ function moveMonster() {
 
 
 /* =========================================
-3D RAYCAST ENGINE (Improved Colors)
+3D RAYCAST ENGINE (HEDGE STYLE)
 ========================================= */
 
 function draw3D() {
 
-    // Ceiling (dark blue)
-    ctx.fillStyle = "#0f2027";
+    // Dark sky
+    ctx.fillStyle = "#0a120a";
     ctx.fillRect(0, 0, canvas.width, canvas.height / 2);
 
-    // Floor (dark gray)
-    ctx.fillStyle = "#1a1a1a";
+    // Grass floor
+    ctx.fillStyle = "#0f1f0f";
     ctx.fillRect(0, canvas.height / 2, canvas.width, canvas.height / 2);
 
     for (let x = 0; x < canvas.width; x++) {
@@ -257,12 +256,12 @@ function draw3D() {
         const wallHeight =
             canvas.height / (correctedDist + 0.0001);
 
-        const brightness =
-            1 - Math.min(correctedDist / 18, 1);
+        const fog = 1 - Math.min(correctedDist / 20, 1);
 
-        const r = Math.floor(40 * brightness);
-        const g = Math.floor(180 * brightness + 40);
-        const b = Math.floor(140 * brightness + 40);
+        // Hedge green walls
+        const r = Math.floor(20 * fog);
+        const g = Math.floor(120 * fog + 40);
+        const b = Math.floor(20 * fog);
 
         ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
 
@@ -279,7 +278,7 @@ function draw3D() {
 
 
 /* =========================================
-SPRITES
+SPRITES (Key + Exit + Monster)
 ========================================= */
 
 function drawSprite(sprite, color, scale = 1) {
@@ -299,7 +298,7 @@ function drawSprite(sprite, color, scale = 1) {
         (canvas.height / distance) * scale;
 
     ctx.globalAlpha =
-        1 - Math.min(distance / 12, 0.8);
+        1 - Math.min(distance / 15, 0.8);
 
     ctx.fillStyle = color;
 
@@ -314,21 +313,37 @@ function drawSprite(sprite, color, scale = 1) {
 }
 
 function drawSprites() {
-    drawSprite(monster, "red", 1);
-    drawSprite(exitTile, "gold", 0.7);
+
+    if (!hasKey)
+        drawSprite(keyItem, "yellow", 0.6);
+
+    drawSprite(monster, "darkred", 1);
+
+    if (hasKey)
+        drawSprite(exitTile, "white", 0.8);
 }
 
 
 /* =========================================
-CHECK WIN
+CHECK EVENTS
 ========================================= */
 
-function checkWin() {
-    if (
+function checkEvents() {
+
+    // Collect key
+    if (!hasKey &&
+        Math.floor(player.x) === keyItem.x &&
+        Math.floor(player.y) === keyItem.y) {
+        hasKey = true;
+        score += 50;
+    }
+
+    // Win only if key collected
+    if (hasKey &&
         Math.floor(player.x) === exitTile.x &&
-        Math.floor(player.y) === exitTile.y
-    ) {
-        score += 100;
+        Math.floor(player.y) === exitTile.y) {
+
+        score += 150;
         level++;
         resetGame();
     }
@@ -341,26 +356,22 @@ INSTRUCTION SCREEN
 
 function drawInstructions() {
 
-    ctx.fillStyle = "rgba(0, 0, 0, 0.9)";
+    ctx.fillStyle = "black";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    ctx.fillStyle = "white";
+    ctx.fillStyle = "#66ff66";
     ctx.textAlign = "center";
 
     ctx.font = "48px Arial";
-    ctx.fillText("LABYRINTH", canvas.width / 2, 150);
+    ctx.fillText("THE MAZE", canvas.width / 2, 150);
 
     ctx.font = "22px Arial";
-    ctx.fillText("W / ↑  - Move Forward", canvas.width / 2, 250);
-    ctx.fillText("S / ↓  - Move Backward", canvas.width / 2, 290);
-    ctx.fillText("A / ←  - Turn Left", canvas.width / 2, 330);
-    ctx.fillText("D / →  - Turn Right", canvas.width / 2, 370);
-    ctx.fillText("Reach the GOLD exit.", canvas.width / 2, 430);
-    ctx.fillText("Avoid the RED monster.", canvas.width / 2, 470);
+    ctx.fillText("Find the key.", canvas.width / 2, 260);
+    ctx.fillText("Escape the hedge maze.", canvas.width / 2, 300);
+    ctx.fillText("Something is watching...", canvas.width / 2, 340);
 
-    ctx.fillStyle = "#00ffaa";
-    ctx.font = "28px Arial";
-    ctx.fillText("Press ENTER to Start", canvas.width / 2, 540);
+    ctx.fillStyle = "white";
+    ctx.fillText("Press ENTER to Begin", canvas.width / 2, 500);
 }
 
 
@@ -378,7 +389,7 @@ function gameLoop() {
 
     movePlayer();
     moveMonster();
-    checkWin();
+    checkEvents();
     draw3D();
 
     requestAnimationFrame(gameLoop);
@@ -386,7 +397,7 @@ function gameLoop() {
 
 
 /* =========================================
-INITIALIZE
+START
 ========================================= */
 
 gameLoop();
