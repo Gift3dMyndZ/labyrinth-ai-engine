@@ -1,19 +1,4 @@
 /* =========================================
-SESSION + TELEMETRY SETUP
-========================================= */
-
-const sessionId = crypto.randomUUID();
-let sessionStart = Date.now();
-let eventLog = [];
-
-const API_BASE =
-    window.location.hostname === "localhost" ||
-    window.location.hostname === "127.0.0.1"
-        ? "http://127.0.0.1:8000"
-        : "https://labyrinth-ai-engine.onrender.com";
-
-
-/* =========================================
 CANVAS SETUP
 ========================================= */
 
@@ -42,10 +27,13 @@ let player;
 let monster;
 let exitTile;
 
-let fear_level = 0;
-let aggression = 0;
-let curiosity = 0;
-let difficultyModifier = 1.0;
+
+/* =========================================
+RAYCAST SETTINGS
+========================================= */
+
+const FOV = Math.PI / 3;      // 60 degrees
+const MAX_DEPTH = 20;
 
 
 /* =========================================
@@ -100,13 +88,7 @@ function generateMaze(width, height) {
 RESET GAME
 ========================================= */
 
-function resetGame(fullReset = false) {
-
-    if (fullReset) {
-        level = 1;
-        score = 0;
-        sessionStart = Date.now();
-    }
+function resetGame() {
 
     const size = 21 + Math.min(level * 2, 20);
     generateMaze(size, size);
@@ -118,14 +100,10 @@ function resetGame(fullReset = false) {
     monster = {
         x: MAP_W - 3,
         y: 1,
-        speed: (0.02 + level * 0.004) * difficultyModifier
+        speed: 0.02 + level * 0.004
     };
 
     survivalTime = 0;
-    fear_level = 0;
-    aggression = 0;
-    curiosity = 0;
-
     updateHUD();
 }
 
@@ -171,7 +149,6 @@ function movePlayer() {
             player.x + Math.cos(player.angle) * speed,
             player.y + Math.sin(player.angle) * speed
         );
-        logMove("forward");
     }
 
     if (keys["s"]) {
@@ -179,13 +156,10 @@ function movePlayer() {
             player.x - Math.cos(player.angle) * speed,
             player.y - Math.sin(player.angle) * speed
         );
-        logMove("backward");
     }
 
     if (keys["a"]) player.angle -= 0.05;
     if (keys["d"]) player.angle += 0.05;
-
-    curiosity++;
 }
 
 
@@ -199,29 +173,32 @@ function moveMonster() {
     const dy = player.y - monster.y;
     const dist = Math.hypot(dx, dy);
 
-    if (dist < 6) fear_level++;
-    if (dist < 5 && Math.random() < 0.3) aggression++;
-
     if (dist < 10) {
         monster.x += Math.sign(dx) * monster.speed;
         monster.y += Math.sign(dy) * monster.speed;
     }
 
-    if (dist < 0.5) endGame();
+    if (dist < 0.5) {
+        level = 1;
+        score = 0;
+        resetGame();
+    }
 }
 
 
 /* =========================================
-3D RAYCASTING ENGINE
+3D RAYCAST ENGINE
 ========================================= */
-
-const FOV = Math.PI / 3;
-const MAX_DEPTH = 20;
 
 function draw3D() {
 
-    ctx.fillStyle = "black";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    // Sky
+    ctx.fillStyle = "#001100";
+    ctx.fillRect(0, 0, canvas.width, canvas.height / 2);
+
+    // Floor
+    ctx.fillStyle = "#000000";
+    ctx.fillRect(0, canvas.height / 2, canvas.width, canvas.height / 2);
 
     for (let x = 0; x < canvas.width; x++) {
 
@@ -249,7 +226,8 @@ function draw3D() {
             ) {
                 hit = true;
                 distance = MAX_DEPTH;
-            } else if (map[testY][testX] === "1") {
+            }
+            else if (map[testY][testX] === "1") {
                 hit = true;
             }
         }
@@ -258,12 +236,14 @@ function draw3D() {
             distance * Math.cos(rayAngle - player.angle);
 
         const wallHeight =
-            canvas.height / correctedDist;
+            canvas.height / (correctedDist + 0.0001);
 
-        const shade =
-            255 - Math.min(255, correctedDist * 20);
+        const brightness =
+            1 - Math.min(correctedDist / 15, 1);
 
-        ctx.fillStyle = `rgb(0, ${shade}, 0)`;
+        const green = Math.floor(200 * brightness + 30);
+
+        ctx.fillStyle = `rgb(0, ${green}, 0)`;
 
         ctx.fillRect(
             x,
@@ -278,7 +258,7 @@ function draw3D() {
 
 
 /* =========================================
-SPRITE RENDERING
+SPRITES (Monster + Exit)
 ========================================= */
 
 function drawSprite(sprite, color, scale = 1) {
@@ -319,6 +299,22 @@ function drawSprites() {
 
 
 /* =========================================
+CHECK WIN
+========================================= */
+
+function checkWin() {
+    if (
+        Math.floor(player.x) === exitTile.x &&
+        Math.floor(player.y) === exitTile.y
+    ) {
+        score += 100;
+        level++;
+        resetGame();
+    }
+}
+
+
+/* =========================================
 GAME LOOP
 ========================================= */
 
@@ -328,110 +324,10 @@ function gameLoop() {
 
     movePlayer();
     moveMonster();
+    checkWin();
     draw3D();
 
     requestAnimationFrame(gameLoop);
-}
-
-
-/* =========================================
-END GAME
-========================================= */
-
-async function endGame() {
-
-    gameRunning = false;
-    clearInterval(survivalInterval);
-
-    const metrics = {
-        fear_level,
-        aggression,
-        curiosity,
-        survival_time: survivalTime
-    };
-
-    await sendTelemetry(metrics);
-    difficultyModifier =
-        await getAdaptiveDifficulty(metrics);
-
-    resetGame(true);
-
-    gameRunning = true;
-
-    survivalInterval = setInterval(() => {
-        survivalTime++;
-        updateHUD();
-    }, 1000);
-
-    gameLoop();
-}
-
-
-/* =========================================
-TELEMETRY
-========================================= */
-
-function logMove(action) {
-
-    const now = Date.now();
-
-    eventLog.push({
-        session_id: sessionId,
-        timestamp: now,
-        level,
-        action,
-        player_x: player.x,
-        player_y: player.y,
-        player_angle: player.angle,
-        ai_x: monster.x,
-        ai_y: monster.y,
-        distance_to_ai: Math.hypot(
-            player.x - monster.x,
-            player.y - monster.y
-        ),
-        time_since_start: now - sessionStart
-    });
-
-    if (eventLog.length >= 25) sendBatch();
-}
-
-async function sendBatch() {
-    if (!eventLog.length) return;
-
-    try {
-        await fetch(`${API_BASE}/collect`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(eventLog)
-        });
-        eventLog = [];
-    } catch (err) {
-        console.error(err);
-    }
-}
-
-async function sendTelemetry(data) {
-    try {
-        await fetch(`${API_BASE}/telemetry`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(data)
-        });
-    } catch (err) {}
-}
-
-async function getAdaptiveDifficulty(data) {
-    try {
-        const res = await fetch(`${API_BASE}/recommend`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(data)
-        });
-        const result = await res.json();
-        return result.difficulty_modifier || 1.0;
-    } catch {
-        return 1.0;
-    }
 }
 
 
@@ -442,7 +338,7 @@ START GAME
 window.startGame = function () {
 
     gameRunning = true;
-    resetGame(true);
+    resetGame();
 
     survivalInterval = setInterval(() => {
         survivalTime++;
