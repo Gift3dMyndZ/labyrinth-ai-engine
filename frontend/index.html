@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>LABYRINTH.EXE</title>
+    <title>LABYRINTH</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <style>
@@ -11,12 +11,20 @@
             box-sizing: border-box;
         }
 
+        html, body {
+            height: 100%;
+        }
+
         body {
-            background: black;
+            background: radial-gradient(circle at center, #000 40%, #050505 100%);
             color: #00ff66;
             font-family: "Courier New", monospace;
-            text-align: center;
             overflow: hidden;
+
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
 
         /* =========================
@@ -32,9 +40,19 @@
             justify-content: center;
             flex-direction: column;
             z-index: 50;
+            text-align: center;
+        }
+
+        #bootScreen h1 {
+            font-size: 2.5rem;
+            letter-spacing: 6px;
+            text-shadow:
+                0 0 10px #00ff66,
+                0 0 25px #00ff66;
         }
 
         .blink {
+            margin-top: 20px;
             animation: blink 1s infinite;
         }
 
@@ -48,27 +66,34 @@
 
         #gameContainer {
             display: none;
+            width: 100%;
+            text-align: center;
         }
 
         .title {
-            margin-top: 15px;
-            font-size: 1.8rem;
-            letter-spacing: 4px;
+            font-size: 2.2rem;
+            letter-spacing: 6px;
             text-shadow:
                 0 0 5px #00ff66,
-                0 0 15px #00ff66;
+                0 0 15px #00ff66,
+                0 0 30px #00ff66;
         }
 
         .hud {
-            margin-top: 8px;
-            font-size: 0.85rem;
+            margin-top: 10px;
+            font-size: 0.9rem;
         }
+
+        /* =========================
+           CRT DISPLAY
+        ========================== */
 
         .crt-wrapper {
             position: relative;
-            width: 420px;
-            height: 420px;
+            width: min(90vw, 600px);
+            aspect-ratio: 1 / 1;
             margin: 30px auto;
+
             border: 3px solid #00ff66;
             box-shadow:
                 0 0 20px #00ff66,
@@ -76,6 +101,8 @@
         }
 
         canvas {
+            width: 100%;
+            height: 100%;
             display: block;
             background: black;
         }
@@ -92,32 +119,6 @@
             );
             pointer-events: none;
         }
-
-        /* =========================
-           WINDOWS 98 TASKBAR
-        ========================== */
-
-        .status-bar {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 28px;
-            background: #c0c0c0;
-            color: black;
-            display: flex;
-            align-items: center;
-            font-size: 12px;
-            padding: 0 10px;
-            font-family: Tahoma, sans-serif;
-        }
-
-        .start-btn {
-            background: linear-gradient(#fff, #aaa);
-            border: 1px solid #000;
-            padding: 2px 10px;
-            margin-right: 10px;
-        }
     </style>
 </head>
 
@@ -128,9 +129,8 @@
 ========================= -->
 
 <div id="bootScreen">
-    <h1>Microsoft Windows 98</h1>
-    <p>LABYRINTH.EXE</p>
-    <p class="blink">Press ENTER to run</p>
+    <h1>LABYRINTH</h1>
+    <p class="blink">Press ENTER to begin</p>
 </div>
 
 <!-- =========================
@@ -148,13 +148,8 @@
     </div>
 
     <div class="crt-wrapper">
-        <canvas id="game" width="420" height="420"></canvas>
+        <canvas id="game"></canvas>
         <div class="scanlines"></div>
-    </div>
-
-    <div class="status-bar">
-        <div class="start-btn">Start</div>
-        LABYRINTH.EXE Running...
     </div>
 
 </div>
@@ -163,7 +158,6 @@
 <script src="/static/game.js"></script>
 
 <script>
-
 /* =========================
    ENTER TO START
 ========================= */
@@ -184,6 +178,19 @@ document.addEventListener("keydown", function(e) {
     }
 });
 
+/* =========================
+   CANVAS AUTO RESIZE
+========================= */
+
+const canvas = document.getElementById("game");
+
+function resizeCanvas() {
+    canvas.width = canvas.clientWidth;
+    canvas.height = canvas.clientHeight;
+}
+
+window.addEventListener("resize", resizeCanvas);
+resizeCanvas();
 </script>
 
 </body>
