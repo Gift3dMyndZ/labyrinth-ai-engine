@@ -32,7 +32,7 @@ let exitTile;
 RAYCAST SETTINGS
 ========================================= */
 
-const FOV = Math.PI / 3;      // 60 degrees
+const FOV = Math.PI / 3;
 const MAX_DEPTH = 20;
 
 
@@ -55,10 +55,8 @@ function generateMaze(width, height) {
     function carve(x, y) {
 
         const dirs = [
-            [0, -2],
-            [0, 2],
-            [-2, 0],
-            [2, 0]
+            [0, -2], [0, 2],
+            [-2, 0], [2, 0]
         ].sort(() => Math.random() - 0.5);
 
         for (let [dx, dy] of dirs) {
@@ -120,13 +118,25 @@ function updateHUD() {
 
 
 /* =========================================
-MOVEMENT
+MOVEMENT (WASD + ARROWS)
 ========================================= */
 
 let keys = {};
 
 document.addEventListener("keydown", e => {
+
     keys[e.key.toLowerCase()] = true;
+
+    // Start game with ENTER
+    if (e.key === "Enter" && !gameRunning) {
+        gameRunning = true;
+        resetGame();
+
+        survivalInterval = setInterval(() => {
+            survivalTime++;
+            updateHUD();
+        }, 1000);
+    }
 });
 
 document.addEventListener("keyup", e => {
@@ -144,22 +154,31 @@ function movePlayer() {
 
     const speed = 0.08;
 
-    if (keys["w"]) {
+    // Forward
+    if (keys["w"] || keys["arrowup"]) {
         tryMove(
             player.x + Math.cos(player.angle) * speed,
             player.y + Math.sin(player.angle) * speed
         );
     }
 
-    if (keys["s"]) {
+    // Backward
+    if (keys["s"] || keys["arrowdown"]) {
         tryMove(
             player.x - Math.cos(player.angle) * speed,
             player.y - Math.sin(player.angle) * speed
         );
     }
 
-    if (keys["a"]) player.angle -= 0.05;
-    if (keys["d"]) player.angle += 0.05;
+    // Rotate Left
+    if (keys["a"] || keys["arrowleft"]) {
+        player.angle -= 0.05;
+    }
+
+    // Rotate Right
+    if (keys["d"] || keys["arrowright"]) {
+        player.angle += 0.05;
+    }
 }
 
 
@@ -187,17 +206,17 @@ function moveMonster() {
 
 
 /* =========================================
-3D RAYCAST ENGINE
+3D RAYCAST ENGINE (Improved Colors)
 ========================================= */
 
 function draw3D() {
 
-    // Sky
-    ctx.fillStyle = "#001100";
+    // Ceiling (dark blue)
+    ctx.fillStyle = "#0f2027";
     ctx.fillRect(0, 0, canvas.width, canvas.height / 2);
 
-    // Floor
-    ctx.fillStyle = "#000000";
+    // Floor (dark gray)
+    ctx.fillStyle = "#1a1a1a";
     ctx.fillRect(0, canvas.height / 2, canvas.width, canvas.height / 2);
 
     for (let x = 0; x < canvas.width; x++) {
@@ -239,11 +258,13 @@ function draw3D() {
             canvas.height / (correctedDist + 0.0001);
 
         const brightness =
-            1 - Math.min(correctedDist / 15, 1);
+            1 - Math.min(correctedDist / 18, 1);
 
-        const green = Math.floor(200 * brightness + 30);
+        const r = Math.floor(40 * brightness);
+        const g = Math.floor(180 * brightness + 40);
+        const b = Math.floor(140 * brightness + 40);
 
-        ctx.fillStyle = `rgb(0, ${green}, 0)`;
+        ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
 
         ctx.fillRect(
             x,
@@ -258,7 +279,7 @@ function draw3D() {
 
 
 /* =========================================
-SPRITES (Monster + Exit)
+SPRITES
 ========================================= */
 
 function drawSprite(sprite, color, scale = 1) {
@@ -315,12 +336,45 @@ function checkWin() {
 
 
 /* =========================================
+INSTRUCTION SCREEN
+========================================= */
+
+function drawInstructions() {
+
+    ctx.fillStyle = "rgba(0, 0, 0, 0.9)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.fillStyle = "white";
+    ctx.textAlign = "center";
+
+    ctx.font = "48px Arial";
+    ctx.fillText("LABYRINTH", canvas.width / 2, 150);
+
+    ctx.font = "22px Arial";
+    ctx.fillText("W / ↑  - Move Forward", canvas.width / 2, 250);
+    ctx.fillText("S / ↓  - Move Backward", canvas.width / 2, 290);
+    ctx.fillText("A / ←  - Turn Left", canvas.width / 2, 330);
+    ctx.fillText("D / →  - Turn Right", canvas.width / 2, 370);
+    ctx.fillText("Reach the GOLD exit.", canvas.width / 2, 430);
+    ctx.fillText("Avoid the RED monster.", canvas.width / 2, 470);
+
+    ctx.fillStyle = "#00ffaa";
+    ctx.font = "28px Arial";
+    ctx.fillText("Press ENTER to Start", canvas.width / 2, 540);
+}
+
+
+/* =========================================
 GAME LOOP
 ========================================= */
 
 function gameLoop() {
 
-    if (!gameRunning) return;
+    if (!gameRunning) {
+        drawInstructions();
+        requestAnimationFrame(gameLoop);
+        return;
+    }
 
     movePlayer();
     moveMonster();
@@ -332,18 +386,7 @@ function gameLoop() {
 
 
 /* =========================================
-START GAME
+INITIALIZE
 ========================================= */
 
-window.startGame = function () {
-
-    gameRunning = true;
-    resetGame();
-
-    survivalInterval = setInterval(() => {
-        survivalTime++;
-        updateHUD();
-    }, 1000);
-
-    gameLoop();
-};
+gameLoop();
