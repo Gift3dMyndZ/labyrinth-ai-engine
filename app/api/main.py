@@ -3,6 +3,7 @@ import time
 import logging
 import threading
 from pathlib import Path
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -16,17 +17,88 @@ from app.api.routes import recommend, telemetry
 
 
 # ==================================================
+# LOGGING
+# ==================================================
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("labyrinth-ai-engine")
+
+
+# ==================================================
+# BACKGROUND TRAINER
+# ==================================================
+
+def background_trainer(app: FastAPI):
+    while True:
+        time.sleep(5)
+
+        cluster_service = app.state.cluster_service
+
+        if cluster_service:
+            try:
+                cluster_service.train_from_buffer()
+                cluster_service.save_model()
+                logger.info("🔁 Background training cycle complete")
+            except Exception as e:
+                logger.warning(f"Background training error: {e}")
+
+
+# ==================================================
+# LIFESPAN (Modern FastAPI Startup/Shutdown)
+# ==================================================
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+
+    # Startup logic
+    logger.info("🚀 Starting Labyrinth AI Engine...")
+
+    initialize_db()
+    logger.info("✅ Database initialized")
+
+    cluster_service = PlayerClusteringService(n_clusters=3)
+    cluster_service.load_model()
+
+    app.state.cluster_service = cluster_service
+    app.state.start_time = time.time()
+
+    try:
+        telemetry_data = get_all_telemetry()
+
+        if telemetry_data:
+            logger.info("📊 Performing initial training from database...")
+            cluster_service.train_from_buffer()
+        else:
+            logger.info("ℹ️ No historical telemetry found.")
+    except Exception as e:
+        logger.warning(f"Initial training skipped: {e}")
+
+    trainer_thread = threading.Thread(
+        target=background_trainer,
+        args=(app,),
+        daemon=True
+    )
+    trainer_thread.start()
+
+    logger.info("✅ Background trainer started")
+    logger.info("✅ Application startup complete")
+
+    yield
+
+    # Shutdown logic (optional)
+    logger.info("🛑 Shutting down Labyrinth AI Engine...")
+
+
+# ==================================================
 # CREATE APP
 # ==================================================
 
 app = FastAPI(
     title="Labyrinth AI Engine",
     description="Adaptive ML-powered maze survival engine.",
-    version="3.0.0"
+    version="3.0.0",
+    lifespan=lifespan
 )
-
-app.state.start_time = time.time()
-app.state.cluster_service = None
 
 
 # ==================================================
@@ -45,7 +117,7 @@ templates = Jinja2Templates(directory=BASE_DIR / "templates")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # tighten later
+    allow_origins=["*"],  # tighten in production
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -53,74 +125,7 @@ app.add_middleware(
 
 
 # ==================================================
-# LOGGING
-# ==================================================
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("labyrinth-ai-engine")
-
-
-# ==================================================
-# BACKGROUND TRAINER THREAD
-# ==================================================
-
-def background_trainer():
-
-    while True:
-        time.sleep(5)  # train every 5 seconds
-
-        cluster_service = app.state.cluster_service
-
-        if cluster_service:
-            try:
-                cluster_service.train_from_buffer()
-                cluster_service.save_model()
-                logger.info("🔁 Background training cycle complete")
-            except Exception as e:
-                logger.warning(f"Background training error: {e}")
-
-
-# ==================================================
-# STARTUP — INITIALIZE ML + LOAD MODEL
-# ==================================================
-
-@app.on_event("startup")
-def startup_event():
-
-    initialize_db()
-    logger.info("✅ Database initialized")
-
-    # Create clustering service
-    cluster_service = PlayerClusteringService(n_clusters=3)
-    cluster_service.load_model()
-
-    app.state.cluster_service = cluster_service
-
-    # Optional: Initial offline training from DB
-    try:
-        telemetry_data = get_all_telemetry()
-
-        if telemetry_data:
-            logger.info("📊 Performing initial training from database...")
-            cluster_service.train_from_buffer()
-        else:
-            logger.info("ℹ️ No historical telemetry found.")
-    except Exception as e:
-        logger.warning(f"Initial training skipped: {e}")
-
-    # Start background trainer thread
-    trainer_thread = threading.Thread(
-        target=background_trainer,
-        daemon=True
-    )
-    trainer_thread.start()
-
-    logger.info("✅ Background trainer started")
-    logger.info("🚀 Labyrinth AI Engine running")
-
-
-# ==================================================
-# FRONTEND — SINGLE GAME ENTRY
+# ROUTES
 # ==================================================
 
 @app.get("/", response_class=HTMLResponse)
@@ -130,10 +135,6 @@ def serve_game(request: Request):
         {"request": request}
     )
 
-
-# ==================================================
-# SYSTEM STATUS
-# ==================================================
 
 @app.get("/api")
 def api_status():
@@ -150,10 +151,6 @@ def health():
         "clustering_initialized": app.state.cluster_service is not None
     }
 
-
-# ==================================================
-# PLAYER CLUSTER PREDICTION
-# ==================================================
 
 @app.post("/cluster-player")
 def cluster_player(data: dict):
@@ -179,10 +176,7 @@ def cluster_player(data: dict):
     }
 
 
-# ==================================================
-# INCLUDE ML ROUTES
-# ==================================================
-
+# Include API routers
 app.include_router(recommend.router)
 app.include_router(telemetry.router)
 
@@ -201,7 +195,7 @@ async def global_exception_handler(request: Request, exc: Exception):
 
 
 # ==================================================
-# RENDER COMPATIBLE ENTRYPOINT
+# RENDER ENTRYPOINT
 # ==================================================
 
 if __name__ == "__main__":
@@ -212,5 +206,6 @@ if __name__ == "__main__":
     uvicorn.run(
         "main:app",
         host="0.0.0.0",
-        port=port
+        port=port,
+        log_level="info"
     )
