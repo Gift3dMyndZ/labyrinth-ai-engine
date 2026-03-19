@@ -1,3 +1,13 @@
+/* =========================================
+   LABYRINTH – PRODUCTION CSS
+========================================= */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
 html, body {
     height: 100%;
 }
@@ -5,8 +15,7 @@ html, body {
 body {
     background: radial-gradient(circle at center, #000 40%, #050505 100%);
     color: #00ff99;
-    font-family: monospace;
-    margin: 0;
+    font-family: "Courier New", monospace;
     overflow: hidden;
 
     display: flex;
@@ -14,10 +23,14 @@ body {
     align-items: center;
 }
 
+/* =========================================
+   TITLE / TEXT
+========================================= */
+
 .title {
     font-size: 36px;
     letter-spacing: 4px;
-    margin-top: 10px;
+    margin-top: 15px;
 }
 
 .glow {
@@ -34,41 +47,118 @@ body {
         0 0 15px #ff00cc;
 }
 
+/* =========================================
+   GAME CONTAINER
+========================================= */
+
+#gameContainer {
+    width: 100%;
+    max-width: 1100px;
+    text-align: center;
+}
+
+/* =========================================
+   CRT MONITOR FRAME
+========================================= */
+
+.crt-wrapper {
+    position: relative;
+    width: min(92vw, 900px);
+    margin: 30px auto;
+}
+
+/* =========================================
+   CANVAS (True 4:3 – NO DISTORTION)
+========================================= */
+
 canvas {
     display: block;
-    width: min(90vw, 900px);
-    height: auto;
+    width: 100%;
     aspect-ratio: 4 / 3;
 
     background: black;
     border: 4px solid #00ff99;
-    box-shadow: 0 0 30px #00ff99;
 
-    transform: perspective(700px) rotateX(20deg);
+    box-shadow:
+        0 0 20px #00ff99,
+        0 0 40px rgba(0, 255, 150, 0.4);
+
+    image-rendering: pixelated; /* optional retro sharpness */
 }
 
-.screen {
+/* =========================================
+   CRT EFFECTS
+========================================= */
+
+.scanlines {
+    pointer-events: none;
     position: absolute;
     inset: 0;
+
+    background: repeating-linear-gradient(
+        to bottom,
+        rgba(0,255,150,0.05) 0px,
+        rgba(0,255,150,0.05) 2px,
+        transparent 2px,
+        transparent 4px
+    );
+
+    mix-blend-mode: overlay;
+}
+
+/* Subtle screen glow */
+.crt-wrapper::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+
+    box-shadow:
+        inset 0 0 80px rgba(0, 255, 150, 0.15);
+}
+
+/* =========================================
+   HUD
+========================================= */
+
+.hud {
+    margin-bottom: 10px;
+    font-size: 14px;
+}
+
+/* =========================================
+   BOOT / OVERLAY SCREENS
+========================================= */
+
+.screen {
+    position: fixed;
+    inset: 0;
     background: black;
+
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    z-index: 10;
+
+    z-index: 100;
+    text-align: center;
 }
 
-.hidden { display: none; }
+.hidden {
+    display: none;
+}
 
-.blink { animation: blink 1s infinite; }
+.blink {
+    animation: blink 1s infinite;
+}
 
 @keyframes blink {
     50% { opacity: 0; }
 }
 
-.hud {
-    margin-bottom: 10px;
-}
+/* =========================================
+   LEADERBOARD (Optional)
+========================================= */
 
 .leaderboard {
     position: absolute;
@@ -76,24 +166,4 @@ canvas {
     top: 100px;
     text-align: left;
     font-size: 14px;
-}
-
-.crt-wrapper {
-    position: relative;
-    width: 100%;
-    display: flex;
-    justify-content: center;
-}
-
-.scanlines {
-    pointer-events: none;
-    position: absolute;
-    inset: 0;
-    background: repeating-linear-gradient(
-        to bottom,
-        rgba(0,255,150,0.05),
-        rgba(0,255,150,0.05) 2px,
-        transparent 2px,
-        transparent 4px
-    );
 }

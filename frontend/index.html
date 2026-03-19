@@ -1,161 +1,169 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>LABYRINTH</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+/* =========================================
+   LABYRINTH – PRODUCTION CSS
+========================================= */
 
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
-        html, body {
-            height: 100%;
-        }
+html, body {
+    height: 100%;
+}
 
-        body {
-            background: radial-gradient(circle at center, #000 40%, #050505 100%);
-            color: #00ff66;
-            font-family: "Courier New", monospace;
-            overflow: hidden;
+body {
+    background: radial-gradient(circle at center, #000 40%, #050505 100%);
+    color: #00ff99;
+    font-family: "Courier New", monospace;
+    overflow: hidden;
 
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
 
-        /* =========================
-           BOOT SCREEN
-        ========================== */
+/* =========================================
+   TITLE / TEXT
+========================================= */
 
-        #bootScreen {
-            position: fixed;
-            inset: 0;
-            background: black;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            z-index: 50;
-            text-align: center;
-        }
+.title {
+    font-size: 36px;
+    letter-spacing: 4px;
+    margin-top: 15px;
+}
 
-        #bootScreen h1 {
-            font-size: 2.5rem;
-            letter-spacing: 6px;
-            text-shadow:
-                0 0 10px #00ff66,
-                0 0 25px #00ff66;
-        }
+.glow {
+    text-shadow:
+        0 0 5px #00ff99,
+        0 0 10px #00ff99,
+        0 0 20px #00ffaa;
+}
 
-        .blink {
-            margin-top: 20px;
-            animation: blink 1s infinite;
-        }
+.insert {
+    color: #ff00cc;
+    text-shadow:
+        0 0 5px #ff00cc,
+        0 0 15px #ff00cc;
+}
 
-        @keyframes blink {
-            50% { opacity: 0; }
-        }
+/* =========================================
+   GAME CONTAINER
+========================================= */
 
-        /* =========================
-           GAME UI
-        ========================== */
+#gameContainer {
+    width: 100%;
+    max-width: 1100px;
+    text-align: center;
+}
 
-        #gameContainer {
-            display: none;
-            width: 100%;
-            text-align: center;
-        }
+/* =========================================
+   CRT MONITOR FRAME
+========================================= */
 
-        .title {
-            font-size: 2.2rem;
-            letter-spacing: 6px;
-            text-shadow:
-                0 0 5px #00ff66,
-                0 0 15px #00ff66,
-                0 0 30px #00ff66;
-        }
+.crt-wrapper {
+    position: relative;
+    width: min(92vw, 900px);
+    margin: 30px auto;
+}
 
-        .hud {
-            margin-top: 10px;
-            font-size: 0.9rem;
-        }
+/* =========================================
+   CANVAS (True 4:3 – NO DISTORTION)
+========================================= */
 
-        /* =========================
-           CRT DISPLAY
-        ========================== */
+canvas {
+    display: block;
+    width: 100%;
+    aspect-ratio: 4 / 3;
 
-        .crt-wrapper {
-            position: relative;
-            width: min(90vw, 600px);
-            aspect-ratio: 1 / 1;
-            margin: 30px auto;
+    background: black;
+    border: 4px solid #00ff99;
 
-            border: 3px solid #00ff66;
-            box-shadow:
-                0 0 20px #00ff66,
-                inset 0 0 20px #002200;
-        }
+    box-shadow:
+        0 0 20px #00ff99,
+        0 0 40px rgba(0, 255, 150, 0.4);
 
-        canvas {
-            width: 100%;
-            height: 100%;
-            display: block;
-            background: black;
-        }
+    image-rendering: pixelated; /* optional retro sharpness */
+}
 
-        .scanlines {
-            position: absolute;
-            inset: 0;
-            background: repeating-linear-gradient(
-                to bottom,
-                rgba(0,255,0,0.05) 0px,
-                rgba(0,255,0,0.05) 2px,
-                transparent 2px,
-                transparent 4px
-            );
-            pointer-events: none;
-        }
-    </style>
-</head>
+/* =========================================
+   CRT EFFECTS
+========================================= */
 
-<body>
+.scanlines {
+    pointer-events: none;
+    position: absolute;
+    inset: 0;
 
-<!-- =========================
-     BOOT SCREEN
-========================= -->
+    background: repeating-linear-gradient(
+        to bottom,
+        rgba(0,255,150,0.05) 0px,
+        rgba(0,255,150,0.05) 2px,
+        transparent 2px,
+        transparent 4px
+    );
 
-<div id="bootScreen">
-    <h1>LABYRINTH</h1>
-    <p class="blink">Press ENTER to begin</p>
-</div>
+    mix-blend-mode: overlay;
+}
 
-<!-- =========================
-     GAME CONTAINER
-========================= -->
+/* Subtle screen glow */
+.crt-wrapper::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
 
-<div id="gameContainer">
+    box-shadow:
+        inset 0 0 80px rgba(0, 255, 150, 0.15);
+}
 
-    <h1 class="title">LABYRINTH</h1>
+/* =========================================
+   HUD
+========================================= */
 
-    <div class="hud">
-        Level: <span id="level">1</span> |
-        Time: <span id="time">0</span>s |
-        Score: <span id="score">0</span>
-    </div>
+.hud {
+    margin-bottom: 10px;
+    font-size: 14px;
+}
 
-    <div class="crt-wrapper">
-        <canvas id="game"></canvas>
-        <div class="scanlines"></div>
-    </div>
+/* =========================================
+   BOOT / OVERLAY SCREENS
+========================================= */
 
-</div>
+.screen {
+    position: fixed;
+    inset: 0;
+    background: black;
 
-<!-- ✅ GAME SCRIPT -->
-<script src="/static/game.js"></script>
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 
-</body>
-</html>
+    z-index: 100;
+    text-align: center;
+}
+
+.hidden {
+    display: none;
+}
+
+.blink {
+    animation: blink 1s infinite;
+}
+
+@keyframes blink {
+    50% { opacity: 0; }
+}
+
+/* =========================================
+   LEADERBOARD (Optional)
+========================================= */
+
+.leaderboard {
+    position: absolute;
+    right: 20px;
+    top: 100px;
+    text-align: left;
+    font-size: 14px;
+}

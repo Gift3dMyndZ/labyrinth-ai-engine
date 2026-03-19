@@ -1,5 +1,5 @@
 /* =========================================
-   LABYRINTH – STABLE VERSION
+   LABYRINTH – TEXTURED FLOOR EDITION
 ========================================= */
 
 console.log("GAME JS LOADED");
@@ -17,6 +17,81 @@ function resizeCanvas() {
 }
 window.addEventListener("resize", resizeCanvas);
 resizeCanvas();
+
+/* =========================================
+   FLOOR – PROCEDURAL BRICK TEXTURE
+========================================= */
+
+function clamp255(v) { return Math.max(0, Math.min(255, v | 0)); }
+function fract(v) { return v - Math.floor(v); }
+
+function createBrickTexture({
+    texW = 512,
+    texH = 512,
+    bricksX = 16,
+    bricksY = 12,
+    mortarPx = 3,
+    baseColor = { r: 165, g: 50, b: 35 },
+    mortarColor = { r: 150, g: 150, b: 150 },
+} = {}) {
+
+    const off = document.createElement("canvas");
+    off.width = texW;
+    off.height = texH;
+    const octx = off.getContext("2d");
+
+    octx.fillStyle = `rgb(${mortarColor.r}, ${mortarColor.g}, ${mortarColor.b})`;
+    octx.fillRect(0, 0, texW, texH);
+
+    const bw = Math.floor(texW / bricksX);
+    const bh = Math.floor(texH / bricksY);
+
+    for (let y = 0; y < bricksY; y++) {
+
+        const offset = (y % 2) ? Math.floor(bw / 2) : 0;
+
+        for (let x = -1; x <= bricksX; x++) {
+
+            const bx = x * bw + offset;
+            const by = y * bh;
+
+            if (bx + bw < 0 || bx > texW) continue;
+
+            const id = (x * 73856093) ^ (y * 19349663);
+            const rng = fract(Math.sin(id) * 43758.5453);
+            const shade = 0.85 + rng * 0.25;
+
+            const r = clamp255(baseColor.r * shade);
+            const g = clamp255(baseColor.g * shade);
+            const b = clamp255(baseColor.b * shade);
+
+            octx.fillStyle = `rgb(${r}, ${g}, ${b})`;
+            octx.fillRect(
+                bx + mortarPx,
+                by + mortarPx,
+                bw - mortarPx * 2,
+                bh - mortarPx * 2
+            );
+
+            const grd = octx.createLinearGradient(bx, by, bx, by + bh);
+            grd.addColorStop(0.0, "rgba(0,0,0,0.10)");
+            grd.addColorStop(0.5, "rgba(0,0,0,0.00)");
+            grd.addColorStop(1.0, "rgba(0,0,0,0.15)");
+
+            octx.fillStyle = grd;
+            octx.fillRect(
+                bx + mortarPx,
+                by + mortarPx,
+                bw - mortarPx * 2,
+                bh - mortarPx * 2
+            );
+        }
+    }
+
+    return off;
+}
+
+const brickTexture = createBrickTexture();
 
 /* =========================================
    GAME STATE
@@ -49,13 +124,10 @@ document.addEventListener("keydown", (e) => {
     keys[e.key.toLowerCase()] = true;
 
     if (e.key === "Enter" && !gameRunning) {
-
         const boot = document.getElementById("bootScreen");
         const gameUI = document.getElementById("gameContainer");
-
         if (boot) boot.remove();
         if (gameUI) gameUI.style.display = "block";
-
         startGame();
     }
 });
@@ -189,7 +261,7 @@ function movePlayer(dt) {
 }
 
 /* =========================================
-   MONSTER STEERING AI
+   MONSTER AI
 ========================================= */
 
 function moveMonster(dt) {
@@ -221,17 +293,9 @@ function moveMonster(dt) {
     monster.vx *= (1 - monster.drag * dt);
     monster.vy *= (1 - monster.drag * dt);
 
-    const vmag = Math.hypot(monster.vx, monster.vy);
-
-    if (vmag > monster.maxSpeed) {
-        monster.vx = (monster.vx / vmag) * monster.maxSpeed;
-        monster.vy = (monster.vy / vmag) * monster.maxSpeed;
-    }
-
     const nx = monster.x + monster.vx * dt;
     const ny = monster.y + monster.vy * dt;
 
-    // Maze collision
     if (
         map[Math.floor(ny)] &&
         map[Math.floor(ny)][Math.floor(nx)] === "0"
@@ -246,24 +310,46 @@ function moveMonster(dt) {
 }
 
 /* =========================================
-   FLOOR
+   FLOOR RENDER (TEXTURED)
 ========================================= */
 
-function drawBrickFloor() {
+function drawBrickFloorFromTexture() {
 
-    for (let y = canvas.height / 2; y < canvas.height; y++) {
+    const horizon = canvas.height / 2;
+    const w = canvas.width;
+    const h = canvas.height;
+    const tanHalfFov = Math.tan(FOV * 0.5);
 
-        const perspective =
-            (y - canvas.height / 2) / (canvas.height / 2);
+    for (let sy = horizon; sy < h; sy++) {
 
-        for (let x = 0; x < canvas.width; x += 4) {
+        const ny = (sy - horizon) / (h - horizon);
+        const forwardDist = 1.0 / Math.max(0.0001, ny * tanHalfFov);
 
-            const shade = Math.max(0.3, 1 - perspective);
+        for (let sx = 0; sx < w; sx += 2) {
 
-            ctx.fillStyle =
-                `rgb(${160 * shade}, ${40 * shade}, ${30 * shade})`;
+            const nx = (sx - w / 2) / (w / 2);
 
-            ctx.fillRect(x, y, 4, 1);
+            const worldX =
+                player.x +
+                Math.cos(player.angle) * forwardDist +
+                Math.sin(player.angle) * nx * forwardDist;
+
+            const worldY =
+                player.y +
+                Math.sin(player.angle) * forwardDist -
+                Math.cos(player.angle) * nx * forwardDist;
+
+            const u = ((worldX % 2) + 2) % 2 / 2;
+            const v = ((worldY % 2) + 2) % 2 / 2;
+
+            const srcX = (u * brickTexture.width) | 0;
+            const srcY = (v * brickTexture.height) | 0;
+
+            ctx.drawImage(
+                brickTexture,
+                srcX, srcY, 1, 1,
+                sx, sy, 2, 1
+            );
         }
     }
 }
@@ -281,7 +367,7 @@ function draw3D() {
     ctx.fillStyle = sky;
     ctx.fillRect(0, 0, canvas.width, canvas.height / 2);
 
-    drawBrickFloor();
+    drawBrickFloorFromTexture();
 
     for (let x = 0; x < canvas.width; x++) {
 
@@ -344,18 +430,16 @@ function draw3D() {
 ========================================= */
 
 function drawHUD() {
-
     ctx.fillStyle = "white";
     ctx.font = "20px Arial";
     ctx.textAlign = "left";
-
     ctx.fillText(`Level: ${level}`, 20, 40);
     ctx.fillText(`Time: ${survivalTime}`, 20, 65);
     ctx.fillText(`Score: ${score}`, 20, 90);
 }
 
 /* =========================================
-   GAME LOOP (Delta Time)
+   GAME LOOP
 ========================================= */
 
 let lastTime = 0;
@@ -368,22 +452,19 @@ function gameLoop(timestamp = 0) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     if (!gameRunning) {
-
         ctx.fillStyle = "black";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
         ctx.fillStyle = "#00ff66";
         ctx.font = "40px Arial";
         ctx.textAlign = "center";
-        ctx.fillText(
-            "LABYRINTH",
+        ctx.fillText("LABYRINTH",
             canvas.width / 2,
             canvas.height / 2 - 40
         );
 
         ctx.font = "20px Arial";
-        ctx.fillText(
-            "Press ENTER to Start",
+        ctx.fillText("Press ENTER to Start",
             canvas.width / 2,
             canvas.height / 2 + 20
         );
