@@ -157,41 +157,5 @@
 <!-- ✅ GAME SCRIPT -->
 <script src="/static/game.js"></script>
 
-<script>
-/* =========================
-   ENTER TO START
-========================= */
-
-document.addEventListener("keydown", function(e) {
-
-    if (e.key === "Enter") {
-
-        const boot = document.getElementById("bootScreen");
-        const gameUI = document.getElementById("gameContainer");
-
-        boot.style.display = "none";
-        gameUI.style.display = "block";
-
-        if (window.startGame) {
-            window.startGame();
-        }
-    }
-});
-
-/* =========================
-   CANVAS AUTO RESIZE
-========================= */
-
-const canvas = document.getElementById("game");
-
-function resizeCanvas() {
-    canvas.width = canvas.clientWidth;
-    canvas.height = canvas.clientHeight;
-}
-
-window.addEventListener("resize", resizeCanvas);
-resizeCanvas();
-</script>
-
 </body>
 </html>

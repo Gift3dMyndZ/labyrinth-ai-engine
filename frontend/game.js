@@ -1,13 +1,19 @@
 /* =========================================
-   CANVAS FULLSCREEN SETUP
+   LABYRINTH – STABLE VERSION
+========================================= */
+
+console.log("GAME JS LOADED");
+
+/* =========================================
+   CANVAS SETUP
 ========================================= */
 
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
 function resizeCanvas() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    canvas.width = canvas.clientWidth;
+    canvas.height = canvas.clientHeight;
 }
 window.addEventListener("resize", resizeCanvas);
 resizeCanvas();
@@ -29,12 +35,34 @@ let MAP_H;
 let player;
 let monster;
 
-/* =========================================
-   RAYCAST SETTINGS
-========================================= */
-
 const FOV = Math.PI / 3;
 const MAX_DEPTH = 25;
+
+/* =========================================
+   INPUT
+========================================= */
+
+let keys = {};
+
+document.addEventListener("keydown", (e) => {
+
+    keys[e.key.toLowerCase()] = true;
+
+    if (e.key === "Enter" && !gameRunning) {
+
+        const boot = document.getElementById("bootScreen");
+        const gameUI = document.getElementById("gameContainer");
+
+        if (boot) boot.remove();
+        if (gameUI) gameUI.style.display = "block";
+
+        startGame();
+    }
+});
+
+document.addEventListener("keyup", (e) => {
+    keys[e.key.toLowerCase()] = false;
+});
 
 /* =========================================
    MAZE GENERATION
@@ -82,7 +110,7 @@ function generateMaze(width, height) {
 }
 
 /* =========================================
-   RESET GAME
+   START / RESET
 ========================================= */
 
 function resetGame() {
@@ -95,37 +123,21 @@ function resetGame() {
     monster = {
         x: MAP_W - 3,
         y: 1,
-        speed: 0.015 + level * 0.003
+        vx: 0,
+        vy: 0,
+        maxSpeed: 3 + level * 0.5,
+        maxAccel: 20,
+        drag: 4,
+        arrivalRadius: 4,
+        attackRadius: 0.6
     };
 
     survivalTime = 0;
 }
 
-/* =========================================
-   INPUT
-========================================= */
-
-let keys = {};
-
-document.addEventListener("keydown", e => {
-
-    keys[e.key.toLowerCase()] = true;
-
-    // ENTER starts the game
-    if (e.key === "Enter" && !gameRunning) {
-        startGame();
-    }
-});
-
-document.addEventListener("keyup", e => {
-    keys[e.key.toLowerCase()] = false;
-});
-
-/* =========================================
-   START GAME FUNCTION
-========================================= */
-
 function startGame() {
+
+    if (gameRunning) return;
 
     gameRunning = true;
     level = 1;
@@ -145,16 +157,18 @@ function startGame() {
 ========================================= */
 
 function tryMove(nx, ny) {
-    if (map[Math.floor(ny)] &&
-        map[Math.floor(ny)][Math.floor(nx)] === "0") {
+    if (
+        map[Math.floor(ny)] &&
+        map[Math.floor(ny)][Math.floor(nx)] === "0"
+    ) {
         player.x = nx;
         player.y = ny;
     }
 }
 
-function movePlayer() {
+function movePlayer(dt) {
 
-    const speed = 0.08;
+    const speed = 3 * dt;
 
     if (keys["w"]) {
         tryMove(
@@ -170,26 +184,63 @@ function movePlayer() {
         );
     }
 
-    if (keys["a"]) player.angle -= 0.05;
-    if (keys["d"]) player.angle += 0.05;
+    if (keys["a"]) player.angle -= 2 * dt;
+    if (keys["d"]) player.angle += 2 * dt;
 }
 
 /* =========================================
-   MONSTER AI
+   MONSTER STEERING AI
 ========================================= */
 
-function moveMonster() {
+function moveMonster(dt) {
 
     const dx = player.x - monster.x;
     const dy = player.y - monster.y;
-    const dist = Math.hypot(dx, dy);
+    const dist = Math.hypot(dx, dy) || 0.0001;
 
-    if (dist < 12) {
-        monster.x += Math.sign(dx) * monster.speed;
-        monster.y += Math.sign(dy) * monster.speed;
+    const desiredSpeed = dist < monster.arrivalRadius
+        ? monster.maxSpeed * (dist / monster.arrivalRadius)
+        : monster.maxSpeed;
+
+    const desiredVX = (dx / dist) * desiredSpeed;
+    const desiredVY = (dy / dist) * desiredSpeed;
+
+    const steerX = desiredVX - monster.vx;
+    const steerY = desiredVY - monster.vy;
+
+    const steerMag = Math.hypot(steerX, steerY) || 1;
+
+    const ax = (steerX / steerMag) *
+        Math.min(steerMag, monster.maxAccel);
+    const ay = (steerY / steerMag) *
+        Math.min(steerMag, monster.maxAccel);
+
+    monster.vx += ax * dt;
+    monster.vy += ay * dt;
+
+    monster.vx *= (1 - monster.drag * dt);
+    monster.vy *= (1 - monster.drag * dt);
+
+    const vmag = Math.hypot(monster.vx, monster.vy);
+
+    if (vmag > monster.maxSpeed) {
+        monster.vx = (monster.vx / vmag) * monster.maxSpeed;
+        monster.vy = (monster.vy / vmag) * monster.maxSpeed;
     }
 
-    if (dist < 0.6) {
+    const nx = monster.x + monster.vx * dt;
+    const ny = monster.y + monster.vy * dt;
+
+    // Maze collision
+    if (
+        map[Math.floor(ny)] &&
+        map[Math.floor(ny)][Math.floor(nx)] === "0"
+    ) {
+        monster.x = nx;
+        monster.y = ny;
+    }
+
+    if (dist < monster.attackRadius) {
         gameRunning = false;
     }
 }
@@ -202,7 +253,8 @@ function drawBrickFloor() {
 
     for (let y = canvas.height / 2; y < canvas.height; y++) {
 
-        const perspective = (y - canvas.height / 2) / (canvas.height / 2);
+        const perspective =
+            (y - canvas.height / 2) / (canvas.height / 2);
 
         for (let x = 0; x < canvas.width; x += 4) {
 
@@ -297,17 +349,21 @@ function drawHUD() {
     ctx.font = "20px Arial";
     ctx.textAlign = "left";
 
-    ctx.fillText("LABYRINTH", 20, 30);
-    ctx.fillText(`Level: ${level}`, 20, 60);
-    ctx.fillText(`Time: ${survivalTime}`, 20, 85);
-    ctx.fillText(`Score: ${score}`, 20, 110);
+    ctx.fillText(`Level: ${level}`, 20, 40);
+    ctx.fillText(`Time: ${survivalTime}`, 20, 65);
+    ctx.fillText(`Score: ${score}`, 20, 90);
 }
 
 /* =========================================
-   GAME LOOP
+   GAME LOOP (Delta Time)
 ========================================= */
 
-function gameLoop() {
+let lastTime = 0;
+
+function gameLoop(timestamp = 0) {
+
+    const dt = (timestamp - lastTime) / 1000;
+    lastTime = timestamp;
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -319,21 +375,25 @@ function gameLoop() {
         ctx.fillStyle = "#00ff66";
         ctx.font = "40px Arial";
         ctx.textAlign = "center";
-        ctx.fillText("LABYRINTH",
+        ctx.fillText(
+            "LABYRINTH",
             canvas.width / 2,
-            canvas.height / 2 - 40);
+            canvas.height / 2 - 40
+        );
 
         ctx.font = "20px Arial";
-        ctx.fillText("Press ENTER to Start",
+        ctx.fillText(
+            "Press ENTER to Start",
             canvas.width / 2,
-            canvas.height / 2 + 20);
+            canvas.height / 2 + 20
+        );
 
         requestAnimationFrame(gameLoop);
         return;
     }
 
-    movePlayer();
-    moveMonster();
+    movePlayer(dt);
+    moveMonster(dt);
     draw3D();
 
     requestAnimationFrame(gameLoop);
