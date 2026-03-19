@@ -1,12 +1,16 @@
 /* =========================================
-CANVAS SETUP
+CANVAS FULLSCREEN SETUP
 ========================================= */
 
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
-canvas.width = 1000;
-canvas.height = 600;
+function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+window.addEventListener("resize", resizeCanvas);
+resizeCanvas();
 
 
 /* =========================================
@@ -17,7 +21,6 @@ let level = 1;
 let score = 0;
 let survivalTime = 0;
 let gameRunning = false;
-let survivalInterval;
 
 let map = [];
 let MAP_W;
@@ -39,7 +42,7 @@ const MAX_DEPTH = 25;
 
 
 /* =========================================
-MAZE GENERATION (Procedural)
+MAZE GENERATION
 ========================================= */
 
 function generateMaze(width, height) {
@@ -111,18 +114,6 @@ function resetGame() {
     };
 
     survivalTime = 0;
-    updateHUD();
-}
-
-
-/* =========================================
-HUD
-========================================= */
-
-function updateHUD() {
-    document.getElementById("level").innerText = level;
-    document.getElementById("score").innerText = score;
-    document.getElementById("time").innerText = survivalTime;
 }
 
 
@@ -133,17 +124,12 @@ MOVEMENT
 let keys = {};
 
 document.addEventListener("keydown", e => {
-
     keys[e.key.toLowerCase()] = true;
 
     if (e.key === "Enter" && !gameRunning) {
         gameRunning = true;
         resetGame();
-
-        survivalInterval = setInterval(() => {
-            survivalTime++;
-            updateHUD();
-        }, 1000);
+        setInterval(() => survivalTime++, 1000);
     }
 });
 
@@ -162,27 +148,27 @@ function movePlayer() {
 
     const speed = 0.08;
 
-    if (keys["w"] || keys["arrowup"]) {
+    if (keys["w"]) {
         tryMove(
             player.x + Math.cos(player.angle) * speed,
             player.y + Math.sin(player.angle) * speed
         );
     }
 
-    if (keys["s"] || keys["arrowdown"]) {
+    if (keys["s"]) {
         tryMove(
             player.x - Math.cos(player.angle) * speed,
             player.y - Math.sin(player.angle) * speed
         );
     }
 
-    if (keys["a"] || keys["arrowleft"]) player.angle -= 0.05;
-    if (keys["d"] || keys["arrowright"]) player.angle += 0.05;
+    if (keys["a"]) player.angle -= 0.05;
+    if (keys["d"]) player.angle += 0.05;
 }
 
 
 /* =========================================
-MONSTER AI (Slow Lurking)
+MONSTER AI
 ========================================= */
 
 function moveMonster() {
@@ -196,7 +182,7 @@ function moveMonster() {
         monster.y += Math.sign(dy) * monster.speed;
     }
 
-    if (dist < 0.5) {
+    if (dist < 0.6) {
         level = 1;
         score = 0;
         resetGame();
@@ -205,18 +191,43 @@ function moveMonster() {
 
 
 /* =========================================
-3D RAYCAST ENGINE (HEDGE STYLE)
+RED BRICK FLOOR
+========================================= */
+
+function drawBrickFloor() {
+
+    for (let y = canvas.height / 2; y < canvas.height; y++) {
+
+        const perspective = (y - canvas.height / 2) / (canvas.height / 2);
+        const depth = 1 / (perspective + 0.0001);
+
+        for (let x = 0; x < canvas.width; x += 4) {
+
+            const shade = Math.max(0.3, 1 - perspective);
+
+            ctx.fillStyle =
+                `rgb(${160 * shade}, ${40 * shade}, ${30 * shade})`;
+
+            ctx.fillRect(x, y, 4, 1);
+        }
+    }
+}
+
+
+/* =========================================
+3D RENDER
 ========================================= */
 
 function draw3D() {
 
-    // Dark sky
-    ctx.fillStyle = "#0a120a";
+    // Blue sky
+    const sky = ctx.createLinearGradient(0, 0, 0, canvas.height / 2);
+    sky.addColorStop(0, "#4da6ff");
+    sky.addColorStop(1, "#87ceeb");
+    ctx.fillStyle = sky;
     ctx.fillRect(0, 0, canvas.width, canvas.height / 2);
 
-    // Grass floor
-    ctx.fillStyle = "#0f1f0f";
-    ctx.fillRect(0, canvas.height / 2, canvas.width, canvas.height / 2);
+    drawBrickFloor();
 
     for (let x = 0; x < canvas.width; x++) {
 
@@ -256,14 +267,12 @@ function draw3D() {
         const wallHeight =
             canvas.height / (correctedDist + 0.0001);
 
-        const fog = 1 - Math.min(correctedDist / 20, 1);
+        const shade =
+            1 - Math.min(correctedDist / 18, 1);
 
-        // Hedge green walls
-        const r = Math.floor(20 * fog);
-        const g = Math.floor(120 * fog + 40);
-        const b = Math.floor(20 * fog);
+        const grey = Math.floor(180 * shade);
 
-        ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
+        ctx.fillStyle = `rgb(${grey}, ${grey}, ${grey})`;
 
         ctx.fillRect(
             x,
@@ -274,104 +283,103 @@ function draw3D() {
     }
 
     drawSprites();
+    drawHUD();
+    drawMiniMap();
 }
 
 
 /* =========================================
-SPRITES (Key + Exit + Monster)
+DETAILED MONSTER SPRITE
 ========================================= */
 
-function drawSprite(sprite, color, scale = 1) {
+function drawMonsterSprite(screenX, size) {
 
-    const dx = sprite.x - player.x;
-    const dy = sprite.y - player.y;
+    const y = (canvas.height - size) / 2;
 
-    const distance = Math.hypot(dx, dy);
-    const angle = Math.atan2(dy, dx) - player.angle;
+    ctx.fillStyle = "darkred";
+    ctx.fillRect(screenX - size/2, y, size, size);
 
-    if (Math.abs(angle) > FOV / 2) return;
+    // Eyes
+    ctx.fillStyle = "white";
+    ctx.fillRect(screenX - size/4, y + size/3, size/8, size/8);
+    ctx.fillRect(screenX + size/8, y + size/3, size/8, size/8);
 
-    const screenX =
-        (angle + FOV / 2) / FOV * canvas.width;
+    ctx.fillStyle = "black";
+    ctx.fillRect(screenX - size/4, y + size/3, size/16, size/16);
+    ctx.fillRect(screenX + size/8, y + size/3, size/16, size/16);
 
-    const size =
-        (canvas.height / distance) * scale;
-
-    ctx.globalAlpha =
-        1 - Math.min(distance / 15, 0.8);
-
-    ctx.fillStyle = color;
-
-    ctx.fillRect(
-        screenX - size / 2,
-        (canvas.height - size) / 2,
-        size,
-        size
-    );
-
-    ctx.globalAlpha = 1;
+    // Horns
+    ctx.fillStyle = "black";
+    ctx.fillRect(screenX - size/2, y - size/4, size/4, size/4);
+    ctx.fillRect(screenX + size/4, y - size/4, size/4, size/4);
 }
 
 function drawSprites() {
 
-    if (!hasKey)
-        drawSprite(keyItem, "yellow", 0.6);
+    const dx = monster.x - player.x;
+    const dy = monster.y - player.y;
 
-    drawSprite(monster, "darkred", 1);
+    const distance = Math.hypot(dx, dy);
+    const angle = Math.atan2(dy, dx) - player.angle;
 
-    if (hasKey)
-        drawSprite(exitTile, "white", 0.8);
-}
+    if (Math.abs(angle) < FOV / 2) {
 
+        const screenX =
+            (angle + FOV / 2) / FOV * canvas.width;
 
-/* =========================================
-CHECK EVENTS
-========================================= */
+        const size =
+            canvas.height / distance;
 
-function checkEvents() {
-
-    // Collect key
-    if (!hasKey &&
-        Math.floor(player.x) === keyItem.x &&
-        Math.floor(player.y) === keyItem.y) {
-        hasKey = true;
-        score += 50;
-    }
-
-    // Win only if key collected
-    if (hasKey &&
-        Math.floor(player.x) === exitTile.x &&
-        Math.floor(player.y) === exitTile.y) {
-
-        score += 150;
-        level++;
-        resetGame();
+        drawMonsterSprite(screenX, size);
     }
 }
 
 
 /* =========================================
-INSTRUCTION SCREEN
+HUD + MINI MAP
 ========================================= */
 
-function drawInstructions() {
-
-    ctx.fillStyle = "black";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    ctx.fillStyle = "#66ff66";
-    ctx.textAlign = "center";
-
-    ctx.font = "48px Arial";
-    ctx.fillText("THE MAZE", canvas.width / 2, 150);
-
-    ctx.font = "22px Arial";
-    ctx.fillText("Find the key.", canvas.width / 2, 260);
-    ctx.fillText("Escape the hedge maze.", canvas.width / 2, 300);
-    ctx.fillText("Something is watching...", canvas.width / 2, 340);
+function drawHUD() {
 
     ctx.fillStyle = "white";
-    ctx.fillText("Press ENTER to Begin", canvas.width / 2, 500);
+    ctx.font = "20px Arial";
+    ctx.textAlign = "left";
+
+    ctx.fillText("LABYRINTH", 20, 30);
+    ctx.fillText(`Level: ${level}`, 20, 60);
+    ctx.fillText(`Time: ${survivalTime}`, 20, 85);
+    ctx.fillText(`Score: ${score}`, 20, 110);
+}
+
+function drawMiniMap() {
+
+    const scale = 6;
+    const offsetX = 20;
+    const offsetY = 130;
+
+    for (let y = 0; y < MAP_H; y++) {
+        for (let x = 0; x < MAP_W; x++) {
+
+            ctx.fillStyle =
+                map[y][x] === "1" ? "#555" : "#111";
+
+            ctx.fillRect(
+                offsetX + x * scale,
+                offsetY + y * scale,
+                scale,
+                scale
+            );
+        }
+    }
+
+    // Player
+    ctx.fillStyle = "yellow";
+    ctx.fillRect(
+        offsetX + player.x * scale,
+        offsetY + player.y * scale,
+        scale,
+        scale
+    );
 }
 
 
@@ -382,22 +390,26 @@ GAME LOOP
 function gameLoop() {
 
     if (!gameRunning) {
-        drawInstructions();
+        ctx.fillStyle = "black";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.fillStyle = "white";
+        ctx.font = "40px Arial";
+        ctx.textAlign = "center";
+        ctx.fillText("LABYRINTH", canvas.width/2, canvas.height/2 - 40);
+        ctx.font = "20px Arial";
+        ctx.fillText("Press ENTER to Start",
+            canvas.width/2, canvas.height/2 + 20);
+
         requestAnimationFrame(gameLoop);
         return;
     }
 
     movePlayer();
     moveMonster();
-    checkEvents();
     draw3D();
 
     requestAnimationFrame(gameLoop);
 }
-
-
-/* =========================================
-START
-========================================= */
 
 gameLoop();
