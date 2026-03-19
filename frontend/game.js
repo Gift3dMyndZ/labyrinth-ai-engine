@@ -1,5 +1,5 @@
 /* =========================================
-   LABYRINTH – TEXTURED FLOOR EDITION
+   LABYRINTH – TEXTURED FLOOR + MINIMAP
 ========================================= */
 
 console.log("GAME JS LOADED");
@@ -17,6 +17,14 @@ function resizeCanvas() {
 }
 window.addEventListener("resize", resizeCanvas);
 resizeCanvas();
+
+/* =========================================
+   MINIMAP SETTINGS
+========================================= */
+
+const MINIMAP_SIZE = 180;
+const MINIMAP_MARGIN = 20;
+const SHOW_ROTATING_MAP = false;
 
 /* =========================================
    FLOOR – PROCEDURAL BRICK TEXTURE
@@ -52,7 +60,6 @@ function createBrickTexture({
         for (let x = -1; x <= bricksX; x++) {
             const bx = x * bw + offset;
             const by = y * bh;
-
             if (bx + bw < 0 || bx > texW) continue;
 
             const id = (x * 73856093) ^ (y * 19349663);
@@ -122,7 +129,7 @@ document.addEventListener("keyup", (e) => {
 });
 
 /* =========================================
-   MAZE GENERATION (WITH ENTRANCE + EXIT)
+   MAZE GENERATION
 ========================================= */
 
 function generateMaze(width, height) {
@@ -163,14 +170,12 @@ function generateMaze(width, height) {
     map[1][1] = "0";
     carve(1, 1);
 
-    // Create entrance (top)
     let entranceX = 1;
     for (let x = 1; x < width - 1; x += 2) {
         if (map[1][x] === "0") { entranceX = x; break; }
     }
     map[0][entranceX] = "0";
 
-    // Create exit (bottom)
     let exitX = width - 2;
     for (let x = width - 2; x >= 1; x -= 2) {
         if (map[height - 2][x] === "0") { exitX = x; break; }
@@ -234,7 +239,7 @@ function startGame() {
 }
 
 /* =========================================
-   MOVEMENT
+   MOVEMENT + MONSTER
 ========================================= */
 
 function tryMove(nx, ny) {
@@ -268,7 +273,6 @@ function movePlayer(dt) {
     if (keys["a"]) player.angle -= 2 * dt;
     if (keys["d"]) player.angle += 2 * dt;
 
-    // WIN CONDITION
     const dx = player.x - goal.x;
     const dy = player.y - goal.y;
 
@@ -278,10 +282,6 @@ function movePlayer(dt) {
         resetGame();
     }
 }
-
-/* =========================================
-   MONSTER AI
-========================================= */
 
 function moveMonster(dt) {
 
@@ -329,48 +329,75 @@ function moveMonster(dt) {
 }
 
 /* =========================================
-   FLOOR RENDER
+   MINIMAP DRAW
 ========================================= */
 
-function drawBrickFloorFromTexture() {
+function drawMinimap() {
 
-    const horizon = canvas.height / 2;
-    const w = canvas.width;
-    const h = canvas.height;
-    const tanHalfFov = Math.tan(FOV * 0.5);
+    const scale = MINIMAP_SIZE / MAP_W;
 
-    for (let sy = horizon; sy < h; sy++) {
+    const startX = canvas.width - MINIMAP_SIZE - MINIMAP_MARGIN;
+    const startY = MINIMAP_MARGIN;
 
-        const ny = (sy - horizon) / (h - horizon);
-        const forwardDist = 1.0 / Math.max(0.0001, ny * tanHalfFov);
+    ctx.save();
 
-        for (let sx = 0; sx < w; sx += 2) {
+    ctx.globalAlpha = 0.85;
+    ctx.fillStyle = "black";
+    ctx.fillRect(startX, startY, MINIMAP_SIZE, MINIMAP_SIZE);
 
-            const nx = (sx - w / 2) / (w / 2);
+    ctx.globalAlpha = 1;
 
-            const worldX =
-                player.x +
-                Math.cos(player.angle) * forwardDist +
-                Math.sin(player.angle) * nx * forwardDist;
-
-            const worldY =
-                player.y +
-                Math.sin(player.angle) * forwardDist -
-                Math.cos(player.angle) * nx * forwardDist;
-
-            const u = ((worldX % 2) + 2) % 2 / 2;
-            const v = ((worldY % 2) + 2) % 2 / 2;
-
-            const srcX = (u * brickTexture.width) | 0;
-            const srcY = (v * brickTexture.height) | 0;
-
-            ctx.drawImage(
-                brickTexture,
-                srcX, srcY, 1, 1,
-                sx, sy, 2, 1
-            );
+    for (let y = 0; y < MAP_H; y++) {
+        for (let x = 0; x < MAP_W; x++) {
+            if (map[y][x] === "1") {
+                ctx.fillStyle = "#00ff99";
+                ctx.fillRect(
+                    startX + x * scale,
+                    startY + y * scale,
+                    scale,
+                    scale
+                );
+            }
         }
     }
+
+    // Goal
+    ctx.fillStyle = "gold";
+    ctx.beginPath();
+    ctx.arc(
+        startX + goal.x * scale,
+        startY + goal.y * scale,
+        4,
+        0,
+        Math.PI * 2
+    );
+    ctx.fill();
+
+    // Monster
+    ctx.fillStyle = "red";
+    ctx.beginPath();
+    ctx.arc(
+        startX + monster.x * scale,
+        startY + monster.y * scale,
+        4,
+        0,
+        Math.PI * 2
+    );
+    ctx.fill();
+
+    // Player
+    ctx.fillStyle = "#00ff99";
+    ctx.beginPath();
+    ctx.arc(
+        startX + player.x * scale,
+        startY + player.y * scale,
+        4,
+        0,
+        Math.PI * 2
+    );
+    ctx.fill();
+
+    ctx.restore();
 }
 
 /* =========================================
@@ -442,6 +469,7 @@ function draw3D() {
     }
 
     drawHUD();
+    drawMinimap();
 }
 
 /* =========================================
