@@ -10,7 +10,7 @@ const API_BASE =
     window.location.hostname === "localhost" ||
     window.location.hostname === "127.0.0.1"
         ? "http://127.0.0.1:8000"
-        : "https://labyrinth-ai-engine.onrender.com"; // ✅ your deployed backend
+        : "https://labyrinth-ai-engine.onrender.com";
 
 
 /* =========================================
@@ -19,6 +19,9 @@ CANVAS SETUP
 
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
+
+canvas.width = 1000;
+canvas.height = 600;
 
 
 /* =========================================
@@ -46,7 +49,7 @@ let difficultyModifier = 1.0;
 
 
 /* =========================================
-MAZE GENERATION (Recursive Backtracking)
+MAZE GENERATION
 ========================================= */
 
 function generateMaze(width, height) {
@@ -63,14 +66,14 @@ function generateMaze(width, height) {
 
     function carve(x, y) {
 
-        const directions = [
+        const dirs = [
             [0, -2],
             [0, 2],
             [-2, 0],
             [2, 0]
         ].sort(() => Math.random() - 0.5);
 
-        for (let [dx, dy] of directions) {
+        for (let [dx, dy] of dirs) {
 
             const nx = x + dx;
             const ny = y + dy;
@@ -90,7 +93,6 @@ function generateMaze(width, height) {
 
     map[1][1] = "0";
     carve(1, 1);
-    map = map.map(row => row.join(""));
 }
 
 
@@ -162,7 +164,7 @@ function tryMove(nx, ny) {
 
 function movePlayer() {
 
-    const speed = 0.06;
+    const speed = 0.08;
 
     if (keys["w"]) {
         tryMove(
@@ -180,15 +182,8 @@ function movePlayer() {
         logMove("backward");
     }
 
-    if (keys["a"]) {
-        player.angle -= 0.05;
-        logMove("left");
-    }
-
-    if (keys["d"]) {
-        player.angle += 0.05;
-        logMove("right");
-    }
+    if (keys["a"]) player.angle -= 0.05;
+    if (keys["d"]) player.angle += 0.05;
 
     curiosity++;
 }
@@ -202,105 +197,124 @@ function moveMonster() {
 
     const dx = player.x - monster.x;
     const dy = player.y - monster.y;
-    const dist = Math.sqrt(dx * dx + dy * dy);
+    const dist = Math.hypot(dx, dy);
 
-    if (dist < 5) fear_level++;
+    if (dist < 6) fear_level++;
     if (dist < 5 && Math.random() < 0.3) aggression++;
 
-    if (dist < 8) {
+    if (dist < 10) {
         monster.x += Math.sign(dx) * monster.speed;
         monster.y += Math.sign(dy) * monster.speed;
     }
 
-    if (dist < 0.5) {
-        endGame();
-    }
+    if (dist < 0.5) endGame();
 }
 
 
 /* =========================================
-MOVEMENT LOGGING
+3D RAYCASTING ENGINE
 ========================================= */
 
-function logMove(action) {
+const FOV = Math.PI / 3;
+const MAX_DEPTH = 20;
 
-    const now = Date.now();
+function draw3D() {
 
-    const distanceToAI = Math.hypot(
-        player.x - monster.x,
-        player.y - monster.y
+    ctx.fillStyle = "black";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    for (let x = 0; x < canvas.width; x++) {
+
+        const rayAngle =
+            player.angle - FOV / 2 +
+            (x / canvas.width) * FOV;
+
+        let distance = 0;
+        let hit = false;
+
+        while (!hit && distance < MAX_DEPTH) {
+
+            distance += 0.05;
+
+            const testX = Math.floor(
+                player.x + Math.cos(rayAngle) * distance
+            );
+            const testY = Math.floor(
+                player.y + Math.sin(rayAngle) * distance
+            );
+
+            if (
+                testX < 0 || testY < 0 ||
+                testX >= MAP_W || testY >= MAP_H
+            ) {
+                hit = true;
+                distance = MAX_DEPTH;
+            } else if (map[testY][testX] === "1") {
+                hit = true;
+            }
+        }
+
+        const correctedDist =
+            distance * Math.cos(rayAngle - player.angle);
+
+        const wallHeight =
+            canvas.height / correctedDist;
+
+        const shade =
+            255 - Math.min(255, correctedDist * 20);
+
+        ctx.fillStyle = `rgb(0, ${shade}, 0)`;
+
+        ctx.fillRect(
+            x,
+            (canvas.height - wallHeight) / 2,
+            1,
+            wallHeight
+        );
+    }
+
+    drawSprites();
+}
+
+
+/* =========================================
+SPRITE RENDERING
+========================================= */
+
+function drawSprite(sprite, color, scale = 1) {
+
+    const dx = sprite.x - player.x;
+    const dy = sprite.y - player.y;
+
+    const distance = Math.hypot(dx, dy);
+    const angle = Math.atan2(dy, dx) - player.angle;
+
+    if (Math.abs(angle) > FOV / 2) return;
+
+    const screenX =
+        (angle + FOV / 2) / FOV * canvas.width;
+
+    const size =
+        (canvas.height / distance) * scale;
+
+    ctx.globalAlpha =
+        1 - Math.min(distance / 12, 0.8);
+
+    ctx.fillStyle = color;
+
+    ctx.fillRect(
+        screenX - size / 2,
+        (canvas.height - size) / 2,
+        size,
+        size
     );
 
-    eventLog.push({
-        session_id: sessionId,
-        timestamp: now,
-        level: level,
-        action: action,
-        player_x: player.x,
-        player_y: player.y,
-        player_angle: player.angle,
-        ai_x: monster.x,
-        ai_y: monster.y,
-        distance_to_ai: distanceToAI,
-        time_since_start: now - sessionStart
-    });
-
-    if (eventLog.length >= 25) {
-        sendBatch();
-    }
+    ctx.globalAlpha = 1;
 }
 
-async function sendBatch() {
-
-    if (eventLog.length === 0) return;
-
-    try {
-        await fetch(`${API_BASE}/collect`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(eventLog)
-        });
-
-        console.log("Batch sent:", eventLog.length);
-        eventLog = [];
-
-    } catch (err) {
-        console.error("Batch send failed:", err);
-    }
-}
-
-
-/* =========================================
-ADAPTIVE TELEMETRY
-========================================= */
-
-async function sendTelemetry(data) {
-    try {
-        await fetch(`${API_BASE}/telemetry`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(data)
-        });
-    } catch (err) {
-        console.error("Telemetry error:", err);
-    }
-}
-
-async function getAdaptiveDifficulty(data) {
-    try {
-        const response = await fetch(`${API_BASE}/recommend`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(data)
-        });
-
-        const result = await response.json();
-        return result.difficulty_modifier || 1.0;
-
-    } catch (err) {
-        console.error("Recommendation error:", err);
-        return 1.0;
-    }
+function drawSprites() {
+    drawSprite(monster, "red", 1);
+    drawSprite(exitTile, "gold", 0.7);
 }
 
 
@@ -314,13 +328,14 @@ function gameLoop() {
 
     movePlayer();
     moveMonster();
+    draw3D();
 
     requestAnimationFrame(gameLoop);
 }
 
 
 /* =========================================
-GAME END
+END GAME
 ========================================= */
 
 async function endGame() {
@@ -336,14 +351,87 @@ async function endGame() {
     };
 
     await sendTelemetry(metrics);
+    difficultyModifier =
+        await getAdaptiveDifficulty(metrics);
 
-    difficultyModifier = await getAdaptiveDifficulty(metrics);
-
-    level++;
-    resetGame(false);
+    resetGame(true);
 
     gameRunning = true;
+
+    survivalInterval = setInterval(() => {
+        survivalTime++;
+        updateHUD();
+    }, 1000);
+
     gameLoop();
+}
+
+
+/* =========================================
+TELEMETRY
+========================================= */
+
+function logMove(action) {
+
+    const now = Date.now();
+
+    eventLog.push({
+        session_id: sessionId,
+        timestamp: now,
+        level,
+        action,
+        player_x: player.x,
+        player_y: player.y,
+        player_angle: player.angle,
+        ai_x: monster.x,
+        ai_y: monster.y,
+        distance_to_ai: Math.hypot(
+            player.x - monster.x,
+            player.y - monster.y
+        ),
+        time_since_start: now - sessionStart
+    });
+
+    if (eventLog.length >= 25) sendBatch();
+}
+
+async function sendBatch() {
+    if (!eventLog.length) return;
+
+    try {
+        await fetch(`${API_BASE}/collect`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(eventLog)
+        });
+        eventLog = [];
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+async function sendTelemetry(data) {
+    try {
+        await fetch(`${API_BASE}/telemetry`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        });
+    } catch (err) {}
+}
+
+async function getAdaptiveDifficulty(data) {
+    try {
+        const res = await fetch(`${API_BASE}/recommend`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        });
+        const result = await res.json();
+        return result.difficulty_modifier || 1.0;
+    } catch {
+        return 1.0;
+    }
 }
 
 
