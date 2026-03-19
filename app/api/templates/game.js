@@ -1,5 +1,5 @@
 /* =========================================
-CANVAS FULLSCREEN SETUP
+   CANVAS FULLSCREEN SETUP
 ========================================= */
 
 const canvas = document.getElementById("game");
@@ -12,15 +12,15 @@ function resizeCanvas() {
 window.addEventListener("resize", resizeCanvas);
 resizeCanvas();
 
-
 /* =========================================
-GAME STATE
+   GAME STATE
 ========================================= */
 
 let level = 1;
 let score = 0;
 let survivalTime = 0;
 let gameRunning = false;
+let survivalInterval = null;
 
 let map = [];
 let MAP_W;
@@ -28,21 +28,16 @@ let MAP_H;
 
 let player;
 let monster;
-let exitTile;
-let keyItem;
-let hasKey = false;
-
 
 /* =========================================
-RAYCAST SETTINGS
+   RAYCAST SETTINGS
 ========================================= */
 
 const FOV = Math.PI / 3;
 const MAX_DEPTH = 25;
 
-
 /* =========================================
-MAZE GENERATION
+   MAZE GENERATION
 ========================================= */
 
 function generateMaze(width, height) {
@@ -86,9 +81,8 @@ function generateMaze(width, height) {
     carve(1, 1);
 }
 
-
 /* =========================================
-RESET GAME
+   RESET GAME
 ========================================= */
 
 function resetGame() {
@@ -97,15 +91,6 @@ function resetGame() {
     generateMaze(size, size);
 
     player = { x: 1.5, y: 1.5, angle: 0 };
-
-    exitTile = { x: MAP_W - 2, y: MAP_H - 2 };
-
-    keyItem = {
-        x: Math.floor(MAP_W / 2),
-        y: Math.floor(MAP_H / 2)
-    };
-
-    hasKey = false;
 
     monster = {
         x: MAP_W - 3,
@@ -116,20 +101,19 @@ function resetGame() {
     survivalTime = 0;
 }
 
-
 /* =========================================
-MOVEMENT
+   INPUT
 ========================================= */
 
 let keys = {};
 
 document.addEventListener("keydown", e => {
+
     keys[e.key.toLowerCase()] = true;
 
+    // ENTER starts the game
     if (e.key === "Enter" && !gameRunning) {
-        gameRunning = true;
-        resetGame();
-        setInterval(() => survivalTime++, 1000);
+        startGame();
     }
 });
 
@@ -137,8 +121,32 @@ document.addEventListener("keyup", e => {
     keys[e.key.toLowerCase()] = false;
 });
 
+/* =========================================
+   START GAME FUNCTION
+========================================= */
+
+function startGame() {
+
+    gameRunning = true;
+    level = 1;
+    score = 0;
+
+    resetGame();
+
+    if (survivalInterval) clearInterval(survivalInterval);
+
+    survivalInterval = setInterval(() => {
+        survivalTime++;
+    }, 1000);
+}
+
+/* =========================================
+   MOVEMENT
+========================================= */
+
 function tryMove(nx, ny) {
-    if (map[Math.floor(ny)][Math.floor(nx)] === "0") {
+    if (map[Math.floor(ny)] &&
+        map[Math.floor(ny)][Math.floor(nx)] === "0") {
         player.x = nx;
         player.y = ny;
     }
@@ -166,9 +174,8 @@ function movePlayer() {
     if (keys["d"]) player.angle += 0.05;
 }
 
-
 /* =========================================
-MONSTER AI
+   MONSTER AI
 ========================================= */
 
 function moveMonster() {
@@ -183,15 +190,12 @@ function moveMonster() {
     }
 
     if (dist < 0.6) {
-        level = 1;
-        score = 0;
-        resetGame();
+        gameRunning = false;
     }
 }
 
-
 /* =========================================
-RED BRICK FLOOR
+   FLOOR
 ========================================= */
 
 function drawBrickFloor() {
@@ -199,7 +203,6 @@ function drawBrickFloor() {
     for (let y = canvas.height / 2; y < canvas.height; y++) {
 
         const perspective = (y - canvas.height / 2) / (canvas.height / 2);
-        const depth = 1 / (perspective + 0.0001);
 
         for (let x = 0; x < canvas.width; x += 4) {
 
@@ -213,17 +216,16 @@ function drawBrickFloor() {
     }
 }
 
-
 /* =========================================
-3D RENDER
+   3D RENDER
 ========================================= */
 
 function draw3D() {
 
-    // Blue sky
     const sky = ctx.createLinearGradient(0, 0, 0, canvas.height / 2);
     sky.addColorStop(0, "#4da6ff");
     sky.addColorStop(1, "#87ceeb");
+
     ctx.fillStyle = sky;
     ctx.fillRect(0, 0, canvas.width, canvas.height / 2);
 
@@ -282,61 +284,11 @@ function draw3D() {
         );
     }
 
-    drawSprites();
     drawHUD();
-    drawMiniMap();
 }
-
 
 /* =========================================
-DETAILED MONSTER SPRITE
-========================================= */
-
-function drawMonsterSprite(screenX, size) {
-
-    const y = (canvas.height - size) / 2;
-
-    ctx.fillStyle = "darkred";
-    ctx.fillRect(screenX - size/2, y, size, size);
-
-    // Eyes
-    ctx.fillStyle = "white";
-    ctx.fillRect(screenX - size/4, y + size/3, size/8, size/8);
-    ctx.fillRect(screenX + size/8, y + size/3, size/8, size/8);
-
-    ctx.fillStyle = "black";
-    ctx.fillRect(screenX - size/4, y + size/3, size/16, size/16);
-    ctx.fillRect(screenX + size/8, y + size/3, size/16, size/16);
-
-    // Horns
-    ctx.fillStyle = "black";
-    ctx.fillRect(screenX - size/2, y - size/4, size/4, size/4);
-    ctx.fillRect(screenX + size/4, y - size/4, size/4, size/4);
-}
-
-function drawSprites() {
-
-    const dx = monster.x - player.x;
-    const dy = monster.y - player.y;
-
-    const distance = Math.hypot(dx, dy);
-    const angle = Math.atan2(dy, dx) - player.angle;
-
-    if (Math.abs(angle) < FOV / 2) {
-
-        const screenX =
-            (angle + FOV / 2) / FOV * canvas.width;
-
-        const size =
-            canvas.height / distance;
-
-        drawMonsterSprite(screenX, size);
-    }
-}
-
-
-/* =========================================
-HUD + MINI MAP
+   HUD
 ========================================= */
 
 function drawHUD() {
@@ -351,55 +303,30 @@ function drawHUD() {
     ctx.fillText(`Score: ${score}`, 20, 110);
 }
 
-function drawMiniMap() {
-
-    const scale = 6;
-    const offsetX = 20;
-    const offsetY = 130;
-
-    for (let y = 0; y < MAP_H; y++) {
-        for (let x = 0; x < MAP_W; x++) {
-
-            ctx.fillStyle =
-                map[y][x] === "1" ? "#555" : "#111";
-
-            ctx.fillRect(
-                offsetX + x * scale,
-                offsetY + y * scale,
-                scale,
-                scale
-            );
-        }
-    }
-
-    // Player
-    ctx.fillStyle = "yellow";
-    ctx.fillRect(
-        offsetX + player.x * scale,
-        offsetY + player.y * scale,
-        scale,
-        scale
-    );
-}
-
-
 /* =========================================
-GAME LOOP
+   GAME LOOP
 ========================================= */
 
 function gameLoop() {
 
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
     if (!gameRunning) {
+
         ctx.fillStyle = "black";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        ctx.fillStyle = "white";
+        ctx.fillStyle = "#00ff66";
         ctx.font = "40px Arial";
         ctx.textAlign = "center";
-        ctx.fillText("LABYRINTH", canvas.width/2, canvas.height/2 - 40);
+        ctx.fillText("LABYRINTH",
+            canvas.width / 2,
+            canvas.height / 2 - 40);
+
         ctx.font = "20px Arial";
         ctx.fillText("Press ENTER to Start",
-            canvas.width/2, canvas.height/2 + 20);
+            canvas.width / 2,
+            canvas.height / 2 + 20);
 
         requestAnimationFrame(gameLoop);
         return;
