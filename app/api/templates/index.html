@@ -3,123 +3,9 @@
 <head>
     <title>LABYRINTH</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        html, body {
-            height: 100%;
-        }
-
-        body {
-            background: radial-gradient(circle at center, #000 40%, #050505 100%);
-            color: #00ff66;
-            font-family: "Courier New", monospace;
-            overflow: hidden;
-
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-
-        /* =========================
-           BOOT SCREEN
-        ========================== */
-
-        #bootScreen {
-            position: fixed;
-            inset: 0;
-            background: black;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            z-index: 50;
-            text-align: center;
-        }
-
-        #bootScreen h1 {
-            font-size: 2.5rem;
-            letter-spacing: 6px;
-            text-shadow:
-                0 0 10px #00ff66,
-                0 0 25px #00ff66;
-        }
-
-        .blink {
-            margin-top: 20px;
-            animation: blink 1s infinite;
-        }
-
-        @keyframes blink {
-            50% { opacity: 0; }
-        }
-
-        /* =========================
-           GAME UI
-        ========================== */
-
-        #gameContainer {
-            display: none;
-            width: 100%;
-            text-align: center;
-        }
-
-        .title {
-            font-size: 2.2rem;
-            letter-spacing: 6px;
-            text-shadow:
-                0 0 5px #00ff66,
-                0 0 15px #00ff66,
-                0 0 30px #00ff66;
-        }
-
-        .hud {
-            margin-top: 10px;
-            font-size: 0.9rem;
-        }
-
-        /* =========================
-           CRT DISPLAY
-        ========================== */
-
-        .crt-wrapper {
-            position: relative;
-            width: min(90vw, 600px);
-            aspect-ratio: 1 / 1;
-            margin: 30px auto;
-
-            border: 3px solid #00ff66;
-            box-shadow:
-                0 0 20px #00ff66,
-                inset 0 0 20px #002200;
-        }
-
-        canvas {
-            width: 100%;
-            height: 100%;
-            display: block;
-            background: black;
-        }
-
-        .scanlines {
-            position: absolute;
-            inset: 0;
-            background: repeating-linear-gradient(
-                to bottom,
-                rgba(0,255,0,0.05) 0px,
-                rgba(0,255,0,0.05) 2px,
-                transparent 2px,
-                transparent 4px
-            );
-            pointer-events: none;
-        }
-    </style>
+    
+    <!-- ✅ External Production Stylesheet -->
+    <link rel="stylesheet" href="/static/style.css">
 </head>
 
 <body>
@@ -128,8 +14,8 @@
      BOOT SCREEN
 ========================= -->
 
-<div id="bootScreen">
-    <h1>LABYRINTH</h1>
+<div id="bootScreen" class="screen">
+    <h2 class="glow">LABYRINTH</h2>
     <p class="blink">Press ENTER to begin</p>
 </div>
 
@@ -137,15 +23,9 @@
      GAME CONTAINER
 ========================= -->
 
-<div id="gameContainer">
+<div id="gameContainer" style="display:none;">
 
-    <h1 class="title">LABYRINTH</h1>
-
-    <div class="hud">
-        Level: <span id="level">1</span> |
-        Time: <span id="time">0</span>s |
-        Score: <span id="score">0</span>
-    </div>
+    <h1 class="title glow">LABYRINTH</h1>
 
     <div class="crt-wrapper">
         <canvas id="game"></canvas>
