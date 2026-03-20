@@ -1,5 +1,5 @@
 /* =========================================
-   LABYRINTH – PRODUCTION CSS
+   LABYRINTH – PRODUCTION CSS (GAME.JS ALIGNED)
 ========================================= */
 
 * {
@@ -24,27 +24,23 @@ body {
 }
 
 /* =========================================
-   TITLE / TEXT
+   TITLE
 ========================================= */
 
 .title {
-    font-size: 36px;
-    letter-spacing: 4px;
-    margin-top: 15px;
+    font-size: 42px;
+    letter-spacing: 6px;
+    margin-top: 20px;
+    margin-bottom: 10px;
+    text-align: center;
 }
 
 .glow {
     text-shadow:
         0 0 5px #00ff99,
-        0 0 10px #00ff99,
-        0 0 20px #00ffaa;
-}
-
-.insert {
-    color: #ff00cc;
-    text-shadow:
-        0 0 5px #ff00cc,
-        0 0 15px #ff00cc;
+        0 0 15px #00ff99,
+        0 0 30px #00ffaa,
+        0 0 60px rgba(0,255,150,0.4);
 }
 
 /* =========================================
@@ -58,17 +54,17 @@ body {
 }
 
 /* =========================================
-   CRT MONITOR FRAME
+   CRT WRAPPER
 ========================================= */
 
 .crt-wrapper {
     position: relative;
-    width: min(92vw, 900px);
+    width: min(92vw, 1000px);
     margin: 30px auto;
 }
 
 /* =========================================
-   CANVAS (True 4:3 – NO DISTORTION)
+   CANVAS (4:3 RENDER TARGET)
 ========================================= */
 
 canvas {
@@ -77,17 +73,19 @@ canvas {
     aspect-ratio: 4 / 3;
 
     background: black;
+
     border: 4px solid #00ff99;
 
     box-shadow:
         0 0 20px #00ff99,
-        0 0 40px rgba(0, 255, 150, 0.4);
+        0 0 60px rgba(0,255,150,0.5),
+        0 0 120px rgba(0,255,150,0.2);
 
-    image-rendering: pixelated; /* optional retro sharpness */
+    image-rendering: pixelated;
 }
 
 /* =========================================
-   CRT EFFECTS
+   CRT SCANLINES
 ========================================= */
 
 .scanlines {
@@ -97,8 +95,8 @@ canvas {
 
     background: repeating-linear-gradient(
         to bottom,
-        rgba(0,255,150,0.05) 0px,
-        rgba(0,255,150,0.05) 2px,
+        rgba(0,255,150,0.06) 0px,
+        rgba(0,255,150,0.06) 2px,
         transparent 2px,
         transparent 4px
     );
@@ -106,7 +104,7 @@ canvas {
     mix-blend-mode: overlay;
 }
 
-/* Subtle screen glow */
+/* Screen glow vignette */
 .crt-wrapper::after {
     content: "";
     position: absolute;
@@ -114,20 +112,11 @@ canvas {
     pointer-events: none;
 
     box-shadow:
-        inset 0 0 80px rgba(0, 255, 150, 0.15);
+        inset 0 0 120px rgba(0, 255, 150, 0.18);
 }
 
 /* =========================================
-   HUD
-========================================= */
-
-.hud {
-    margin-bottom: 10px;
-    font-size: 14px;
-}
-
-/* =========================================
-   BOOT / OVERLAY SCREENS
+   BOOT SCREEN
 ========================================= */
 
 .screen {
@@ -144,6 +133,11 @@ canvas {
     text-align: center;
 }
 
+.screen h2 {
+    margin-bottom: 20px;
+    letter-spacing: 3px;
+}
+
 .hidden {
     display: none;
 }
@@ -157,13 +151,26 @@ canvas {
 }
 
 /* =========================================
-   LEADERBOARD (Optional)
+   REMOVE OLD HUD / LEADERBOARD STYLES
+   (Now handled inside canvas)
 ========================================= */
 
-.leaderboard {
-    position: absolute;
-    right: 20px;
-    top: 100px;
-    text-align: left;
-    font-size: 14px;
+/* These are intentionally removed:
+   .hud
+   .leaderboard
+*/
+
+/* =========================================
+   RESPONSIVE TWEAKS
+========================================= */
+
+@media (max-width: 768px) {
+    .title {
+        font-size: 28px;
+        letter-spacing: 4px;
+    }
+
+    .crt-wrapper {
+        width: 95vw;
+    }
 }
