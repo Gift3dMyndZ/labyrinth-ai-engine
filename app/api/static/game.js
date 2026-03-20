@@ -112,16 +112,14 @@ const MAX_DEPTH = 25;
 
 let keys = {};
 
-document.addEventListener("keydown", (e) => {
-    keys[e.key.toLowerCase()] = true;
+window.addEventListener("load", () => {
+    const boot = document.getElementById("bootScreen");
+    const gameUI = document.getElementById("gameContainer");
 
-    if (e.key === "Enter" && !gameRunning) {
-        const boot = document.getElementById("bootScreen");
-        const gameUI = document.getElementById("gameContainer");
-        if (boot) boot.remove();
-        if (gameUI) gameUI.style.display = "block";
-        startGame();
-    }
+    if (boot) boot.remove();
+    if (gameUI) gameUI.style.display = "block";
+
+    startGame();
 });
 
 document.addEventListener("keyup", (e) => {
@@ -236,6 +234,9 @@ function startGame() {
         survivalTime++;
         score += 1;
     }, 1000);
+
+    // ✅ START THE RENDER LOOP
+    requestAnimationFrame(gameLoop);
 }
 
 /* =========================================
