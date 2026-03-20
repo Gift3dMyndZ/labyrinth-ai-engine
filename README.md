@@ -262,6 +262,20 @@ docker run -p 8000:8000 labyrinth-ai-engine
 - Model versioning and artifact tracking
 - Cloud scaling configuration
 ```
+### 🔬 ML Model
+
+- Model: RandomForestClassifier
+- Features: Survival time, movement speed, proximity patterns
+- Target: Predicted survival likelihood
+- Output: Difficulty scaling factor (0.0 – 1.0)
+
+### 💡 Why This Project Matters
+
+This project demonstrates:
+- Real-time system design
+- ML integration in interactive environments
+- Telemetry-based adaptive systems
+- Production-oriented backend architecture
 ---
 
 # 👤 Author
