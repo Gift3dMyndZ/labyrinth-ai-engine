@@ -122,8 +122,8 @@ window.addEventListener("load", () => {
     startGame();
 });
 
-document.addEventListener("keyup", (e) => {
-    keys[e.key.toLowerCase()] = false;
+document.addEventListener("keydown", (e) => {
+    keys[e.key.toLowerCase()] = true;
 });
 
 /* =========================================
@@ -404,6 +404,47 @@ function drawMinimap() {
 /* =========================================
    3D RENDER
 ========================================= */
+function drawBrickFloorFromTexture() {
+    const horizon = canvas.height / 2;
+
+    for (let y = horizon; y < canvas.height; y++) {
+
+        const perspective = (y - horizon) / horizon;
+        const rowDistance = 1 / (perspective + 0.0001);
+
+        const floorStepX =
+            rowDistance * Math.cos(player.angle - FOV / 2) / canvas.width;
+
+        const floorStepY =
+            rowDistance * Math.sin(player.angle - FOV / 2) / canvas.width;
+
+        let floorX =
+            player.x + rowDistance *
+            Math.cos(player.angle - FOV / 2);
+
+        let floorY =
+            player.y + rowDistance *
+            Math.sin(player.angle - FOV / 2);
+
+        for (let x = 0; x < canvas.width; x++) {
+
+            const tx =
+                Math.floor(fract(floorX) * brickTexture.width);
+
+            const ty =
+                Math.floor(fract(floorY) * brickTexture.height);
+
+            ctx.drawImage(
+                brickTexture,
+                tx, ty, 1, 1,
+                x, y, 1, 1
+            );
+
+            floorX += floorStepX;
+            floorY += floorStepY;
+        }
+    }
+}
 
 function draw3D() {
 
@@ -494,7 +535,8 @@ let lastTime = 0;
 
 function gameLoop(timestamp = 0) {
 
-    const dt = (timestamp - lastTime) / 1000;
+    let dt = (timestamp - lastTime) / 1000;
+    dt = Math.min(dt, 0.1); // clamp spikes
     lastTime = timestamp;
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -510,5 +552,3 @@ function gameLoop(timestamp = 0) {
 
     requestAnimationFrame(gameLoop);
 }
-
-gameLoop();
