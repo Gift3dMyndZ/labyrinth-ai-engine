@@ -1,4 +1,7 @@
 from fastapi import APIRouter, Request
+from pydantic import BaseModel
+from typing import Optional
+
 from app.db.database import (
     insert_telemetry,
     insert_leaderboard_entry,
@@ -9,42 +12,47 @@ router = APIRouter()
 
 
 # ==================================================
-# TELEMETRY LOGGING (PRIMARY ENDPOINT)
+# SCHEMA
+# ==================================================
+
+class TelemetryRequest(BaseModel):
+    fear_level: float
+    aggression: float
+    curiosity: float
+    survival_time: Optional[float] = None
+    difficulty_modifier: Optional[float] = 1.0
+    outcome: str
+    session_id: Optional[str] = None
+    floor_reached: Optional[int] = None
+    maze_size: Optional[int] = None
+
+
+# ==================================================
+# TELEMETRY LOGGING
 # ==================================================
 
 @router.post("/")
-def log_telemetry(data: dict, request: Request):
-    """
-    Logs player telemetry data.
-    Updates leaderboard.
-    Adds experience to ML replay buffer.
-    """
+def log_telemetry(data: TelemetryRequest, request: Request):
 
-    # ------------------------------------------------
-    # 1️⃣ Save telemetry to database
-    # ------------------------------------------------
-    insert_telemetry(data)
+    # 1️⃣ Save telemetry
+    insert_telemetry(data.dict())
 
-    # ------------------------------------------------
-    # 2️⃣ Update leaderboard if survival time exists
-    # ------------------------------------------------
+    # 2️⃣ Leaderboard update
     leaderboard_updated = False
 
-    if data.get("survival_time") is not None:
+    if data.survival_time is not None:
         insert_leaderboard_entry(
-            survival_time=data.get("survival_time"),
-            difficulty_modifier=data.get("difficulty_modifier", 1.0)
+            survival_time=data.survival_time,
+            difficulty_modifier=data.difficulty_modifier or 1.0
         )
         leaderboard_updated = True
 
-    # ------------------------------------------------
-    # 3️⃣ ✅ Add to ML replay buffer (NO direct training)
-    # ------------------------------------------------
-    cluster_service = request.app.state.cluster_service
+    # 3️⃣ Replay buffer
+    cluster_service = getattr(request.app.state, "cluster_service", None)
 
     if cluster_service:
         try:
-            cluster_service.add_experience(data)
+            cluster_service.add_experience(data.dict())
         except Exception as e:
             print(f"Replay buffer add failed: {e}")
 
@@ -55,26 +63,20 @@ def log_telemetry(data: dict, request: Request):
 
 
 # ==================================================
-# LEADERBOARD ENDPOINT
+# LEADERBOARD
 # ==================================================
 
 @router.get("/leaderboard")
 def leaderboard(limit: int = 10):
-    """
-    Returns top survival records.
-    """
     return get_top_survivals(limit)
 
 
 # ==================================================
-# TELEMETRY STATUS
+# STATUS
 # ==================================================
 
 @router.get("/status")
 def telemetry_status():
-    """
-    Basic telemetry health check.
-    """
     return {
         "status": "Telemetry system operational"
     }
