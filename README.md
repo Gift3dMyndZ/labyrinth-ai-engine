@@ -1,5 +1,11 @@
 # 🧩 LABYRINTH 🧩
+## 🎮 Live Simulation Preview
 
+<p align="center">
+  <img src="assets/labyrinth-demo.png" alt="Labyrinth Gameplay" width="100%"/>
+</p>
+
+*Real-time raycasting engine with adaptive AI difficulty and ML-driven telemetry modeling.*
 ## Adaptive Raycasting AI Simulation Engine
 
 LABYRINTH is a browser-based 3D raycasting engine integrated with a full-stack machine learning backend that dynamically adapts survival difficulty based on real-time behavioral telemetry.
