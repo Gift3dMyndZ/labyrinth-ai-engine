@@ -1,9 +1,74 @@
-# LABYRINTH – Raycasting AI Maze Engine
+# 🧩 LABYRINTH 🧩
 
-LABYRINTH is a browser-based 3D raycasting engine built from scratch using vanilla JavaScript and HTML5 Canvas. The project demonstrates real-time rendering, procedural maze generation, AI steering behavior, and optimized floor texturing techniques.
+## Adaptive Raycasting AI Simulation Engine
 
-## 🚀 Live Demo
-(https://labyrinth-ai-engine.onrender.com)
+LABYRINTH is a browser-based 3D raycasting engine integrated with a full-stack machine learning backend that dynamically adapts survival difficulty based on real-time behavioral telemetry.
+
+It combines low-level graphics programming with production-style ML architecture inside a modular simulation platform.
+
+![Python](https://pfst.cf2.poecdn.net/base/image/eb0a896e8374c4fd9444d205422f34ab733dea13b665cfdbfcd909ebb940b5bd?pmaid=587912115)
+![FastAPI](https://pfst.cf2.poecdn.net/base/image/3e6659a8a421f5cb805567db450f3617c21b02fc62e3c268e7a86d6e8e33a4cc?pmaid=587912116)
+![SQLite](https://pfst.cf2.poecdn.net/base/image/c31e1e16b33ad45d4492179818eb80d827556269628f8a0fbb82922af611cee0?pmaid=587912117)
+![Docker](https://pfst.cf2.poecdn.net/base/image/3111f6a8fee083ed1ec8b43f904cc99eb163e57f72afe6a054602142dcc51642?pmaid=587912114)
+![License](https://pfst.cf2.poecdn.net/base/image/2c89badab92b5ee0afea1a6328677fab597eaa5d90b21f6a29384f9eaac3cbc0?pmaid=587912113)
+
+![LLM](https://img.shields.io/badge/LLM-Integrated-purple)
+![ML](https://img.shields.io/badge/Machine%20Learning-Enabled-orange)
+![ML Pipeline](https://img.shields.io/badge/ML-Pipeline%20Separated-orange)
+![AI Story Engine](https://img.shields.io/badge/AI-Story%20Engine-ff00ff)
+![CI](https://img.shields.io/github/actions/workflow/status/Gift3dMyndZ/labyrinth-ai-engine/main.yml?branch=main)
+
+![Deployment](https://img.shields.io/badge/Deployment-Render-46E3B7)
+![Tests](https://img.shields.io/badge/Tests-Pytest-blue)
+![Coverage](https://img.shields.io/badge/Coverage-85%25-brightgreen)
+![Model](https://img.shields.io/badge/Model-Scikit--Learn-orange)
+![Docs](https://img.shields.io/badge/API-OpenAPI-success)
+![Version](https://img.shields.io/github/v/tag/Gift3dMyndZ/labyrinth-ai-engine)
+
+![Python](https://img.shields.io/badge/Python-3.9%2B-blue)
+![Code Style](https://img.shields.io/badge/code%20style-black-000000.svg)
+![Architecture](https://img.shields.io/badge/Architecture-Service--Oriented-blueviolet)
+![Telemetry](https://img.shields.io/badge/Telemetry-Real--Time-red)
+![Inference](https://img.shields.io/badge/Inference-Online-success)
+
+---
+
+### Core Capabilities
+- Custom 3D raycasting renderer (no external libraries)
+
+- Procedural maze generation (iterative DFS / recursive backtracking)
+
+- Axis-separated collision detection with radius prevention
+
+- Real-time distance shading
+
+- Device-pixel optimized floor rendering via ImageData
+
+- Steering-based AI pursuit behavior
+
+- Minimap overlay (player, monster, goal tracking)
+
+- DPR-aware canvas scaling
+
+- CRT-inspired retro rendering aesthetic
+
+- Game state boot + restart system
+
+- The engine is designed to demonstrate real-time rendering fundamentals, procedural systems, and deterministic game loop architecture.
+
+
+##  🎮 Controls
+
+### 🕹️ W / S – Move forward / backward
+
+### 🕹️ A / D – Turn left / right
+
+### 👾 ENTER – Start game
+
+##  🖱️ Click – Restart after defeat
+
+# 🚀 Live Demo
+### 🧩 (https://labyrinth-ai-engine.onrender.com) 🧩
 
 ## 🎮 Features
 
@@ -33,52 +98,6 @@ LABYRINTH is a browser-based 3D raycasting engine built from scratch using vanil
 - CSS3 (CRT visual effects)
 - Procedural texture generation
 - Git version control
-
-## 📦 Installation
-
-```bash
-git clone https://github.com/Gift3dMyndZ/labyrinth-ai-engine.git
-cd labyrinth-ai-engine
-```
-
-Then open index.html in your browser.
-
-📌 Controls
-W / S – Move forward / backward
-A / D – Turn left / right
-ENTER – Start game
-Click – Restart after defeat
-
-🎯 Purpose
-
-This project demonstrates real-time graphics programming, procedural systems, and game loop architecture in a lightweight browser environment.
-
-
-
-![Python](https://pfst.cf2.poecdn.net/base/image/eb0a896e8374c4fd9444d205422f34ab733dea13b665cfdbfcd909ebb940b5bd?pmaid=587912115)
-![FastAPI](https://pfst.cf2.poecdn.net/base/image/3e6659a8a421f5cb805567db450f3617c21b02fc62e3c268e7a86d6e8e33a4cc?pmaid=587912116)
-![SQLite](https://pfst.cf2.poecdn.net/base/image/c31e1e16b33ad45d4492179818eb80d827556269628f8a0fbb82922af611cee0?pmaid=587912117)
-![Docker](https://pfst.cf2.poecdn.net/base/image/3111f6a8fee083ed1ec8b43f904cc99eb163e57f72afe6a054602142dcc51642?pmaid=587912114)
-![License](https://pfst.cf2.poecdn.net/base/image/2c89badab92b5ee0afea1a6328677fab597eaa5d90b21f6a29384f9eaac3cbc0?pmaid=587912113)
-![LLM](https://img.shields.io/badge/LLM-Integrated-purple)
-![ML](https://img.shields.io/badge/Machine%20Learning-Enabled-orange)
-![AI Story Engine](https://img.shields.io/badge/AI-Story%20Engine-ff00ff)
-![CI](https://img.shields.io/github/actions/workflow/status/Gift3dMyndZ/labyrinth-ai-engine/main.yml?branch=main)
-![Deployment](https://img.shields.io/badge/Deployment-Render-46E3B7)
-![Tests](https://img.shields.io/badge/Tests-Pytest-blue)
-![Coverage](https://img.shields.io/badge/Coverage-85%25-brightgreen)
-![Model](https://img.shields.io/badge/Model-Scikit--Learn-orange)
-![Docs](https://img.shields.io/badge/API-OpenAPI-success)
-![Version](https://img.shields.io/github/v/tag/Gift3dMyndZ/labyrinth-ai-engine)
-![Python](https://img.shields.io/badge/Python-3.9%2B-blue)
-![Code Style](https://img.shields.io/badge/code%20style-black-000000.svg)
-![Architecture](https://img.shields.io/badge/Architecture-Service--Oriented-blueviolet)
-![ML Pipeline](https://img.shields.io/badge/ML-Pipeline%20Separated-orange)
-![Telemetry](https://img.shields.io/badge/Telemetry-Real--Time-red)
-![Inference](https://img.shields.io/badge/Inference-Online-success)
-
----
-
 This project demonstrates production-style ML architecture inside an interactive simulation system.
 
 ---
@@ -110,25 +129,17 @@ This project demonstrates production-style ML architecture inside an interactive
 └────────────────────────┘
 ```
 
-🧠 System Overview
+### 🧠 System Overview
 LABYRINTH is structured as a full-stack ML simulation platform.
 
-```
 Browser → Telemetry → FastAPI → ML Engine → Adaptive Output → Story Engine
-```
-
 
 ### 🖥 Frontend
 - Vanilla JavaScript raycasting renderer
 - Player movement + collision system
 - Monster AI pursuit logic
-- Behavioral telemetry tracking:
-- Fear level
-- Aggression
-- Curiosity
 - Survival time
 - Dynamic difficulty adjustments
-
 
 ### ⚙ Backend (FastAPI)
 - REST API architecture
@@ -138,15 +149,6 @@ Browser → Telemetry → FastAPI → ML Engine → Adaptive Output → Story En
 - Analytics hooks
 - Service-layer abstraction
 
-### ☁ Infrastructure
-
-- Dockerized FastAPI application
-- Cloud deployment via Render
-- GitHub-managed version control
-- Modular production-style project structure
-- Serialized ML model artifact management
-
----
 
 ### POST /train
 
@@ -158,136 +160,66 @@ Example Response:
   "status": "training_started"
 }
 ```
----
 
-## 📂 Project Structure
-```
-labyrinth-ai-engine/
-│
-├── app/
-│   ├── __init__.py
-│   │
-│   ├── api/
-│   │   ├── __init__.py
-│   │   └── main.py
-│   │
-│   ├── services/
-│   │   ├── __init__.py
-│   │   ├── story_engine.py
-│   │   ├── ml_engine.py
-│   │   └── features.py
-│   │
-│   ├── templates/
-│   │   └── dashboard.html
-│   │
-│   └── static/
-│
-├── data/
-│   └── library.json
-│
-├── models/
-│   └── model.pkl
-│
-├── training/
-│   ├── __init__.py
-│   ├── preprocessing.py
-│   └── train.py
-│
-├── tests/
-├── Dockerfile
-├── requirements.txt
-└── README.md
-```
-
----
-
-## 🧠 Machine Learning Architecture
-located in: 
-```
-traning/
-```
-
-Pipeline:
-```
-- Feature engineering
-- Data preprocessing
-- Model serialization
-- Artifact saved to /models/model.pkl
-- Model training (Scikit-learn)
-```
-Retrain locally:
-
-```
-python training/train.py
-```
-
-### Offline Training
-
-Located in:
-```
-training/
-```
-Responsibilities:
-```
-- Feature engineering  
-- Data preprocessing  
-- Model training  
-- Model serialization  
-- Artifact saving to /models/model.pkl  
-```
-
-Retrain model:
-```
-python training/train.py
-```
----
-
-### Online Inference
+### 🔹 Online Inference
 
 Located in:
 ```
 app/services/ml_engine.py
 ```
-Responsibilities:
-```
-- Load trained model  
-- Transform input features  
-- Perform inference  
-- Return adaptive recommendations  
-```
-This separation ensures:
-```
-- Clean production boundaries  
-- Reproducible training  
-- Scalable deployment  
-- Docker safety  
-```
 ---
 
-## ⚙️ Local Installation
+## ⚙️ Local Development (macOS)
 
-Clone repository:
+### ✅ Requirements
+- macOS
+- Python 3.9+
+- Git
+### Verify Python installation:
 ```
-git clone https://github.com/Gift3dMyndZ/labyrinth-ai-engine.git  
-cd labyrinth-ai-engine  
+bash
+python3 --version
 ```
-Create virtual environment:
+### 1️⃣ Clone the Repository
 ```
-python3 -m venv venv  
-source venv/bin/activate  
+bash
+git clone https://github.com/Gift3dMyndZ/labyrinth-ai-engine.git
+cd labyrinth-ai-engine
 ```
-Install dependencies:
+### 2️⃣ Create & Activate Virtual Environment
 ```
-pip install -r requirements.txt  
+bash
+python3 -m venv venv
+source venv/bin/activate
 ```
-Run application:
+
+### 3️⃣ Install Dependencies
 ```
-uvicorn app.api.main:app --reload  
+bash
+pip install --upgrade pip
+pip install -r requirements.txt
 ```
-Visit:
+### 4️⃣ Run the Application
 ```
+bash
+uvicorn app.api.main:app --reload
+```
+
+#### If uvicorn is not recognized:
+```
+bash
+python3 -m uvicorn app.api.main:app --reload
+```
+
+### 5️⃣ Open in Browser
+
 http://127.0.0.1:8000
-```
+
+### ✅ Notes
+- macOS uses python3 by default.
+- The --reload flag enables auto-restart during development.
+- Ensure models/model.pkl exists before running inference.
+
 ---
 
 ## 🐳 Docker Deployment
@@ -301,18 +233,14 @@ Run container:
 docker run -p 8000:8000 labyrinth-ai-engine
 ```
 ---
-
-
-
 ## 🔬 Design Principles
 ```
 - Separation of concerns  
 - Modular architecture  
 - Reproducible ML workflows  
-- Service-layer abstraction  
-- Production-ready folder structure  
-- Clean import safety via __init__.py  
-- Clear ML training vs inference boundary  
+- Clear training vs inference boundary  
+- Production-oriented folder structure 
+- Clean import safety via __init__.py   
 ```
 ---
 
@@ -328,10 +256,8 @@ docker run -p 8000:8000 labyrinth-ai-engine
 ```
 ---
 
----
+# 👤 Author
 
-## 👤 Author
-
-Developed by - Joshua Wolfe
+## Developed by - Joshua Wolfe
 
 If you found this interesting, consider starring the repository ⭐

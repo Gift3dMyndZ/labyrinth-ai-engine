@@ -1,5 +1,20 @@
 /* =========================================
-   LABYRINTH – PRODUCTION CSS (GAME.JS ALIGNED)
+   LABYRINTH – PRODUCTION CSS (UPDATED)
+========================================= */
+
+/* =========================================
+   ROOT VARIABLES (VISUAL CALIBRATION)
+========================================= */
+
+:root {
+    --brightness: 1;
+    --gamma: 1;
+    --contrast: 1.05;
+    --saturation: 1.1;
+}
+
+/* =========================================
+   RESET
 ========================================= */
 
 * {
@@ -11,6 +26,10 @@
 html, body {
     height: 100%;
 }
+
+/* =========================================
+   BODY
+========================================= */
 
 body {
     background: radial-gradient(circle at center, #000 40%, #050505 100%);
@@ -71,7 +90,6 @@ canvas {
     display: block;
     width: 100%;
     aspect-ratio: 4 / 3;
-
     background: black;
 
     border: 4px solid #00ff99;
@@ -82,6 +100,14 @@ canvas {
         0 0 120px rgba(0,255,150,0.2);
 
     image-rendering: pixelated;
+
+    /* 🎛️ Brightness + Gamma pipeline */
+    filter:
+        brightness(calc(var(--brightness) * var(--gamma)))
+        contrast(calc(var(--contrast) / var(--gamma)))
+        saturate(var(--saturation))
+        drop-shadow(-1px 0 rgba(255,0,0,0.15))
+        drop-shadow(1px 0 rgba(0,255,255,0.15));
 }
 
 /* =========================================
@@ -93,18 +119,19 @@ canvas {
     position: absolute;
     inset: 0;
 
-    background: repeating-linear-gradient(
-        to bottom,
-        rgba(0,255,150,0.06) 0px,
-        rgba(0,255,150,0.06) 2px,
-        transparent 2px,
-        transparent 4px
-    );
+    background:
+        repeating-linear-gradient(
+            to bottom,
+            rgba(0,255,150,0.05) 0px,
+            rgba(0,255,150,0.05) 1px,
+            transparent 1px,
+            transparent 3px
+        );
 
     mix-blend-mode: overlay;
 }
 
-/* Screen glow vignette */
+/* CRT Vignette */
 .crt-wrapper::after {
     content: "";
     position: absolute;
@@ -112,7 +139,55 @@ canvas {
     pointer-events: none;
 
     box-shadow:
-        inset 0 0 120px rgba(0, 255, 150, 0.18);
+        inset 0 0 140px rgba(0, 255, 150, 0.25);
+}
+
+/* =========================================
+   VISUAL CONTROLS (BRIGHTNESS / GAMMA)
+========================================= */
+
+.controls {
+    margin-top: 14px;
+    display: flex;
+    justify-content: center;
+    gap: 28px;
+
+    color: #00ff99;
+    font-size: 13px;
+    letter-spacing: 2px;
+}
+
+.controls label {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.controls input[type="range"] {
+    -webkit-appearance: none;
+    width: 140px;
+    height: 4px;
+    background: #003322;
+    border-radius: 2px;
+    outline: none;
+}
+
+.controls input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px;
+    height: 14px;
+    background: #00ff99;
+    border-radius: 50%;
+    box-shadow: 0 0 10px #00ff99;
+    cursor: pointer;
+}
+
+.controls input[type="range"]::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    background: #00ff99;
+    border-radius: 50%;
+    cursor: pointer;
 }
 
 /* =========================================
@@ -151,16 +226,6 @@ canvas {
 }
 
 /* =========================================
-   REMOVE OLD HUD / LEADERBOARD STYLES
-   (Now handled inside canvas)
-========================================= */
-
-/* These are intentionally removed:
-   .hud
-   .leaderboard
-*/
-
-/* =========================================
    RESPONSIVE TWEAKS
 ========================================= */
 
@@ -172,5 +237,11 @@ canvas {
 
     .crt-wrapper {
         width: 95vw;
+    }
+
+    canvas {
+        box-shadow:
+            0 0 10px #00ff99,
+            0 0 30px rgba(0,255,150,0.4);
     }
 }

@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>LABYRINTH</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
     <!-- ✅ External Production Stylesheet -->
     <link rel="stylesheet" href="/static/style.css">
 </head>
@@ -30,6 +31,33 @@
     <div class="crt-wrapper">
         <canvas id="game"></canvas>
         <div class="scanlines"></div>
+    </div>
+
+    <!-- 🎛️ VISUAL CONTROLS -->
+    <div class="controls">
+        <label>
+            BRIGHTNESS
+            <input
+                type="range"
+                min="0.6"
+                max="1.6"
+                step="0.01"
+                value="1"
+                id="brightnessSlider"
+            >
+        </label>
+
+        <label>
+            GAMMA
+            <input
+                type="range"
+                min="0.6"
+                max="1.6"
+                step="0.01"
+                value="1"
+                id="gammaSlider"
+            >
+        </label>
     </div>
 
 </div>
