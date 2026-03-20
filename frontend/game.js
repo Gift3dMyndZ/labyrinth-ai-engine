@@ -2,12 +2,12 @@
    LABYRINTH – COMPLETE PRODUCTION BUILD
 ========================================= */
 
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d", { alpha: false });
+
 /* =========================================
    CANVAS SETUP (DPR AWARE)
 ========================================= */
-
-const canvas = document.getElementById("game");
-const ctx = canvas.getContext("2d", { alpha: false });
 
 function resizeCanvas() {
   const dpr = window.devicePixelRatio || 1;
@@ -15,7 +15,6 @@ function resizeCanvas() {
   canvas.height = canvas.clientHeight * dpr;
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 }
-
 window.addEventListener("resize", resizeCanvas);
 resizeCanvas();
 
@@ -42,8 +41,10 @@ const MAX_DEPTH = 25;
 const keys = {};
 
 document.addEventListener("keydown", (e) => {
+  const k = e.key.toLowerCase();
+  if (k === "enter") return;
   if (!gameRunning) return;
-  keys[e.key.toLowerCase()] = true;
+  keys[k] = true;
 });
 
 document.addEventListener("keyup", (e) => {
@@ -99,15 +100,14 @@ function generateMaze(w, h) {
   map[1][1] = "0";
 
   while (stack.length) {
-    const [x, y] = stack[stack.length - 1];
+    const [x, y] = stack.at(-1);
     const dirs = [[0,-2],[0,2],[-2,0],[2,0]].sort(() => Math.random() - 0.5);
     let moved = false;
 
-    for (const [dx,dy] of dirs) {
+    for (const [dx, dy] of dirs) {
       const nx = x + dx;
       const ny = y + dy;
-
-      if (nx > 0 && ny > 0 && nx < w-1 && ny < h-1 && map[ny][nx] === "1") {
+      if (nx > 0 && ny > 0 && nx < w - 1 && ny < h - 1 && map[ny][nx] === "1") {
         map[ny][nx] = "0";
         map[y + dy/2][x + dx/2] = "0";
         stack.push([nx, ny]);
@@ -115,12 +115,11 @@ function generateMaze(w, h) {
         break;
       }
     }
-
     if (!moved) stack.pop();
   }
 
   map[0][1] = "0";
-  map[h-1][w-2] = "0";
+  map[h - 1][w - 2] = "0";
 
   return {
     start: { x: 1.5, y: 1.5 },
@@ -136,11 +135,10 @@ function resetGame() {
   const m = generateMaze(31, 31);
 
   player = { x: m.start.x, y: m.start.y, angle: 0 };
-  goal = m.goal;
 
   monster = {
-    x: goal.x,
-    y: goal.y - 2,
+    x: m.goal.x,
+    y: m.goal.y - 2,
     vx: 0,
     vy: 0,
     speed: 2.4,
@@ -167,23 +165,65 @@ function movePlayer(dt) {
     player.x += ca * speed;
     player.y += sa * speed;
   }
-
   if (keys.s && cellOpen(player.x - ca * speed, player.y - sa * speed)) {
     player.x -= ca * speed;
     player.y -= sa * speed;
   }
-
   if (keys.a) player.angle -= 2 * dt;
   if (keys.d) player.angle += 2 * dt;
+
+  if (player.angle > Math.PI) player.angle -= Math.PI * 2;
+  if (player.angle < -Math.PI) player.angle += Math.PI * 2;
 }
 
+/* =========================================
+   MONSTER AI (REALISTIC CHASE)
+========================================= */
+
 function moveMonster(dt) {
+  monster.vx ??= 0;
+  monster.vy ??= 0;
+
   const dx = player.x - monster.x;
   const dy = player.y - monster.y;
-  const d = Math.hypot(dx, dy) || 1e-4;
+  const dist = Math.hypot(dx, dy) || 1e-4;
 
-  monster.vx = (dx / d) * monster.speed;
-  monster.vy = (dy / d) * monster.speed;
+  // Line of sight check
+  function hasLOS(ax, ay, bx, by) {
+    let x0 = Math.floor(ax), y0 = Math.floor(ay);
+    let x1 = Math.floor(bx), y1 = Math.floor(by);
+    const dx = Math.abs(x1 - x0), sx = x0 < x1 ? 1 : -1;
+    const dy = -Math.abs(y1 - y0), sy = y0 < y1 ? 1 : -1;
+    let err = dx + dy;
+
+    while (true) {
+      if (!map[y0] || map[y0][x0] !== "0") return false;
+      if (x0 === x1 && y0 === y1) return true;
+      const e2 = 2 * err;
+      if (e2 >= dy) { err += dy; x0 += sx; }
+      if (e2 <= dx) { err += dx; y0 += sy; }
+    }
+  }
+
+  if (hasLOS(monster.x, monster.y, player.x, player.y)) {
+    const desiredSpeed =
+      dist < 2 ? monster.speed * (dist / 2) : monster.speed;
+
+    const desiredVX = (dx / dist) * desiredSpeed;
+    const desiredVY = (dy / dist) * desiredSpeed;
+
+    const steerX = desiredVX - monster.vx;
+    const steerY = desiredVY - monster.vy;
+
+    const steerMag = Math.hypot(steerX, steerY) || 1;
+    const maxAccel = 12;
+
+    monster.vx += (steerX / steerMag) * Math.min(steerMag, maxAccel) * dt;
+    monster.vy += (steerY / steerMag) * Math.min(steerMag, maxAccel) * dt;
+  }
+
+  monster.vx *= (1 - 4 * dt);
+  monster.vy *= (1 - 4 * dt);
 
   const nx = monster.x + monster.vx * dt;
   const ny = monster.y + monster.vy * dt;
@@ -191,15 +231,17 @@ function moveMonster(dt) {
   if (cellOpen(nx, monster.y)) monster.x = nx;
   if (cellOpen(monster.x, ny)) monster.y = ny;
 
-  const danger = Math.max(0, 1 - d / 10);
-  heartbeatTimer -= dt;
+  // Heartbeat
+  const danger = Math.max(0, 1 - dist / 10);
+  heartbeatTimer = Math.max(0, heartbeatTimer - dt);
 
   if (danger > 0.05 && heartbeatTimer <= 0) {
     playHeartbeat(danger);
     heartbeatTimer = 1.2 - danger;
   }
 
-  if (d < monster.attackRadius) {
+  // Death
+  if (dist < monster.attackRadius) {
     state = "dead";
     gameRunning = false;
 
@@ -209,6 +251,7 @@ function moveMonster(dt) {
       <p class="blink">Press ENTER to restart</p>
     `;
     boot.style.display = "flex";
+    boot.style.opacity = "1";
   }
 }
 
@@ -220,15 +263,14 @@ function draw3D() {
   const w = canvas.clientWidth;
   const h = canvas.clientHeight;
 
-  const sky = ctx.createLinearGradient(0, 0, 0, h/2);
+  const sky = ctx.createLinearGradient(0, 0, 0, h / 2);
   sky.addColorStop(0, "#0b1d3a");
   sky.addColorStop(1, "#5fa3ff");
-
   ctx.fillStyle = sky;
-  ctx.fillRect(0, 0, w, h/2);
+  ctx.fillRect(0, 0, w, h / 2);
 
   for (let x = 0; x < w; x++) {
-    const angle = player.angle - FOV/2 + (x/w) * FOV;
+    const angle = player.angle - FOV / 2 + (x / w) * FOV;
     let d = 0;
 
     while (d < MAX_DEPTH) {
@@ -241,10 +283,10 @@ function draw3D() {
     const corrected = d * Math.cos(angle - player.angle);
     const wallH = h / (corrected + 0.0001);
     const fog = Math.min(corrected / 18, 1);
-    const base = 200 * (1 - fog);
+    const shade = Math.max(0, 200 * (1 - fog));
 
-    ctx.fillStyle = `rgb(${base},${base},${base})`;
-    ctx.fillRect(x, (h - wallH)/2, 1, wallH);
+    ctx.fillStyle = `rgb(${shade},${shade},${shade})`;
+    ctx.fillRect(x, (h - wallH) / 2, 1, wallH);
   }
 }
 
@@ -276,7 +318,7 @@ window.addEventListener("load", () => {
   const container = document.getElementById("gameContainer");
 
   document.addEventListener("keydown", (e) => {
-    if (e.key !== "Enter" || state === "playing") return;
+    if (e.key !== "Enter") return;
 
     if (audioCtx.state === "suspended") audioCtx.resume();
 
@@ -297,19 +339,16 @@ window.addEventListener("load", () => {
       animationId = requestAnimationFrame(loop);
     }, 600);
   });
-});
 
-/* =========================================
-   BRIGHTNESS + GAMMA CONTROLS
-========================================= */
+  // Brightness / Gamma
+  const brightnessSlider = document.getElementById("brightnessSlider");
+  const gammaSlider = document.getElementById("gammaSlider");
 
-const brightnessSlider = document.getElementById("brightnessSlider");
-const gammaSlider = document.getElementById("gammaSlider");
+  brightnessSlider?.addEventListener("input", () => {
+    document.documentElement.style.setProperty("--brightness", brightnessSlider.value);
+  });
 
-brightnessSlider.addEventListener("input", () => {
-  document.documentElement.style.setProperty("--brightness", brightnessSlider.value);
-});
-
-gammaSlider.addEventListener("input", () => {
-  document.documentElement.style.setProperty("--gamma", gammaSlider.value);
+  gammaSlider?.addEventListener("input", () => {
+    document.documentElement.style.setProperty("--gamma", gammaSlider.value);
+  });
 });
