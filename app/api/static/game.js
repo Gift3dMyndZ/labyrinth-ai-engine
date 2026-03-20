@@ -1,9 +1,20 @@
 /* =========================================
-   LABYRINTH – 3D RAYCASTER + 👾 + AUDIO
+   LABYRINTH – CLEAN STATE ARCHITECTURE
 ========================================= */
 
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d", { alpha: false });
+
+/* =========================================
+   BOOT + STATE SYSTEM
+========================================= */
+
+const bootScreen = document.getElementById("bootScreen");
+const gameContainer = document.getElementById("gameContainer");
+
+let state = "boot"; // boot | playing | dead
+let gameRunning = false;
+let animationId = null;
 
 /* =========================================
    CANVAS
@@ -24,8 +35,6 @@ resizeCanvas();
 
 const FOV = Math.PI / 3;
 const MAX_DEPTH = 25;
-const MINIMAP_SIZE = 180;
-const MINIMAP_MARGIN = 20;
 
 /* =========================================
    INPUT
@@ -63,16 +72,16 @@ function playHeartbeat(strength) {
 }
 
 /* =========================================
-   GAME STATE
+   GAME STATE VARIABLES
 ========================================= */
 
 let map = [];
 let MAP_W, MAP_H;
 let player, monster, goal;
-let gameRunning = true;
+let heartbeatTimer = 0;
 
 /* =========================================
-   MAZE
+   MAZE GENERATION
 ========================================= */
 
 function generateMaze(w, h) {
@@ -111,13 +120,14 @@ function generateMaze(w, h) {
 }
 
 /* =========================================
-   RESET
+   RESET GAME
 ========================================= */
 
 function resetGame() {
   const m = generateMaze(31,31);
   player = { x:m.start.x, y:m.start.y, angle:0 };
   goal = m.goal;
+
   monster = {
     x: goal.x,
     y: goal.y - 2,
@@ -125,8 +135,9 @@ function resetGame() {
     speed:2.4,
     attackRadius:0.6
   };
+
+  heartbeatTimer = 0;
 }
-resetGame();
 
 /* =========================================
    MOVEMENT
@@ -150,8 +161,6 @@ function movePlayer(dt){
   if(keys.d) player.angle+=2*dt;
 }
 
-let heartbeatTimer = 0;
-
 function moveMonster(dt){
   const dx=player.x-monster.x;
   const dy=player.y-monster.y;
@@ -166,7 +175,6 @@ function moveMonster(dt){
   if(cellOpen(nx,monster.y)) monster.x=nx;
   if(cellOpen(monster.x,ny)) monster.y=ny;
 
-  // 🔊 Heartbeat logic
   const danger = Math.max(0, 1 - d / 10);
   heartbeatTimer -= dt;
   if (danger > 0.05 && heartbeatTimer <= 0) {
@@ -174,88 +182,15 @@ function moveMonster(dt){
     heartbeatTimer = 1.2 - danger;
   }
 
-  if(d<monster.attackRadius) gameRunning=false;
-}
+  if (d < monster.attackRadius) {
+    state = "dead";
+    gameRunning = false;
 
-/* =========================================
-   👾 MONSTER SPRITE
-========================================= */
-
-function makeAlien(pattern,scale=3){
-  const c=document.createElement("canvas");
-  c.width=pattern[0].length*scale;
-  c.height=pattern.length*scale;
-  const g=c.getContext("2d");
-  g.imageSmoothingEnabled=false;
-  pattern.forEach((row,y)=>{
-    [...row].forEach((v,x)=>{
-      if(v!=="0"){
-        g.fillStyle=v==="1"?"#7aff00":"#30c000";
-        g.fillRect(x*scale,y*scale,scale,scale);
-      }
-    });
-  });
-  c.__data=g.getImageData(0,0,c.width,c.height).data;
-  return c;
-}
-
-const alienFrames=[
-  makeAlien([
-    "00111100",
-    "01111110",
-    "11111111",
-    "11011011",
-    "11111111",
-    "01100110",
-    "00100100"
-  ]),
-  makeAlien([
-    "00111100",
-    "01111110",
-    "11111111",
-    "11011011",
-    "11111111",
-    "00100100",
-    "01000010"
-  ])
-];
-let alienFrame=0, alienTimer=0;
-
-/* =========================================
-   SPRITE RENDER
-========================================= */
-
-function drawSprite(x,y,tex,depth){
-  const w=canvas.clientWidth,h=canvas.clientHeight;
-  const dirX=Math.cos(player.angle),dirY=Math.sin(player.angle);
-  const planeX=-dirY*Math.tan(FOV/2);
-  const planeY= dirX*Math.tan(FOV/2);
-
-  const relX=x-player.x, relY=y-player.y;
-  const inv=1/(planeX*dirY-dirX*planeY);
-  const tx=inv*(dirY*relX-dirX*relY);
-  const tz=inv*(-planeY*relX+planeX*relY);
-  if(tz<=0) return;
-
-  const sx=(w/2)*(1+tx/tz);
-  const size=h/tz;
-  const data=tex.__data;
-
-  for(let x0=sx-size/2;x0<sx+size/2;x0++){
-    const xi=x0|0;
-    if(xi<0||xi>=w||tz>depth[xi]) continue;
-    const u=((x0-(sx-size/2))/size*tex.width)|0;
-
-    for(let y0=h/2-size/2;y0<h/2+size/2;y0++){
-      const yi=y0|0;
-      if(yi<0||yi>=h) continue;
-      const v=((y0-(h/2-size/2))/size*tex.height)|0;
-      const i=(v*tex.width+u)*4;
-      if(data[i+3]>0){
-        ctx.fillStyle=`rgb(${data[i]},${data[i+1]},${data[i+2]})`;
-        ctx.fillRect(xi,yi,1,1);
-      }
-    }
+    bootScreen.style.display = "flex";
+    bootScreen.innerHTML = `
+      <h2 class="glow">YOU DIED</h2>
+      <p class="blink">Press ENTER to restart</p>
+    `;
   }
 }
 
@@ -266,7 +201,6 @@ function drawSprite(x,y,tex,depth){
 function draw3D(){
   const w=canvas.clientWidth,h=canvas.clientHeight;
 
-  // 🌌 Better sky
   const sky=ctx.createLinearGradient(0,0,0,h/2);
   sky.addColorStop(0,"#0b1d3a");
   sky.addColorStop(1,"#5fa3ff");
@@ -275,7 +209,6 @@ function draw3D(){
 
   const depth=new Float32Array(w);
 
-  // 🧱 Walls with fog + edge shading
   for(let x=0;x<w;x++){
     const angle=player.angle-FOV/2+(x/w)*FOV;
     let d=0;
@@ -291,15 +224,9 @@ function draw3D(){
     const wallH=h/(cd+0.0001);
     const fog=Math.min(cd/18,1);
     const base=200*(1-fog);
-    const shade=(x%2?0.9:1); // subtle vertical variation
-
-    const g=(base*shade)|0;
-    ctx.fillStyle=`rgb(${g},${g},${g})`;
+    ctx.fillStyle=`rgb(${base},${base},${base})`;
     ctx.fillRect(x,(h-wallH)/2,1,wallH);
   }
-
-  // 👾 Monster
-  drawSprite(monster.x,monster.y,alienFrames[alienFrame],depth);
 }
 
 /* =========================================
@@ -316,14 +243,33 @@ function loop(t){
   if(gameRunning){
     movePlayer(dt);
     moveMonster(dt);
-    alienTimer+=dt;
-    if(alienTimer>0.3){
-      alienTimer=0;
-      alienFrame^=1;
-    }
     draw3D();
   }
 
-  requestAnimationFrame(loop);
+  animationId = requestAnimationFrame(loop);
 }
-requestAnimationFrame(loop);
+
+/* =========================================
+   ENTER HANDLER (START + RESTART)
+========================================= */
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && state !== "playing") {
+
+    if (audioCtx.state === "suspended") {
+      audioCtx.resume();
+    }
+
+    state = "playing";
+    gameRunning = true;
+
+    bootScreen.style.display = "none";
+    gameContainer.style.display = "block";
+
+    resetGame();
+
+    if (animationId) cancelAnimationFrame(animationId);
+    last = performance.now();
+    animationId = requestAnimationFrame(loop);
+  }
+});
