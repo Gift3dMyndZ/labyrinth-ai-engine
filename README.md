@@ -1,4 +1,6 @@
-# 🧩 LABYRINTH 🧩
+# 🧩 LABYRINTH
+### Adaptive Raycasting AI Simulation Engine
+
 ## 🎮 Live Simulation Preview
 
 <p align="center">
