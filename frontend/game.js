@@ -1,6 +1,6 @@
 /* =========================================
    LABYRINTH – COMPLETE PRODUCTION BUILD
-   (EARTH TONES + TORCHLIGHT FLICKER)
+   (EARTH TONES + TORCHLIGHT FLICKER + MINIMAP)
 ========================================= */
 
 const canvas = document.getElementById("game");
@@ -21,8 +21,12 @@ function resizeCanvas() {
 }
 
 window.addEventListener("resize", resizeCanvas);
-new ResizeObserver(() => resizeCanvas())
-  .observe(document.querySelector(".crt-wrapper"));
+
+// ✅ Safe ResizeObserver
+const wrapper = document.querySelector(".crt-wrapper");
+if (wrapper) {
+  new ResizeObserver(() => resizeCanvas()).observe(wrapper);
+}
 
 /* =========================================
    STATE SYSTEM
@@ -39,6 +43,10 @@ let last = 0;
 
 const FOV = Math.PI / 3;
 const MAX_DEPTH = 25;
+
+// ✅ MINIMAP CONSTANTS (MISSING BEFORE)
+const MINIMAP_SIZE = 140;
+const MINIMAP_PADDING = 16;
 
 /* =========================================
    INPUT
@@ -139,8 +147,6 @@ function resetGame() {
   monster = {
     x: m.goal.x,
     y: m.goal.y - 2,
-    vx: 0,
-    vy: 0,
     speed: 2.4,
     attackRadius: 0.6
   };
@@ -207,6 +213,56 @@ function moveMonster(dt) {
 }
 
 /* =========================================
+   🗺️ MINI MAP
+========================================= */
+
+function drawMiniMap() {
+  const size = MINIMAP_SIZE;
+  const pad = MINIMAP_PADDING;
+  const scale = size / MAP_W;
+
+  const x0 = pad;
+  const y0 = pad;
+
+  ctx.save();
+
+  ctx.globalAlpha = 0.85;
+  ctx.fillStyle = "rgba(40,32,22,0.85)";
+  ctx.fillRect(x0 - 4, y0 - 4, size + 8, size + 8);
+  ctx.globalAlpha = 1;
+
+  ctx.fillStyle = "rgb(90,72,48)";
+  for (let y = 0; y < MAP_H; y++) {
+    for (let x = 0; x < MAP_W; x++) {
+      if (map[y][x] === "1") {
+        ctx.fillRect(x0 + x * scale, y0 + y * scale, scale, scale);
+      }
+    }
+  }
+
+  ctx.fillStyle = "rgb(140,60,40)";
+  ctx.beginPath();
+  ctx.arc(x0 + monster.x * scale, y0 + monster.y * scale, 3, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = "rgb(220,200,150)";
+  ctx.beginPath();
+  ctx.arc(x0 + player.x * scale, y0 + player.y * scale, 3, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.strokeStyle = "rgb(220,200,150)";
+  ctx.beginPath();
+  ctx.moveTo(x0 + player.x * scale, y0 + player.y * scale);
+  ctx.lineTo(
+    x0 + (player.x + Math.cos(player.angle)) * scale,
+    y0 + (player.y + Math.sin(player.angle)) * scale
+  );
+  ctx.stroke();
+
+  ctx.restore();
+}
+
+/* =========================================
    🔥 TORCHLIGHT + EARTH‑TONE RENDER
 ========================================= */
 
@@ -217,7 +273,6 @@ function draw3D() {
   const h = canvas.clientHeight;
   flickerTime += 0.02;
 
-  /* Sky */
   const sky = ctx.createLinearGradient(0, 0, 0, h / 2);
   sky.addColorStop(0, "#6f7d6b");
   sky.addColorStop(1, "#cbbf9c");
@@ -240,21 +295,19 @@ function draw3D() {
     const corrected = d * Math.cos(rayAngle - player.angle);
     const wallH = h / (corrected + 0.0001);
 
-    /* Torch falloff */
-    const distFade = Math.max(0, 1 - corrected / 8);
+    const distFade   = Math.max(0, 1 - corrected / 8);
     const centerFade = 1 - Math.abs(x / w - 0.5) * 1.4;
     const light = Math.max(0, distFade * centerFade * flicker);
 
-    /* Earth tones */
-    const base = {
-      r: 130 + light * 70,
-      g: 110 + light * 55,
-      b: 80  + light * 40
-    };
+    const r = 130 + light * 70;
+    const g = 110 + light * 55;
+    const b =  80 + light * 40;
 
-    ctx.fillStyle = `rgb(${base.r|0},${base.g|0},${base.b|0})`;
+    ctx.fillStyle = `rgb(${r|0}, ${g|0}, ${b|0})`;
     ctx.fillRect(x, (h - wallH) / 2, 1, wallH);
   }
+
+  drawMiniMap();
 }
 
 /* =========================================
