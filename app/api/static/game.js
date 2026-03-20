@@ -2,8 +2,6 @@
    LABYRINTH – TEXTURED FLOOR + MINIMAP
 ========================================= */
 
-console.log("GAME JS LOADED");
-
 /* =========================================
    CANVAS SETUP
 ========================================= */
@@ -24,7 +22,6 @@ resizeCanvas();
 
 const MINIMAP_SIZE = 180;
 const MINIMAP_MARGIN = 20;
-const SHOW_ROTATING_MAP = false;
 
 /* =========================================
    FLOOR – PROCEDURAL BRICK TEXTURE
@@ -89,11 +86,7 @@ const brickTexture = createBrickTexture();
    GAME STATE
 ========================================= */
 
-let level = 1;
-let score = 0;
-let survivalTime = 0;
 let gameRunning = false;
-let survivalInterval = null;
 
 let map = [];
 let MAP_W;
@@ -112,18 +105,14 @@ const MAX_DEPTH = 25;
 
 let keys = {};
 
-window.addEventListener("load", () => {
-    const boot = document.getElementById("bootScreen");
-    const gameUI = document.getElementById("gameContainer");
-
-    if (boot) boot.remove();
-    if (gameUI) gameUI.style.display = "block";
-
-    startGame();
-});
+window.addEventListener("load", startGame);
 
 document.addEventListener("keydown", (e) => {
     keys[e.key.toLowerCase()] = true;
+});
+
+document.addEventListener("keyup", (e) => {
+    keys[e.key.toLowerCase()] = false;
 });
 
 /* =========================================
@@ -192,8 +181,7 @@ function generateMaze(width, height) {
 
 function resetGame() {
 
-    const size = 25 + Math.min(level * 2, 20);
-    const mazeData = generateMaze(size, size);
+    const mazeData = generateMaze(35, 35);
 
     player = {
         x: mazeData.start.x,
@@ -208,14 +196,12 @@ function resetGame() {
         y: goal.y - 2,
         vx: 0,
         vy: 0,
-        maxSpeed: 3 + level * 0.5,
+        maxSpeed: 4,
         maxAccel: 20,
         drag: 4,
         arrivalRadius: 4,
         attackRadius: 0.6
     };
-
-    survivalTime = 0;
 }
 
 function startGame() {
@@ -223,19 +209,7 @@ function startGame() {
     if (gameRunning) return;
 
     gameRunning = true;
-    level = 1;
-    score = 0;
-
     resetGame();
-
-    if (survivalInterval) clearInterval(survivalInterval);
-
-    survivalInterval = setInterval(() => {
-        survivalTime++;
-        score += 1;
-    }, 1000);
-
-    // ✅ START THE RENDER LOOP
     requestAnimationFrame(gameLoop);
 }
 
@@ -273,15 +247,6 @@ function movePlayer(dt) {
 
     if (keys["a"]) player.angle -= 2 * dt;
     if (keys["d"]) player.angle += 2 * dt;
-
-    const dx = player.x - goal.x;
-    const dy = player.y - goal.y;
-
-    if (Math.hypot(dx, dy) < 0.5) {
-        level++;
-        score += 100 * level;
-        resetGame();
-    }
 }
 
 function moveMonster(dt) {
@@ -290,7 +255,8 @@ function moveMonster(dt) {
     const dy = player.y - monster.y;
     const dist = Math.hypot(dx, dy) || 0.0001;
 
-    const desiredSpeed = dist < monster.arrivalRadius
+    const desiredSpeed =
+        dist < monster.arrivalRadius
         ? monster.maxSpeed * (dist / monster.arrivalRadius)
         : monster.maxSpeed;
 
@@ -299,7 +265,6 @@ function moveMonster(dt) {
 
     const steerX = desiredVX - monster.vx;
     const steerY = desiredVY - monster.vy;
-
     const steerMag = Math.hypot(steerX, steerY) || 1;
 
     const ax = (steerX / steerMag) *
@@ -330,81 +295,11 @@ function moveMonster(dt) {
 }
 
 /* =========================================
-   MINIMAP DRAW
+   RENDER
 ========================================= */
 
-function drawMinimap() {
-
-    const scale = MINIMAP_SIZE / MAP_W;
-
-    const startX = canvas.width - MINIMAP_SIZE - MINIMAP_MARGIN;
-    const startY = MINIMAP_MARGIN;
-
-    ctx.save();
-
-    ctx.globalAlpha = 0.85;
-    ctx.fillStyle = "black";
-    ctx.fillRect(startX, startY, MINIMAP_SIZE, MINIMAP_SIZE);
-
-    ctx.globalAlpha = 1;
-
-    for (let y = 0; y < MAP_H; y++) {
-        for (let x = 0; x < MAP_W; x++) {
-            if (map[y][x] === "1") {
-                ctx.fillStyle = "#00ff99";
-                ctx.fillRect(
-                    startX + x * scale,
-                    startY + y * scale,
-                    scale,
-                    scale
-                );
-            }
-        }
-    }
-
-    // Goal
-    ctx.fillStyle = "gold";
-    ctx.beginPath();
-    ctx.arc(
-        startX + goal.x * scale,
-        startY + goal.y * scale,
-        4,
-        0,
-        Math.PI * 2
-    );
-    ctx.fill();
-
-    // Monster
-    ctx.fillStyle = "red";
-    ctx.beginPath();
-    ctx.arc(
-        startX + monster.x * scale,
-        startY + monster.y * scale,
-        4,
-        0,
-        Math.PI * 2
-    );
-    ctx.fill();
-
-    // Player
-    ctx.fillStyle = "#00ff99";
-    ctx.beginPath();
-    ctx.arc(
-        startX + player.x * scale,
-        startY + player.y * scale,
-        4,
-        0,
-        Math.PI * 2
-    );
-    ctx.fill();
-
-    ctx.restore();
-}
-
-/* =========================================
-   3D RENDER
-========================================= */
 function drawBrickFloorFromTexture() {
+
     const horizon = canvas.height / 2;
 
     for (let y = horizon; y < canvas.height; y++) {
@@ -444,6 +339,45 @@ function drawBrickFloorFromTexture() {
             floorY += floorStepY;
         }
     }
+}
+
+function drawMinimap() {
+
+    const scale = MINIMAP_SIZE / MAP_W;
+    const startX = canvas.width - MINIMAP_SIZE - MINIMAP_MARGIN;
+    const startY = MINIMAP_MARGIN;
+
+    ctx.fillStyle = "black";
+    ctx.fillRect(startX, startY, MINIMAP_SIZE, MINIMAP_SIZE);
+
+    for (let y = 0; y < MAP_H; y++) {
+        for (let x = 0; x < MAP_W; x++) {
+            if (map[y][x] === "1") {
+                ctx.fillStyle = "#00ff99";
+                ctx.fillRect(
+                    startX + x * scale,
+                    startY + y * scale,
+                    scale,
+                    scale
+                );
+            }
+        }
+    }
+
+    ctx.fillStyle = "gold";
+    ctx.beginPath();
+    ctx.arc(startX + goal.x * scale, startY + goal.y * scale, 4, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = "red";
+    ctx.beginPath();
+    ctx.arc(startX + monster.x * scale, startY + monster.y * scale, 4, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = "#00ff99";
+    ctx.beginPath();
+    ctx.arc(startX + player.x * scale, startY + player.y * scale, 4, 0, Math.PI * 2);
+    ctx.fill();
 }
 
 function draw3D() {
@@ -510,21 +444,7 @@ function draw3D() {
         );
     }
 
-    drawHUD();
     drawMinimap();
-}
-
-/* =========================================
-   HUD
-========================================= */
-
-function drawHUD() {
-    ctx.fillStyle = "white";
-    ctx.font = "20px Arial";
-    ctx.textAlign = "left";
-    ctx.fillText(`Level: ${level}`, 20, 40);
-    ctx.fillText(`Time: ${survivalTime}`, 20, 65);
-    ctx.fillText(`Score: ${score}`, 20, 90);
 }
 
 /* =========================================
@@ -536,7 +456,7 @@ let lastTime = 0;
 function gameLoop(timestamp = 0) {
 
     let dt = (timestamp - lastTime) / 1000;
-    dt = Math.min(dt, 0.1); // clamp spikes
+    dt = Math.min(dt, 0.1);
     lastTime = timestamp;
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
