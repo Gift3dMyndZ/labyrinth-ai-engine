@@ -5,7 +5,7 @@
     <title>LABYRINTH</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <!-- ✅ External Production Stylesheet -->
+    <!-- ✅ LOAD STYLESHEET -->
     <link rel="stylesheet" href="/static/style.css">
 </head>
 
@@ -33,37 +33,24 @@
         <div class="scanlines"></div>
     </div>
 
-    <!-- 🎛️ VISUAL CONTROLS -->
+    <!-- OPTIONAL: CONTROLS (if enabled in CSS/JS) -->
     <div class="controls">
         <label>
             BRIGHTNESS
-            <input
-                type="range"
-                min="0.6"
-                max="1.6"
-                step="0.01"
-                value="1"
-                id="brightnessSlider"
-            >
+            <input type="range" min="0.6" max="1.6" step="0.01" value="1" id="brightnessSlider">
         </label>
 
         <label>
             GAMMA
-            <input
-                type="range"
-                min="0.6"
-                max="1.6"
-                step="0.01"
-                value="1"
-                id="gammaSlider"
-            >
+            <input type="range" min="0.6" max="1.6" step="0.01" value="1" id="gammaSlider">
         </label>
     </div>
 
 </div>
 
-<!-- ✅ GAME SCRIPT -->
+<!-- ✅ LOAD GAME SCRIPT -->
 <script src="/static/game.js"></script>
 
 </body>
 </html>
+``
