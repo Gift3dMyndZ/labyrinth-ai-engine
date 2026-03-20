@@ -427,7 +427,7 @@ function drawMinimap() {
   ctx.fill();
 
   // Player
-  ctx.fillStyle = "#00ff99";
+  ctx.fillStyle = "#a020f0";
   ctx.beginPath();
   ctx.arc(player.x * scale, player.y * scale, 4, 0, Math.PI * 2);
   ctx.fill();
