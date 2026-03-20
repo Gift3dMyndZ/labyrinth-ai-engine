@@ -1,14 +1,58 @@
-# 🧠 Labyrinth AI Engine
+# LABYRINTH – Raycasting AI Maze Engine
 
-> Adaptive AI horror survival predictor built with FastAPI, behavioral telemetry modeling, LLM storytelling, leaderboard tracking, and analytics.
+LABYRINTH is a browser-based 3D raycasting engine built from scratch using vanilla JavaScript and HTML5 Canvas. The project demonstrates real-time rendering, procedural maze generation, AI steering behavior, and optimized floor texturing techniques.
 
----
+## 🚀 Live Demo
+(https://labyrinth-ai-engine.onrender.com)
 
-## 🚀 Overview
+## 🎮 Features
 
-Labyrinth AI Engine is a modular, browser-based simulation platform that dynamically adjusts survival difficulty using live player telemetry and machine learning predictions.
+- 3D raycasting engine (Wolfenstein-style rendering)
+- Procedural maze generation using recursive backtracking
+- Textured floor rendering with device-pixel optimization
+- Real-time distance shading
+- AI-driven pursuing monster with steering behavior
+- Minimap overlay with player/goal/monster tracking
+- Boot screen state management
+- Restart system
+- DPR-aware canvas scaling
+- CRT retro visual aesthetic
 
-The system blends:
+## 🧠 Technical Highlights
+
+- Custom raycasting implementation (no external libraries)
+- Axis-separated collision with radius prevention
+- Device-pixel optimized ImageData floor rendering
+- Steering-based AI pursuit system
+- Infrastructure-ready production structure
+
+## 🛠 Tech Stack
+
+- JavaScript (ES6+)
+- HTML5 Canvas
+- CSS3 (CRT visual effects)
+- Procedural texture generation
+- Git version control
+
+## 📦 Installation
+
+```bash
+git clone https://github.com/Gift3dMyndZ/labyrinth-ai-engine.git
+cd labyrinth-ai-engine
+```
+
+Then open index.html in your browser.
+
+📌 Controls
+W / S – Move forward / backward
+A / D – Turn left / right
+ENTER – Start game
+Click – Restart after defeat
+
+🎯 Purpose
+
+This project demonstrates real-time graphics programming, procedural systems, and game loop architecture in a lightweight browser environment.
+
 
 
 ![Python](https://pfst.cf2.poecdn.net/base/image/eb0a896e8374c4fd9444d205422f34ab733dea13b665cfdbfcd909ebb940b5bd?pmaid=587912115)
@@ -19,6 +63,19 @@ The system blends:
 ![LLM](https://img.shields.io/badge/LLM-Integrated-purple)
 ![ML](https://img.shields.io/badge/Machine%20Learning-Enabled-orange)
 ![AI Story Engine](https://img.shields.io/badge/AI-Story%20Engine-ff00ff)
+![CI](https://img.shields.io/github/actions/workflow/status/Gift3dMyndZ/labyrinth-ai-engine/main.yml?branch=main)
+![Deployment](https://img.shields.io/badge/Deployment-Render-46E3B7)
+![Tests](https://img.shields.io/badge/Tests-Pytest-blue)
+![Coverage](https://img.shields.io/badge/Coverage-85%25-brightgreen)
+![Model](https://img.shields.io/badge/Model-Scikit--Learn-orange)
+![Docs](https://img.shields.io/badge/API-OpenAPI-success)
+![Version](https://img.shields.io/github/v/tag/Gift3dMyndZ/labyrinth-ai-engine)
+![Python](https://img.shields.io/badge/Python-3.9%2B-blue)
+![Code Style](https://img.shields.io/badge/code%20style-black-000000.svg)
+![Architecture](https://img.shields.io/badge/Architecture-Service--Oriented-blueviolet)
+![ML Pipeline](https://img.shields.io/badge/ML-Pipeline%20Separated-orange)
+![Telemetry](https://img.shields.io/badge/Telemetry-Real--Time-red)
+![Inference](https://img.shields.io/badge/Inference-Online-success)
 
 ---
 
@@ -29,81 +86,66 @@ This project demonstrates production-style ML architecture inside an interactive
 ## 🏗 System Architecture
 ```
 ┌──────────────────────────┐
-                │        Browser UI        │
-                │  Raycasting + Telemetry  │
-                └─────────────┬────────────┘
-                              │
-                              ▼
-                ┌──────────────────────────┐
-                │        FastAPI API       │
-                │  /telemetry  /train      │
-                └─────────────┬────────────┘
-                              │
-          ┌───────────────────┼───────────────────┐
-          ▼                   ▼                   ▼
-┌────────────────┐  ┌────────────────┐  ┌────────────────┐
-│   ML Engine    │  │  Story Engine  │  │  Leaderboard   │
-│ (Inference)    │  │  (LLM Driven)  │  │  & Analytics   │
-└────────────────┘  └────────────────┘  └────────────────┘
-          │
-          ▼
-┌────────────────────┐
-│  Adaptive Output   │
-│ Difficulty + Story │
-└────────────────────┘
+│        Browser UI        │
+│  Raycasting + Telemetry  │
+└─────────────┬────────────┘
+              │
+              ▼
+┌──────────────────────────┐
+│        FastAPI API       │
+│  /telemetry  /train      │
+└─────────────┬────────────┘
+              │
+   ┌──────────┼──────────┐
+   ▼          ▼          ▼
+┌──────────┐ ┌──────────┐ ┌────────────┐
+│ ML Engine│ │ Story    │ │ Leaderboard│
+│Inference │ │ Engine   │ │ Analytics  │
+└──────────┘ └──────────┘ └────────────┘
+        │
+        ▼
+┌────────────────────────┐
+│ Adaptive Difficulty +  │
+│ Narrative Modulation   │
+└────────────────────────┘
 ```
 
-### High-Level Flow
+🧠 System Overview
+LABYRINTH is structured as a full-stack ML simulation platform.
+
 ```
-Browser → Telemetry → FastAPI → ML Engine → Adaptive Output → Narrative Engine
+Browser → Telemetry → FastAPI → ML Engine → Adaptive Output → Story Engine
 ```
-### 🎮 Frontend
 
-- JavaScript raycasting renderer
-- Retro hedge-style maze visuals
-- Monster movement logic
-- Telemetry collection (fear, aggression, curiosity, etc.)
-- Dynamic difficulty updates
 
-### ⚙️ Backend (FastAPI)
+### 🖥 Frontend
+- Vanilla JavaScript raycasting renderer
+- Player movement + collision system
+- Monster AI pursuit logic
+- Behavioral telemetry tracking:
+- Fear level
+- Aggression
+- Curiosity
+- Survival time
+- Dynamic difficulty adjustments
 
-- REST API endpoints
-- Telemetry ingestion
-- Adaptive difficulty computation
-- ML integration hooks
-- Leaderboard logic
-- Analytics tracking
+
+### ⚙ Backend (FastAPI)
+- REST API architecture
+- Telemetry ingestion endpoint
+- ML inference service
+- Optional training trigger endpoint
+- Analytics hooks
+- Service-layer abstraction
 
 ### ☁ Infrastructure
 
-- Dockerized deployment
-- GitHub-based CI-ready structure
-- Cloud-ready configuration
+- Dockerized FastAPI application
+- Cloud deployment via Render
+- GitHub-managed version control
+- Modular production-style project structure
+- Serialized ML model artifact management
 
----
-
-## 🔌 API Endpoints
-
-### `GET /`
-
-Returns main simulation dashboard.
-
----
-
-### `POST /telemetry`
-
-Accepts live player behavioral data.
-
-Example:
-
-```json
-{
-  "fear_level": 6,
-  "aggression": 3,
-  "curiosity": 8,
-  "survival_time": 124
-}
-```
 ---
 
 ### POST /train
@@ -157,13 +199,6 @@ labyrinth-ai-engine/
 └── README.md
 ```
 
-Architecture emphasizes:
-
-- Clear separation of concerns  
-- Service-layer abstraction  
-- ML training vs inference isolation  
-- Production-ready organization  
-
 ---
 
 ## 🧠 Machine Learning Architecture
@@ -178,8 +213,10 @@ Pipeline:
 - Data preprocessing
 - Model serialization
 - Artifact saved to /models/model.pkl
+- Model training (Scikit-learn)
 ```
-Retrain:
+Retrain locally:
+
 ```
 python training/train.py
 ```
@@ -227,23 +264,6 @@ This separation ensures:
 ```
 ---
 
-## 🎭 LLM Story Engine
-
-Located in:
-```
-app/services/story_engine.py
-```
-Features:
-```
-- Dynamic narrative generation  
-- Character-based survival arcs  
-- Context-aware event creation  
-- Modular story service abstraction  
-```
-Narrative logic is isolated from predictive modeling for extensibility.
-
----
-
 ## ⚙️ Local Installation
 
 Clone repository:
@@ -282,19 +302,7 @@ docker run -p 8000:8000 labyrinth-ai-engine
 ```
 ---
 
-## 📊 Technologies Used
-```
-- Python  
-- FastAPI  
-- Scikit-Learn  
-- Pandas  
-- NumPy  
-- Sentence Transformers  
-- Jinja2  
-- SQLite  
-- Docker  
-```
----
+
 
 ## 🔬 Design Principles
 ```
@@ -320,14 +328,10 @@ docker run -p 8000:8000 labyrinth-ai-engine
 ```
 ---
 
-## 📜 License
-
-MIT License  
-
 ---
 
 ## 👤 Author
 
-Developed by Gift3dMyndz - Joshua Wolfe
+Developed by - Joshua Wolfe
 
 If you found this interesting, consider starring the repository ⭐
