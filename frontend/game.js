@@ -304,7 +304,7 @@ function draw3D(){
   // 👾 Monster
   drawSprite(monster.x, monster.y, alienFrames[alienFrame], depth);
 }
-=========================================
+/* =========================================
    LOOP
 ========================================= */
 
