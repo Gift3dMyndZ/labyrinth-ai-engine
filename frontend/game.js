@@ -401,15 +401,27 @@ function loop(t){
    BOOT
 ========================================= */
 
-document.addEventListener("keydown",function(e){
+const bootScreen = document.getElementById("bootScreen");
+const gameContainer = document.getElementById("gameContainer");
+
+document.addEventListener("keydown", function(e){
   if(e.code==="Enter"||e.code==="NumpadEnter"){
-    if(audioCtx.state==="suspended") audioCtx.resume();
+
+    if(audioCtx.state==="suspended") {
+      audioCtx.resume();
+    }
+
+    // ✅ Show game
+    bootScreen.style.display = "none";
+    gameContainer.style.display = "block";
+
+    // ✅ CRITICAL FIX
+    resizeCanvas();
+
     resetGame();
-    gameRunning=true;
-    gameOver=false;
-    gameWon=false;
-    last=performance.now();
+    gameRunning = true;
+    gameOver = false;
+    gameWon = false;
+    last = performance.now();
   }
 });
-
-requestAnimationFrame(loop);
