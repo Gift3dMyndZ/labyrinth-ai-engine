@@ -382,13 +382,35 @@ function loop(t){
    BOOT
 ========================================= */
 
-document.addEventListener("keydown",function(e){
-  if(e.key==="Enter"){
-    if(audioCtx.state==="suspended") audioCtx.resume();
+const bootScreen = document.getElementById("bootScreen");
+const gameContainer = document.getElementById("gameContainer");
+
+canvas.setAttribute("tabindex", "0");
+
+document.addEventListener("keydown", function(e) {
+
+  if (e.code === "Enter" || e.code === "NumpadEnter") {
+
+    if (audioCtx.state === "suspended") {
+      audioCtx.resume();
+    }
+
+    // Hide boot screen
+    bootScreen.style.display = "none";
+
+    // Show game
+    gameContainer.style.display = "block";
+
+    canvas.focus();
+
     resetGame();
-    gameRunning=true;
-    last=performance.now();
+    gameRunning = true;
+    gameOver = false;
+    gameWon = false;
+
+    last = performance.now();
   }
+
 });
 
 requestAnimationFrame(loop);
