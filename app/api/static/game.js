@@ -1,5 +1,6 @@
 /* ==========================================
-   LABYRINTH – 3D RAYCASTER + 👾 + AUDIO
+   LABYRINTH – ARCADE MODE 👾
+   Score + Win + Speed Ramp + Retro Sounds
 ========================================== */
 
 const canvas = document.getElementById("game");
@@ -25,6 +26,21 @@ const FOV = Math.PI / 3;
 const MAX_DEPTH = 25;
 
 /* =========================================
+   GAME STATE
+========================================= */
+
+let map = [];
+let MAP_W, MAP_H;
+let player, monster, goal;
+
+let gameRunning = false;
+let gameOver = false;
+let gameWon = false;
+
+let score = 0;
+let startTime = 0;
+
+/* =========================================
    INPUT
 ========================================= */
 
@@ -33,43 +49,42 @@ document.addEventListener("keydown", e => keys[e.key.toLowerCase()] = true);
 document.addEventListener("keyup", e => keys[e.key.toLowerCase()] = false);
 
 /* =========================================
-   AUDIO – HEARTBEAT
+   AUDIO SYSTEM
 ========================================= */
 
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
 const audioCtx = new AudioCtx();
 
-const heartbeatGain = audioCtx.createGain();
-heartbeatGain.gain.value = 0;
-heartbeatGain.connect(audioCtx.destination);
-
-function playHeartbeat(strength) {
+function beep(freq, duration, type="square", volume=0.2){
   const osc = audioCtx.createOscillator();
-  osc.type = "sine";
-  osc.frequency.value = 60;
-  osc.connect(heartbeatGain);
+  const gain = audioCtx.createGain();
 
-  const now = audioCtx.currentTime;
-  heartbeatGain.gain.cancelScheduledValues(now);
-  heartbeatGain.gain.setValueAtTime(0, now);
-  heartbeatGain.gain.linearRampToValueAtTime(0.25 * strength, now + 0.05);
-  heartbeatGain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+  osc.type = type;
+  osc.frequency.value = freq;
 
-  osc.start(now);
-  osc.stop(now + 0.3);
+  gain.gain.value = volume;
+
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+
+  osc.start();
+  osc.stop(audioCtx.currentTime + duration);
+}
+
+function playDeathSound(){
+  beep(200,0.1);
+  setTimeout(()=>beep(120,0.15),100);
+  setTimeout(()=>beep(60,0.3),250);
+}
+
+function playWinSound(){
+  beep(440,0.1);
+  setTimeout(()=>beep(660,0.1),100);
+  setTimeout(()=>beep(880,0.2),200);
 }
 
 /* =========================================
-   GAME STATE
-========================================= */
-
-let map = [];
-let MAP_W, MAP_H;
-let player, monster, goal;
-let gameRunning = false;
-
-/* =========================================
-   MAZE GENERATION
+   MAZE
 ========================================= */
 
 function generateMaze(w, h) {
@@ -98,25 +113,32 @@ function generateMaze(w, h) {
     if (!moved) stack.pop();
   }
 
-  map[0][1]="0";
-  map[h-1][w-2]="0";
+  const goalPos = { x:w-2.5, y:h-2.5 };
 
   return {
     start:{x:1.5,y:1.5},
-    goal:{x:w-2.5,y:h-1.5}
+    goal:goalPos
   };
 }
 
 function resetGame() {
   const m = generateMaze(31,31);
+
   player = { x:m.start.x, y:m.start.y, angle:0 };
+
   goal = m.goal;
+
   monster = {
     x: goal.x,
     y: goal.y - 2,
-    speed:2.4,
-    attackRadius:0.6
+    baseSpeed:2.2,
+    speed:2.2
   };
+
+  score = 0;
+  startTime = performance.now();
+  gameOver = false;
+  gameWon = false;
 }
 resetGame();
 
@@ -142,9 +164,12 @@ function movePlayer(dt){
   if(keys.d) player.angle+=2*dt;
 }
 
-let heartbeatTimer = 0;
-
 function moveMonster(dt){
+
+  // ⚡ Speed ramps up over time
+  const elapsed = (performance.now() - startTime) / 1000;
+  monster.speed = monster.baseSpeed + elapsed * 0.08;
+
   const dx=player.x-monster.x;
   const dy=player.y-monster.y;
   const d=Math.hypot(dx,dy)||1e-4;
@@ -152,183 +177,203 @@ function moveMonster(dt){
   const vx=(dx/d)*monster.speed;
   const vy=(dy/d)*monster.speed;
 
-  const nx=monster.x+vx*dt;
-  const ny=monster.y+vy*dt;
+  if(cellOpen(monster.x+vx*dt,monster.y)) monster.x+=vx*dt;
+  if(cellOpen(monster.x,monster.y+vy*dt)) monster.y+=vy*dt;
 
-  if(cellOpen(nx,monster.y)) monster.x=nx;
-  if(cellOpen(monster.x,ny)) monster.y=ny;
-
-  const danger = Math.max(0, 1 - d / 10);
-  heartbeatTimer -= dt;
-  if (danger > 0.05 && heartbeatTimer <= 0) {
-    playHeartbeat(danger);
-    heartbeatTimer = 1.2 - danger;
+  if(d<0.6){
+    gameOver=true;
+    gameRunning=false;
+    playDeathSound();
   }
-
-  if(d<monster.attackRadius) gameRunning=false;
 }
 
 /* =========================================
-   MONSTER SPRITE (DEPTH-CORRECT)
+   MONSTER SPRITE
 ========================================= */
 
-function drawMonsterSprite(depth) {
+function makeAlien(pattern,scale=2){
+  const c=document.createElement("canvas");
+  c.width=pattern[0].length*scale;
+  c.height=pattern.length*scale;
+  const g=c.getContext("2d");
+  g.imageSmoothingEnabled=false;
 
-  const dx = monster.x - player.x;
-  const dy = monster.y - player.y;
-  const dist = Math.hypot(dx, dy);
+  pattern.forEach((row,y)=>{
+    [...row].forEach((v,x)=>{
+      if(v==="1"){
+        g.fillStyle="#7aff00";
+        g.fillRect(x*scale,y*scale,scale,scale);
+      }
+    });
+  });
 
-  if (dist < 0.3 || dist > MAX_DEPTH) return;
-
-  let angleToMonster = Math.atan2(dy, dx) - player.angle;
-
-  while (angleToMonster > Math.PI) angleToMonster -= Math.PI * 2;
-  while (angleToMonster < -Math.PI) angleToMonster += Math.PI * 2;
-
-  if (Math.abs(angleToMonster) > FOV / 2) return;
-
-  const screenX = (0.5 + angleToMonster / FOV) * canvas.width;
-  const size = canvas.height / (dist * 1.5);
-  const y = canvas.height / 2 - size / 2;
-
-  const column = Math.floor(screenX);
-  if (column < 0 || column >= canvas.width) return;
-  if (depth[column] < dist) return;
-
-  ctx.globalAlpha = Math.max(0, 1 - dist / 8);
-
-  ctx.fillStyle = "rgba(20, 10, 5, 0.9)";
-  ctx.beginPath();
-  ctx.ellipse(screenX, y + size / 2, size * 0.25, size * 0.5, 0, 0, Math.PI * 2);
-  ctx.fill();
-
-  ctx.fillStyle = "rgba(180, 60, 20, 0.7)";
-  ctx.beginPath();
-  ctx.arc(screenX, y + size / 2, size * 0.12, 0, Math.PI * 2);
-  ctx.fill();
-
-  ctx.globalAlpha = 1;
+  c.__data=g.getImageData(0,0,c.width,c.height).data;
+  return c;
 }
 
+const alien = makeAlien([
+  "000011111100000",
+  "000111111110000",
+  "001111111111000",
+  "011110110111100",
+  "111111111111110",
+  "111011111110111",
+  "111111111111110",
+  "001110011100100",
+  "011001100110010",
+  "110000000000011"
+]);
+
 /* =========================================
-   RENDER
+   RENDER 3D
 ========================================= */
 
 function draw3D(){
 
-  const w = canvas.width;
-  const h = canvas.height;
+  const w=canvas.width;
+  const h=canvas.height;
 
-  const sky = ctx.createLinearGradient(0, 0, 0, h / 2);
-  sky.addColorStop(0, "#0b1d3a");
-  sky.addColorStop(1, "#5fa3ff");
-  ctx.fillStyle = sky;
-  ctx.fillRect(0, 0, w, h / 2);
+  const sky=ctx.createLinearGradient(0,0,0,h/2);
+  sky.addColorStop(0,"#001a33");
+  sky.addColorStop(1,"#0055aa");
+  ctx.fillStyle=sky;
+  ctx.fillRect(0,0,w,h/2);
 
-  const depth = new Float32Array(w);
+  const depth=new Float32Array(w);
 
-  for (let x = 0; x < w; x++) {
-    const angle = player.angle - FOV / 2 + (x / w) * FOV;
-    let d = 0;
+  for(let x=0;x<w;x++){
 
-    while (d < MAX_DEPTH) {
-      d += 0.05;
-      const tx = Math.floor(player.x + Math.cos(angle) * d);
-      const ty = Math.floor(player.y + Math.sin(angle) * d);
-      if (tx < 0 || ty < 0 || tx >= MAP_W || ty >= MAP_H || map[ty][tx] === "1") break;
+    const angle=player.angle-FOV/2+(x/w)*FOV;
+    let d=0;
+
+    while(d<MAX_DEPTH){
+      d+=0.05;
+      const tx=Math.floor(player.x+Math.cos(angle)*d);
+      const ty=Math.floor(player.y+Math.sin(angle)*d);
+      if(tx<0||ty<0||tx>=MAP_W||ty>=MAP_H||map[ty][tx]==="1") break;
     }
 
-    const cd = d * Math.cos(angle - player.angle);
-    depth[x] = cd;
+    const cd=d*Math.cos(angle-player.angle);
+    depth[x]=cd;
 
-    const wallH = h / (cd + 0.0001);
-    const fog = Math.min(cd / 18, 1);
-    const base = 200 * (1 - fog);
-    const shade = (x % 2 ? 0.9 : 1);
+    const wallH=h/(cd+0.0001);
+    const fog=Math.min(cd/20,1);
 
-    const g = (base * shade) | 0;
-    ctx.fillStyle = `rgb(${g},${g},${g})`;
-    ctx.fillRect(x, (h - wallH) / 2, 1, wallH);
+    const r=(150*(1-fog))|0;
+    const g=(80*(1-fog))|0;
+    const b=(220*(1-fog))|0;
+
+    ctx.fillStyle=`rgb(${r},${g},${b})`;
+    ctx.fillRect(x,(h-wallH)/2,1,wallH);
   }
 
-  drawMonsterSprite(depth);
+  drawMonster(depth);
 }
 
 /* =========================================
-   MINIMAP
+   DEPTH MONSTER
 ========================================= */
 
-function drawMiniMap() {
+function drawMonster(depth){
 
-  const scale = 0.2;
-  const tileSize = 16;
+  const w=canvas.width;
+  const h=canvas.height;
 
-  const offsetX = 20;
-  const offsetY = 20;
+  const dx=monster.x-player.x;
+  const dy=monster.y-player.y;
+  const dist=Math.hypot(dx,dy);
+  if(dist<=0) return;
 
-  ctx.save();
-  ctx.globalAlpha = 0.85;
+  const angle=Math.atan2(dy,dx)-player.angle;
+  if(Math.abs(angle)>FOV/2) return;
 
-  ctx.fillStyle = "rgb(0,20,0)";
-  ctx.fillRect(offsetX - 4, offsetY - 4, 160, 160);
+  const size=h/dist;
+  const sx=w/2+(angle/FOV)*w;
 
-  for (let y = 0; y < MAP_H; y++) {
-    for (let x = 0; x < MAP_W; x++) {
-      if (map[y][x] === "1") {
-        ctx.fillStyle = "rgb(0,255,0)";
-        ctx.fillRect(
-          offsetX + x * tileSize * scale,
-          offsetY + y * tileSize * scale,
-          tileSize * scale,
-          tileSize * scale
-        );
+  for(let x0=sx-size/2;x0<sx+size/2;x0++){
+    const xi=x0|0;
+    if(xi<0||xi>=w||dist>depth[xi]) continue;
+
+    const u=((x0-(sx-size/2))/size*alien.width)|0;
+
+    for(let y0=h/2-size/2;y0<h/2+size/2;y0++){
+      const yi=y0|0;
+      if(yi<0||yi>=h) continue;
+
+      const v=((y0-(h/2-size/2))/size*alien.height)|0;
+      const i=(v*alien.width+u)*4;
+      if(alien.__data[i+3]>0){
+        ctx.fillStyle="#7aff00";
+        ctx.fillRect(xi,yi,1,1);
       }
     }
   }
+}
 
-  ctx.fillStyle = "red";
-  ctx.beginPath();
-  ctx.arc(offsetX + player.x * scale, offsetY + player.y * scale, 4, 0, Math.PI*2);
-  ctx.fill();
+/* =========================================
+   UI
+========================================= */
 
-  ctx.fillStyle = "lime";
-  ctx.beginPath();
-  ctx.arc(offsetX + monster.x * scale, offsetY + monster.y * scale, 4, 0, Math.PI*2);
-  ctx.fill();
+function drawScore(){
+  ctx.fillStyle="#00ffcc";
+  ctx.font="20px Courier New";
+  ctx.fillText("SCORE: "+score,20,30);
+}
 
-  ctx.restore();
+function drawGameOver(){
+  ctx.fillStyle="rgba(0,0,0,0.7)";
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle="#ff0033";
+  ctx.font="bold 80px Courier New";
+  ctx.textAlign="center";
+  ctx.fillText("GAME OVER",canvas.width/2,canvas.height/2);
+}
+
+function drawWin(){
+  ctx.fillStyle="rgba(0,0,0,0.7)";
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle="#00ff99";
+  ctx.font="bold 80px Courier New";
+  ctx.textAlign="center";
+  ctx.fillText("YOU WIN!",canvas.width/2,canvas.height/2);
 }
 
 /* =========================================
    LOOP
 ========================================= */
 
-let last = 0;
+let last=0;
 
-function loop(t) {
-  const dt = Math.min((t - last) / 1000, 0.05);
-  last = t;
+function loop(t){
 
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const dt=Math.min((t-last)/1000,0.05);
+  last=t;
 
-  if (gameRunning) {
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  if(gameRunning){
 
     movePlayer(dt);
     moveMonster(dt);
-
     draw3D();
-    drawMiniMap();
 
-    const dx = player.x - monster.x;
-    const dy = player.y - monster.y;
-    const dist = Math.hypot(dx, dy);
-    const danger = Math.max(0, 1 - dist / 8);
+    // 💾 Score increases over time
+    score += Math.floor(dt * 100);
 
-    if (danger > 0) {
-      ctx.fillStyle = `rgba(255,0,0,${danger * 0.25})`;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    drawScore();
+
+    // 🏁 Win condition
+    const gx=goal.x-player.x;
+    const gy=goal.y-player.y;
+    if(Math.hypot(gx,gy)<0.8){
+      gameWon=true;
+      gameRunning=false;
+      playWinSound();
     }
   }
+
+  if(gameOver) drawGameOver();
+  if(gameWon) drawWin();
 
   requestAnimationFrame(loop);
 }
@@ -337,16 +382,13 @@ function loop(t) {
    BOOT
 ========================================= */
 
-document.addEventListener("keydown", function (e) {
-  if (e.key === "Enter" && !gameRunning) {
-
-    if (audioCtx.state === "suspended") {
-      audioCtx.resume();
-    }
-
+document.addEventListener("keydown",function(e){
+  if(e.key==="Enter"){
+    if(audioCtx.state==="suspended") audioCtx.resume();
     resetGame();
-    gameRunning = true;
-    last = performance.now();
-    requestAnimationFrame(loop);
+    gameRunning=true;
+    last=performance.now();
   }
 });
+
+requestAnimationFrame(loop);
