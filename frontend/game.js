@@ -69,7 +69,7 @@ function playHeartbeat(strength) {
 let map = [];
 let MAP_W, MAP_H;
 let player, monster, goal;
-let gameRunning = true;
+let gameRunning = false;
 
 /* =========================================
    MAZE
@@ -264,45 +264,47 @@ function drawSprite(x,y,tex,depth){
 ========================================= */
 
 function draw3D(){
-  const w=canvas.clientWidth,h=canvas.clientHeight;
+  const w = canvas.width;
+  const h = canvas.height;
 
   // 🌌 Better sky
-  const sky=ctx.createLinearGradient(0,0,0,h/2);
-  sky.addColorStop(0,"#0b1d3a");
-  sky.addColorStop(1,"#5fa3ff");
-  ctx.fillStyle=sky;
-  ctx.fillRect(0,0,w,h/2);
+  const sky = ctx.createLinearGradient(0, 0, 0, h / 2);
+  sky.addColorStop(0, "#0b1d3a");
+  sky.addColorStop(1, "#5fa3ff");
+  ctx.fillStyle = sky;
+  ctx.fillRect(0, 0, w, h / 2);
 
-  const depth=new Float32Array(w);
+  const depth = new Float32Array(w);
 
   // 🧱 Walls with fog + edge shading
-  for(let x=0;x<w;x++){
-    const angle=player.angle-FOV/2+(x/w)*FOV;
-    let d=0;
-    while(d<MAX_DEPTH){
-      d+=0.05;
-      const tx=Math.floor(player.x+Math.cos(angle)*d);
-      const ty=Math.floor(player.y+Math.sin(angle)*d);
-      if(tx<0||ty<0||tx>=MAP_W||ty>=MAP_H||map[ty][tx]==="1") break;
+  for (let x = 0; x < w; x++) {
+    const angle = player.angle - FOV / 2 + (x / w) * FOV;
+    let d = 0;
+
+    while (d < MAX_DEPTH) {
+      d += 0.05;
+      const tx = Math.floor(player.x + Math.cos(angle) * d);
+      const ty = Math.floor(player.y + Math.sin(angle) * d);
+      if (tx < 0 || ty < 0 || tx >= MAP_W || ty >= MAP_H || map[ty][tx] === "1") break;
     }
-    const cd=d*Math.cos(angle-player.angle);
-    depth[x]=cd;
 
-    const wallH=h/(cd+0.0001);
-    const fog=Math.min(cd/18,1);
-    const base=200*(1-fog);
-    const shade=(x%2?0.9:1); // subtle vertical variation
+    const cd = d * Math.cos(angle - player.angle);
+    depth[x] = cd;
 
-    const g=(base*shade)|0;
-    ctx.fillStyle=`rgb(${g},${g},${g})`;
-    ctx.fillRect(x,(h-wallH)/2,1,wallH);
+    const wallH = h / (cd + 0.0001);
+    const fog = Math.min(cd / 18, 1);
+    const base = 200 * (1 - fog);
+    const shade = (x % 2 ? 0.9 : 1);
+
+    const g = (base * shade) | 0;
+    ctx.fillStyle = `rgb(${g},${g},${g})`;
+    ctx.fillRect(x, (h - wallH) / 2, 1, wallH);
   }
 
   // 👾 Monster
-  drawSprite(monster.x,monster.y,alienFrames[alienFrame],depth);
+  drawSprite(monster.x, monster.y, alienFrames[alienFrame], depth);
 }
-
-/* =========================================
+=========================================
    LOOP
 ========================================= */
 
@@ -324,6 +326,34 @@ function loop(t){
     draw3D();
   }
 
-  requestAnimationFrame(loop);
+  requestAnimationFrame(loop); // ✅ REQUIRED
 }
-requestAnimationFrame(loop);
+/* =========================================
+   BOOT CONTROL
+========================================= */
+
+const bootScreen = document.getElementById("bootScreen");
+const gameContainer = document.getElementById("gameContainer");
+
+bootScreen.style.display = "flex";
+gameContainer.style.display = "none";
+
+document.addEventListener("keydown", function (e) {
+  if (e.key === "Enter" && !gameRunning) {
+
+    // Unlock audio (required by browser)
+    if (audioCtx.state === "suspended") {
+      audioCtx.resume();
+    }
+
+    bootScreen.style.display = "none";
+    gameContainer.style.display = "block";
+
+    resizeCanvas();
+    resetGame();
+
+    gameRunning = true;
+    last = performance.now();
+    requestAnimationFrame(loop);
+  }
+});
