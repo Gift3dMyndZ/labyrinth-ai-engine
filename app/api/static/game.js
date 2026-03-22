@@ -1,40 +1,32 @@
 /* =========================================
    LABYRINTH – COMPLETE PRODUCTION BUILD
-   (EARTH TONES + TORCHLIGHT FLICKER + MINIMAP)
 ========================================= */
 
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d", { alpha: false });
 
 /* =========================================
-   CANVAS SETUP (DPR AWARE, SAFE)
+   CANVAS SETUP
 ========================================= */
 
 function resizeCanvas() {
   const dpr = window.devicePixelRatio || 1;
   const rect = canvas.getBoundingClientRect();
-  if (rect.width === 0 || rect.height === 0) return;
+  if (!rect.width || !rect.height) return;
 
-  canvas.width = Math.floor(rect.width * dpr);
-  canvas.height = Math.floor(rect.height * dpr);
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 }
 
 window.addEventListener("resize", resizeCanvas);
 
-// ✅ Safe ResizeObserver
-const wrapper = document.querySelector(".crt-wrapper");
-if (wrapper) {
-  new ResizeObserver(() => resizeCanvas()).observe(wrapper);
-}
-
 /* =========================================
-   STATE SYSTEM
+   STATE
 ========================================= */
 
-let state = "boot"; // boot | playing | dead
+let state = "boot";
 let gameRunning = false;
-let animationId = null;
 let last = 0;
 
 /* =========================================
@@ -44,20 +36,14 @@ let last = 0;
 const FOV = Math.PI / 3;
 const MAX_DEPTH = 25;
 
-// ✅ MINIMAP CONSTANTS (MISSING BEFORE)
-const MINIMAP_SIZE = 140;
-const MINIMAP_PADDING = 16;
-
 /* =========================================
    INPUT
 ========================================= */
 
 const keys = {};
 document.addEventListener("keydown", e => {
-  const k = e.key.toLowerCase();
-  if (k === "enter") return;
   if (!gameRunning) return;
-  keys[k] = true;
+  keys[e.key.toLowerCase()] = true;
 });
 document.addEventListener("keyup", e => {
   keys[e.key.toLowerCase()] = false;
@@ -67,9 +53,7 @@ document.addEventListener("keyup", e => {
    AUDIO – HEARTBEAT
 ========================================= */
 
-const AudioCtx = window.AudioContext || window.webkitAudioContext;
-const audioCtx = new AudioCtx();
-
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 const heartbeatGain = audioCtx.createGain();
 heartbeatGain.gain.value = 0;
 heartbeatGain.connect(audioCtx.destination);
@@ -97,6 +81,17 @@ let map = [];
 let MAP_W, MAP_H;
 let player, monster;
 let heartbeatTimer = 0;
+let firePulse = 0;
+let exitTile = null;
+
+/* =========================================
+   TILE SEMANTICS
+========================================= */
+
+function cellOpen(x, y) {
+  const t = map[Math.floor(y)]?.[Math.floor(x)];
+  return t === "0" || t === "E";
+}
 
 /* =========================================
    MAZE GENERATION
@@ -129,10 +124,36 @@ function generateMaze(w, h) {
     if (!moved) stack.pop();
   }
 
-  map[0][1] = "0";
-  map[h - 1][w - 2] = "0";
+  const cx = Math.floor(w / 2);
+  const cy = Math.floor(h / 2);
+  const radius = Math.min(cx, cy) - 1;
 
-  return { start: { x: 1.5, y: 1.5 }, goal: { x: w - 2.5, y: h - 1.5 } };
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      if (Math.hypot(x - cx, y - cy) > radius) {
+        map[y][x] = "1";
+      }
+    }
+  }
+
+  // 🔥 River of Fire ring
+  const fireRadius = Math.floor(radius * 0.55);
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const d = Math.hypot(x - cx, y - cy);
+      if (d > fireRadius - 0.5 && d < fireRadius + 0.5 && map[y][x] === "0") {
+        map[y][x] = "2";
+      }
+    }
+  }
+
+  // 🚪 Exit
+  exitTile = { x: cx, y: cy - radius + 1 };
+  map[exitTile.y][exitTile.x] = "E";
+
+  return {
+    start: { x: cx + 0.5, y: cy + 0.5 }
+  };
 }
 
 /* =========================================
@@ -145,22 +166,20 @@ function resetGame() {
   player = { x: m.start.x, y: m.start.y, angle: 0 };
 
   monster = {
-    x: m.goal.x,
-    y: m.goal.y - 2,
-    speed: 2.4,
-    attackRadius: 0.6
+    x: exitTile.x + 0.5,
+    y: exitTile.y + 2,
+    speed: 2.2,
+    attackRadius: 0.6,
+    radius: 0.35
   };
 
   heartbeatTimer = 0;
+  firePulse = 0;
 }
 
 /* =========================================
-   MOVEMENT
+   PLAYER MOVEMENT
 ========================================= */
-
-function cellOpen(x, y) {
-  return map[Math.floor(y)]?.[Math.floor(x)] === "0";
-}
 
 function movePlayer(dt) {
   const speed = 3 * dt;
@@ -177,22 +196,58 @@ function movePlayer(dt) {
   }
   if (keys.a) player.angle -= 2 * dt;
   if (keys.d) player.angle += 2 * dt;
-
-  if (player.angle > Math.PI) player.angle -= Math.PI * 2;
-  if (player.angle < -Math.PI) player.angle += Math.PI * 2;
 }
 
 /* =========================================
-   MONSTER AI
+   🔥 DYNAMIC FIRE UPDATE
 ========================================= */
+
+function updateFire(dt) {
+  firePulse += dt;
+  if (firePulse < 1.5) return;
+  firePulse = 0;
+
+  for (let i = 0; i < 6; i++) {
+    const x = Math.floor(Math.random() * MAP_W);
+    const y = Math.floor(Math.random() * MAP_H);
+    const t = map[y]?.[x];
+    if (!t || t === "1" || t === "E") continue;
+
+    if (t === "2") {
+      map[y][x] = "0";
+    } else if (t === "0") {
+      let open = 0;
+      for (const [dx, dy] of [[1,0],[-1,0],[0,1],[0,-1]]) {
+        if (map[y + dy]?.[x + dx] === "0") open++;
+      }
+      if (open >= 3) map[y][x] = "2";
+    }
+  }
+}
+
+/* =========================================
+   MONSTER AI (RESPECTS FIRE)
+========================================= */
+
+function monsterCanMove(x, y, r) {
+  return (
+    cellOpen(x - r, y - r) &&
+    cellOpen(x + r, y - r) &&
+    cellOpen(x - r, y + r) &&
+    cellOpen(x + r, y + r)
+  );
+}
 
 function moveMonster(dt) {
   const dx = player.x - monster.x;
   const dy = player.y - monster.y;
   const d = Math.hypot(dx, dy) || 1e-4;
 
-  monster.x += (dx / d) * monster.speed * dt;
-  monster.y += (dy / d) * monster.speed * dt;
+  const vx = (dx / d) * monster.speed * dt;
+  const vy = (dy / d) * monster.speed * dt;
+
+  if (monsterCanMove(monster.x + vx, monster.y, monster.radius)) monster.x += vx;
+  if (monsterCanMove(monster.x, monster.y + vy, monster.radius)) monster.y += vy;
 
   const danger = Math.max(0, 1 - d / 10);
   heartbeatTimer = Math.max(0, heartbeatTimer - dt);
@@ -206,108 +261,41 @@ function moveMonster(dt) {
     state = "dead";
     gameRunning = false;
     const boot = document.getElementById("bootScreen");
-    boot.innerHTML = `<h2 class="glow">YOU DIED</h2><p class="blink">Press ENTER</p>`;
+    boot.innerHTML = `<h2 class="glow-tartarus">YOU DIED</h2><p class="blink">Press ENTER</p>`;
     boot.style.display = "flex";
     boot.style.opacity = "1";
   }
 }
 
 /* =========================================
-   🗺️ MINI MAP
+   RENDER
 ========================================= */
-
-function drawMiniMap() {
-  const size = MINIMAP_SIZE;
-  const pad = MINIMAP_PADDING;
-  const scale = size / MAP_W;
-
-  const x0 = pad;
-  const y0 = pad;
-
-  ctx.save();
-
-  ctx.globalAlpha = 0.85;
-  ctx.fillStyle = "rgba(40,32,22,0.85)";
-  ctx.fillRect(x0 - 4, y0 - 4, size + 8, size + 8);
-  ctx.globalAlpha = 1;
-
-  ctx.fillStyle = "rgb(90,72,48)";
-  for (let y = 0; y < MAP_H; y++) {
-    for (let x = 0; x < MAP_W; x++) {
-      if (map[y][x] === "1") {
-        ctx.fillRect(x0 + x * scale, y0 + y * scale, scale, scale);
-      }
-    }
-  }
-
-  ctx.fillStyle = "rgb(140,60,40)";
-  ctx.beginPath();
-  ctx.arc(x0 + monster.x * scale, y0 + monster.y * scale, 3, 0, Math.PI * 2);
-  ctx.fill();
-
-  ctx.fillStyle = "rgb(220,200,150)";
-  ctx.beginPath();
-  ctx.arc(x0 + player.x * scale, y0 + player.y * scale, 3, 0, Math.PI * 2);
-  ctx.fill();
-
-  ctx.strokeStyle = "rgb(220,200,150)";
-  ctx.beginPath();
-  ctx.moveTo(x0 + player.x * scale, y0 + player.y * scale);
-  ctx.lineTo(
-    x0 + (player.x + Math.cos(player.angle)) * scale,
-    y0 + (player.y + Math.sin(player.angle)) * scale
-  );
-  ctx.stroke();
-
-  ctx.restore();
-}
-
-/* =========================================
-   🔥 TORCHLIGHT + EARTH‑TONE RENDER
-========================================= */
-
-let flickerTime = 0;
 
 function draw3D() {
   const w = canvas.clientWidth;
   const h = canvas.clientHeight;
-  flickerTime += 0.02;
-
-  const sky = ctx.createLinearGradient(0, 0, 0, h / 2);
-  sky.addColorStop(0, "#6f7d6b");
-  sky.addColorStop(1, "#cbbf9c");
-  ctx.fillStyle = sky;
-  ctx.fillRect(0, 0, w, h / 2);
-
-  const flicker = 0.85 + Math.sin(flickerTime * 6) * 0.1 + Math.random() * 0.05;
 
   for (let x = 0; x < w; x++) {
     const rayAngle = player.angle - FOV / 2 + (x / w) * FOV;
     let d = 0;
+    let tile = "0";
 
     while (d < MAX_DEPTH) {
       d += 0.05;
       const tx = Math.floor(player.x + Math.cos(rayAngle) * d);
       const ty = Math.floor(player.y + Math.sin(rayAngle) * d);
-      if (tx < 0 || ty < 0 || tx >= MAP_W || ty >= MAP_H || map[ty][tx] === "1") break;
+      tile = map[ty]?.[tx];
+      if (!tile || tile !== "0") break;
     }
 
     const corrected = d * Math.cos(rayAngle - player.angle);
     const wallH = h / (corrected + 0.0001);
 
-    const distFade   = Math.max(0, 1 - corrected / 8);
-    const centerFade = 1 - Math.abs(x / w - 0.5) * 1.4;
-    const light = Math.max(0, distFade * centerFade * flicker);
+    if (tile === "2") ctx.fillStyle = "rgb(180,60,20)";
+    else ctx.fillStyle = "rgb(120,100,70)";
 
-    const r = 130 + light * 70;
-    const g = 110 + light * 55;
-    const b =  80 + light * 40;
-
-    ctx.fillStyle = `rgb(${r|0}, ${g|0}, ${b|0})`;
     ctx.fillRect(x, (h - wallH) / 2, 1, wallH);
   }
-
-  drawMiniMap();
 }
 
 /* =========================================
@@ -318,24 +306,22 @@ function loop(t) {
   const dt = Math.min((t - last) / 1000, 0.05);
   last = t;
 
-  ctx.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
-
   if (gameRunning) {
     movePlayer(dt);
+    updateFire(dt);
     moveMonster(dt);
     draw3D();
   }
 
-  animationId = requestAnimationFrame(loop);
+  requestAnimationFrame(loop);
 }
 
 /* =========================================
-   BOOT + ENTER HANDLER
+   BOOT
 ========================================= */
 
 window.addEventListener("load", () => {
   const boot = document.getElementById("bootScreen");
-  const container = document.getElementById("gameContainer");
 
   document.addEventListener("keydown", e => {
     if (e.key !== "Enter") return;
@@ -343,30 +329,11 @@ window.addEventListener("load", () => {
 
     state = "playing";
     gameRunning = true;
-    boot.style.opacity = "0";
+    boot.style.display = "none";
 
-    setTimeout(() => {
-      boot.style.display = "none";
-      container.style.display = "block";
-
-      requestAnimationFrame(() => {
-        resizeCanvas();
-        resetGame();
-        last = performance.now();
-        if (animationId) cancelAnimationFrame(animationId);
-        animationId = requestAnimationFrame(loop);
-      });
-    }, 600);
+    resizeCanvas();
+    resetGame();
+    last = performance.now();
+    requestAnimationFrame(loop);
   });
-
-  const brightnessSlider = document.getElementById("brightnessSlider");
-  const gammaSlider = document.getElementById("gammaSlider");
-
-  brightnessSlider?.addEventListener("input", () =>
-    document.documentElement.style.setProperty("--brightness", brightnessSlider.value)
-  );
-  gammaSlider?.addEventListener("input", () =>
-    document.documentElement.style.setProperty("--gamma", gammaSlider.value)
-  );
 });
-``

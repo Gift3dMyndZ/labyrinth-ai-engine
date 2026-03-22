@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <!-- ✅ LOAD STYLESHEET -->
-    <link rel="stylesheet" href="/static/style.css">
+    /static/style.css
 </head>
 
 <body>
@@ -16,7 +16,8 @@
 ========================= -->
 
 <div id="bootScreen" class="screen">
-    <h2 class="glow">LABYRINTH</h2>
+    <!-- ✅ Tartarus glow added, legacy glow preserved -->
+    <h2 class="glow glow-tartarus">LABYRINTH</h2>
     <p class="blink">Press ENTER to begin</p>
 </div>
 
@@ -26,7 +27,8 @@
 
 <div id="gameContainer" style="display:none;">
 
-    <h1 class="title glow">LABYRINTH</h1>
+    <!-- ✅ Title upgraded to Tartarus theme -->
+    <h1 class="title glow glow-tartarus">LABYRINTH</h1>
 
     <div class="crt-wrapper">
         <canvas id="game"></canvas>
@@ -37,20 +39,33 @@
     <div class="controls">
         <label>
             BRIGHTNESS
-            <input type="range" min="0.6" max="1.6" step="0.01" value="1" id="brightnessSlider">
+            <input
+                type="range"
+                min="0.6"
+                max="1.6"
+                step="0.01"
+                value="1"
+                id="brightnessSlider"
+            >
         </label>
 
         <label>
             GAMMA
-            <input type="range" min="0.6" max="1.6" step="0.01" value="1" id="gammaSlider">
+            <input
+                type="range"
+                min="0.6"
+                max="1.6"
+                step="0.01"
+                value="1"
+                id="gammaSlider"
+            >
         </label>
     </div>
 
 </div>
 
 <!-- ✅ LOAD GAME SCRIPT -->
-<script src="/static/game.js"></script>
+/static/game.js</script>
 
 </body>
 </html>
-``
