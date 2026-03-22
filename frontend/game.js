@@ -1,19 +1,18 @@
 /* ==========================================
    LABYRINTH – ARCADE MODE 👾
-   Score + Win + Speed Ramp + Retro Sounds
 ========================================== */
 
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d", { alpha: false });
 
 /* =========================================
-   CANVAS
+   CANVAS RESIZE (PRODUCTION SAFE)
 ========================================= */
 
 function resizeCanvas() {
   const rect = canvas.getBoundingClientRect();
-  canvas.width = rect.width;
-  canvas.height = rect.height;
+  canvas.width = Math.floor(rect.width);
+  canvas.height = Math.floor(rect.height);
 }
 window.addEventListener("resize", resizeCanvas);
 resizeCanvas();
@@ -49,7 +48,7 @@ document.addEventListener("keydown", e => keys[e.key.toLowerCase()] = true);
 document.addEventListener("keyup", e => keys[e.key.toLowerCase()] = false);
 
 /* =========================================
-   AUDIO SYSTEM
+   AUDIO
 ========================================= */
 
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -61,7 +60,6 @@ function beep(freq, duration, type="square", volume=0.2){
 
   osc.type = type;
   osc.frequency.value = freq;
-
   gain.gain.value = volume;
 
   osc.connect(gain);
@@ -84,25 +82,26 @@ function playWinSound(){
 }
 
 /* =========================================
-   MAZE
+   MAZE GENERATION
 ========================================= */
 
 function generateMaze(w, h) {
   w |= 1; h |= 1;
   MAP_W = w; MAP_H = h;
+
   map = Array.from({ length: h }, () => Array(w).fill("1"));
 
-  const stack = [[1, 1]];
+  const stack = [[1,1]];
   map[1][1] = "0";
 
-  while (stack.length) {
-    const [x, y] = stack[stack.length - 1];
+  while(stack.length){
+    const [x,y] = stack[stack.length-1];
     const dirs = [[0,-2],[0,2],[-2,0],[2,0]].sort(()=>Math.random()-0.5);
     let moved = false;
 
-    for (const [dx,dy] of dirs) {
+    for(const [dx,dy] of dirs){
       const nx=x+dx, ny=y+dy;
-      if (nx>0 && ny>0 && nx<w-1 && ny<h-1 && map[ny][nx]==="1") {
+      if(nx>0 && ny>0 && nx<w-1 && ny<h-1 && map[ny][nx]==="1"){
         map[ny][nx]="0";
         map[y+dy/2][x+dx/2]="0";
         stack.push([nx,ny]);
@@ -110,22 +109,19 @@ function generateMaze(w, h) {
         break;
       }
     }
-    if (!moved) stack.pop();
+    if(!moved) stack.pop();
   }
-
-  const goalPos = { x:w-2.5, y:h-2.5 };
 
   return {
     start:{x:1.5,y:1.5},
-    goal:goalPos
+    goal:{x:w-2.5,y:h-2.5}
   };
 }
 
-function resetGame() {
+function resetGame(){
   const m = generateMaze(31,31);
 
   player = { x:m.start.x, y:m.start.y, angle:0 };
-
   goal = m.goal;
 
   monster = {
@@ -147,28 +143,29 @@ resetGame();
 ========================================= */
 
 function cellOpen(x,y){
-  return map[Math.floor(y)]?.[Math.floor(x)]==="0";
+  return map[Math.floor(y)]?.[Math.floor(x)] === "0";
 }
 
 function movePlayer(dt){
   const speed=3*dt;
-  const ca=Math.cos(player.angle), sa=Math.sin(player.angle);
+  const ca=Math.cos(player.angle);
+  const sa=Math.sin(player.angle);
 
   if(keys.w && cellOpen(player.x+ca*speed,player.y+sa*speed)){
-    player.x+=ca*speed; player.y+=sa*speed;
+    player.x+=ca*speed;
+    player.y+=sa*speed;
   }
   if(keys.s && cellOpen(player.x-ca*speed,player.y-sa*speed)){
-    player.x-=ca*speed; player.y-=sa*speed;
+    player.x-=ca*speed;
+    player.y-=sa*speed;
   }
   if(keys.a) player.angle-=2*dt;
   if(keys.d) player.angle+=2*dt;
 }
 
 function moveMonster(dt){
-
-  // ⚡ Speed ramps up over time
-  const elapsed = (performance.now() - startTime) / 1000;
-  monster.speed = monster.baseSpeed + elapsed * 0.08;
+  const elapsed=(performance.now()-startTime)/1000;
+  monster.speed=monster.baseSpeed+elapsed*0.08;
 
   const dx=player.x-monster.x;
   const dy=player.y-monster.y;
@@ -225,7 +222,7 @@ const alien = makeAlien([
 ]);
 
 /* =========================================
-   RENDER 3D
+   3D RENDER
 ========================================= */
 
 function draw3D(){
@@ -271,7 +268,7 @@ function draw3D(){
 }
 
 /* =========================================
-   DEPTH MONSTER
+   MONSTER DEPTH RENDER
 ========================================= */
 
 function drawMonster(depth){
@@ -311,6 +308,50 @@ function drawMonster(depth){
 }
 
 /* =========================================
+   MINI MAP (FIXED)
+========================================= */
+
+function drawMiniMap(){
+
+  const scale=0.2;
+  const tileSize=16;
+  const offsetX=20;
+  const offsetY=20;
+
+  ctx.save();
+  ctx.globalAlpha=0.9;
+
+  ctx.fillStyle="rgb(15,10,25)";
+  ctx.fillRect(offsetX-4,offsetY-4,160,160);
+
+  for(let y=0;y<MAP_H;y++){
+    for(let x=0;x<MAP_W;x++){
+      if(map[y][x]==="1"){
+        ctx.fillStyle="rgb(80,255,80)";
+        ctx.fillRect(
+          offsetX+x*tileSize*scale,
+          offsetY+y*tileSize*scale,
+          tileSize*scale,
+          tileSize*scale
+        );
+      }
+    }
+  }
+
+  ctx.fillStyle="rgb(170,0,255)";
+  ctx.beginPath();
+  ctx.arc(offsetX+player.x*scale,offsetY+player.y*scale,5,0,Math.PI*2);
+  ctx.fill();
+
+  ctx.fillStyle="rgb(0,255,120)";
+  ctx.beginPath();
+  ctx.arc(offsetX+monster.x*scale,offsetY+monster.y*scale,4,0,Math.PI*2);
+  ctx.fill();
+
+  ctx.restore();
+}
+
+/* =========================================
    UI
 ========================================= */
 
@@ -318,24 +359,6 @@ function drawScore(){
   ctx.fillStyle="#00ffcc";
   ctx.font="20px Courier New";
   ctx.fillText("SCORE: "+score,20,30);
-}
-
-function drawGameOver(){
-  ctx.fillStyle="rgba(0,0,0,0.7)";
-  ctx.fillRect(0,0,canvas.width,canvas.height);
-  ctx.fillStyle="#ff0033";
-  ctx.font="bold 80px Courier New";
-  ctx.textAlign="center";
-  ctx.fillText("GAME OVER",canvas.width/2,canvas.height/2);
-}
-
-function drawWin(){
-  ctx.fillStyle="rgba(0,0,0,0.7)";
-  ctx.fillRect(0,0,canvas.width,canvas.height);
-  ctx.fillStyle="#00ff99";
-  ctx.font="bold 80px Courier New";
-  ctx.textAlign="center";
-  ctx.fillText("YOU WIN!",canvas.width/2,canvas.height/2);
 }
 
 /* =========================================
@@ -355,14 +378,13 @@ function loop(t){
 
     movePlayer(dt);
     moveMonster(dt);
+
     draw3D();
-
-    // 💾 Score increases over time
-    score += Math.floor(dt * 100);
-
+    drawMiniMap();
     drawScore();
 
-    // 🏁 Win condition
+    score+=Math.floor(dt*100);
+
     const gx=goal.x-player.x;
     const gy=goal.y-player.y;
     if(Math.hypot(gx,gy)<0.8){
@@ -372,9 +394,6 @@ function loop(t){
     }
   }
 
-  if(gameOver) drawGameOver();
-  if(gameWon) drawWin();
-
   requestAnimationFrame(loop);
 }
 
@@ -382,35 +401,15 @@ function loop(t){
    BOOT
 ========================================= */
 
-const bootScreen = document.getElementById("bootScreen");
-const gameContainer = document.getElementById("gameContainer");
-
-canvas.setAttribute("tabindex", "0");
-
-document.addEventListener("keydown", function(e) {
-
-  if (e.code === "Enter" || e.code === "NumpadEnter") {
-
-    if (audioCtx.state === "suspended") {
-      audioCtx.resume();
-    }
-
-    // Hide boot screen
-    bootScreen.style.display = "none";
-
-    // Show game
-    gameContainer.style.display = "block";
-
-    canvas.focus();
-
+document.addEventListener("keydown",function(e){
+  if(e.code==="Enter"||e.code==="NumpadEnter"){
+    if(audioCtx.state==="suspended") audioCtx.resume();
     resetGame();
-    gameRunning = true;
-    gameOver = false;
-    gameWon = false;
-
-    last = performance.now();
+    gameRunning=true;
+    gameOver=false;
+    gameWon=false;
+    last=performance.now();
   }
-
 });
 
 requestAnimationFrame(loop);

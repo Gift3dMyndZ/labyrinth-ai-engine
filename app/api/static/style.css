@@ -222,9 +222,21 @@ canvas {
 }
 
 @keyframes blink {
-    50% { opacity: 0; }
-}
+    0%, 100% {
+        opacity: 1;
+        text-shadow:
+            0 0 5px #00ff99,
+            0 0 15px #00ff99,
+            0 0 30px #00ffaa;
+    }
 
+    50% {
+        opacity: 0.35;
+        text-shadow:
+            0 0 2px #00ff99,
+            0 0 6px #00ff99;
+    }
+}
 /* =========================================
    RESPONSIVE TWEAKS
 ========================================= */
