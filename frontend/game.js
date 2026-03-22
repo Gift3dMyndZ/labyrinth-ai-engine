@@ -10,9 +10,12 @@ const ctx = canvas.getContext("2d", { alpha: false });
 ========================================= */
 
 function resizeCanvas() {
-  const dpr = window.devicePixelRatio || 1;
-  canvas.width = canvas.clientWidth * dpr;
-  canvas.height = canvas.clientHeight * dpr;
+  const dpr = 1; // LOCK it (instead of window.devicePixelRatio)
+
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 }
 window.addEventListener("resize", resizeCanvas);
@@ -226,7 +229,8 @@ let alienFrame=0, alienTimer=0;
 ========================================= */
 
 function drawSprite(x,y,tex,depth){
-  const w=canvas.clientWidth,h=canvas.clientHeight;
+  const w = canvas.width;
+  const h = canvas.height;
   const dirX=Math.cos(player.angle),dirY=Math.sin(player.angle);
   const planeX=-dirY*Math.tan(FOV/2);
   const planeY= dirX*Math.tan(FOV/2);
@@ -307,26 +311,41 @@ function draw3D(){
 /* =========================================
    LOOP
 ========================================= */
+let last = 0;
 
-let last=0;
-function loop(t){
-  const dt=Math.min((t-last)/1000,0.05);
-  last=t;
+function loop(t) {
+  const dt = Math.min((t - last) / 1000, 0.05);
+  last = t;
 
-  ctx.clearRect(0,0,canvas.clientWidth,canvas.clientHeight);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  if(gameRunning){
+  if (gameRunning) {
+
     movePlayer(dt);
     moveMonster(dt);
-    alienTimer+=dt;
-    if(alienTimer>0.3){
-      alienTimer=0;
-      alienFrame^=1;
+
+    alienTimer += dt;
+    if (alienTimer > 0.3) {
+      alienTimer = 0;
+      alienFrame ^= 1;
     }
+
     draw3D();
+    drawMiniMap();
+
+    // 🔴 Danger screen tint
+    const dx = player.x - monster.x;
+    const dy = player.y - monster.y;
+    const dist = Math.hypot(dx, dy);
+    const danger = Math.max(0, 1 - dist / 8);
+
+    if (danger > 0) {
+      ctx.fillStyle = `rgba(255,0,0,${danger * 0.25})`;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
   }
 
-  requestAnimationFrame(loop); // ✅ REQUIRED
+  requestAnimationFrame(loop);
 }
 /* =========================================
    BOOT CONTROL
@@ -357,3 +376,83 @@ document.addEventListener("keydown", function (e) {
     requestAnimationFrame(loop);
   }
 });
+function drawMiniMap() {
+
+  const scale = 0.2; // mini map scale
+  const tileSize = 16;
+
+  const mapWidth = map[0].length;
+  const mapHeight = map.length;
+
+  const miniWidth = mapWidth * tileSize * scale;
+  const miniHeight = mapHeight * tileSize * scale;
+
+  const offsetX = canvas.width / 20;
+  const offsetY = canvas.height / 20;
+
+  ctx.save();
+  ctx.shadowColor = "rgba(0,255,0,0.6)";
+  ctx.shadowBlur = 8;
+  ctx.globalAlpha = 0.85;
+
+  // Background
+  ctx.fillStyle = "rgb(0,20,0)";
+  ctx.fillRect(offsetX - 4, offsetY - 4, miniWidth + 8, miniHeight + 8);
+
+  // Draw walls
+  for (let y = 0; y < mapHeight; y++) {
+    for (let x = 0; x < mapWidth; x++) {
+      if (map[y][x] === "1") {
+        ctx.fillStyle = "rgb(0,255,0)";
+        ctx.fillRect(
+          offsetX + x * tileSize * scale,
+          offsetY + y * tileSize * scale,
+          tileSize * scale,
+          tileSize * scale
+        );
+      }
+    }
+  }
+
+  // Player
+  ctx.fillStyle = "rgb(255,0,0)";
+  ctx.beginPath();
+  ctx.arc(
+    offsetX + player.x * scale,
+    offsetY + player.y * scale,
+    4,
+    0,
+    Math.PI * 2
+  );
+  ctx.fill();
+
+  // Player direction
+  ctx.strokeStyle = "rgba(255,0,0,0.3)";
+  ctx.beginPath();
+  ctx.moveTo(
+    offsetX + player.x * scale,
+    offsetY + player.y * scale
+  );
+  ctx.lineTo(
+    offsetX + (player.x + Math.cos(player.angle - FOV/2) * 20) * scale,
+    offsetY + (player.y + Math.sin(player.angle - FOV/2) * 20) * scale
+  );
+  ctx.lineTo(
+    offsetX + (player.x + Math.cos(player.angle + FOV/2) * 20) * scale,
+    offsetY + (player.y + Math.sin(player.angle + FOV/2) * 20) * scale
+  );
+  ctx.closePath();
+  ctx.stroke();
+
+  // Monster
+  ctx.fillStyle = "rgb(0,255,120)";
+  ctx.beginPath();
+  ctx.arc(
+    offsetX + monster.x * scale,
+    offsetY + monster.y * scale,
+    4,
+    0,
+    Math.PI * 2
+  );
+  ctx.fill();
+}
