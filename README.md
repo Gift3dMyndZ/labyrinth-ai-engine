@@ -28,7 +28,7 @@ The labyrinth watches. It learns. It adapts.
 
 ## 🎮 Live Demo
 
-### 🔥### 🔥 [Play Labyrinth of Tartarus](https://labyrinth-ai-engine-1.onrender.com) 🔥🔥
+### 🔥 [Play Labyrinth of Tartarus](https://labyrinth-ai-engine-1.onrender.com) 🔥🔥
 
 > Free tier — first load may take ~30s to wake up.
 
