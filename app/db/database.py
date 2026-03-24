@@ -2,29 +2,34 @@
 Tartarus Database Layer
 SQLite with raw queries — no ORM overhead
 """
-
 import sqlite3
 import os
 import threading
 from datetime import datetime, timezone
 
-DB_PATH = os.getenv("DATABASE_URL", "sqlite:///./tartarus.db").replace("sqlite:///", "")
+
+# Use /tmp on Render (writable), or local data/ for dev
+DB_PATH = os.environ.get("DATABASE_URL", "data/tartarus.db").replace("sqlite:///", "")
+
+# If path is relative like "data/tartarus.db", default to /tmp on Render
+if not os.path.isabs(DB_PATH) and os.environ.get("RENDER"):
+    DB_PATH = "/tmp/tartarus.db"
 
 _local = threading.local()
 
 
 def get_connection():
-    """Thread-local SQLite connection."""
     if not hasattr(_local, "conn") or _local.conn is None:
+        # Ensure directory exists
+        os.makedirs(os.path.dirname(DB_PATH) or ".", exist_ok=True)
         _local.conn = sqlite3.connect(DB_PATH)
-        _local.conn.row_factory = sqlite3.Row
         _local.conn.execute("PRAGMA journal_mode=WAL")
         _local.conn.execute("PRAGMA foreign_keys=ON")
+        _local.conn.row_factory = sqlite3.Row
     return _local.conn
 
 
 def init_db():
-    """Create tables if they don't exist."""
     conn = get_connection()
     conn.executescript("""
         CREATE TABLE IF NOT EXISTS telemetry (

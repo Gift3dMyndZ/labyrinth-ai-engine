@@ -8,4 +8,4 @@ numpy>=1.26.4
 pandas>=2.2.2
 scipy>=1.13.1
 joblib>=1.4.2
-EOF
+uvicorn>=0.30.0
