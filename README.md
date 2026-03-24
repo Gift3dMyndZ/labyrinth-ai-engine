@@ -19,6 +19,13 @@ real-time behavioral telemetry.
 
 Built entirely from scratch — no game engine, no 3D library, no shortcuts.
 
+**A first-person procedural maze crawler with adaptive AI, built in pure JavaScript + Python.**
+
+The labyrinth watches. It learns. It adapts.
+
+<img width="1757" height="1261" alt="Labyrinth" src="https://github.com/user-attachments/assets/4c295120-33cb-4198-a0b2-570a9c89efbd" />
+
+
 ## 🎮 Live Demo
 
 ### 🔥 [https://labyrinth-of-tartarus.onrender.com](https://labyrinth-of-tartarus.onrender.com) 🔥
