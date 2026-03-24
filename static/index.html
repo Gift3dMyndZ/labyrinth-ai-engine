@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>LABYRINTH OF TARTARUS</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- BOOT SCREEN -->
+<div id="bootScreen" class="screen">
+    <h2 class="glow">ΤΑΡΤΑΡΟΣ</h2>
+    <p class="subtitle">LABYRINTH OF TARTARUS</p>
+    <p class="blink">Press ENTER to descend</p>
+</div>
+
+<!-- GAME CONTAINER -->
+<div id="gameContainer">
+    <h1 class="title glow">LABYRINTH OF TARTARUS</h1>
+    <div class="crt-wrapper">
+        <canvas id="game"></canvas>
+        <div class="scanlines"></div>
+    </div>
+    <div class="controls">
+        <label>BRIGHTNESS
+            <input type="range" min="0.6" max="1.6" step="0.01" value="1" id="brightnessSlider">
+        </label>
+        <label>GAMMA
+            <input type="range" min="0.6" max="1.6" step="0.01" value="1" id="gammaSlider">
+        </label>
+    </div>
+</div>
+
+<script src="game.js"></script>
+</body>
+</html>

@@ -1,10 +1,10 @@
-# 🧩 LABYRINTH 🧩
+# 🧩 LABYRINTH OF TARTARUS 🧩
 
 ## Adaptive Raycasting AI Simulation Engine
 
-LABYRINTH is a browser-based 3D raycasting engine integrated with a full-stack machine learning backend that dynamically adapts survival difficulty based on real-time behavioral telemetry.
-
-It combines low-level graphics programming with production-style ML architecture inside a modular simulation platform.
+A first-person raycasting maze game set in Greek mythology's Tartarus.
+Navigate concentric ring mazes while hunted by an AI monster that
+learns your behavior through telemetry clustering.
 
 ![Python](https://pfst.cf2.poecdn.net/base/image/eb0a896e8374c4fd9444d205422f34ab733dea13b665cfdbfcd909ebb940b5bd?pmaid=587912115)
 ![FastAPI](https://pfst.cf2.poecdn.net/base/image/3e6659a8a421f5cb805567db450f3617c21b02fc62e3c268e7a86d6e8e33a4cc?pmaid=587912116)
