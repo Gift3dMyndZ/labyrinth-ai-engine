@@ -27,12 +27,6 @@ Built entirely from scratch — no game engine, no 3D library, no shortcuts.
 
 ---
 
-## 📸 Screenshots
-
-![Tartarus Gameplay](https://raw.githubusercontent.com/Gift3dMyndZ/labyrinth-ai-engine/main/static/screenshot.png)
-
----
-
 ## 🏛️ What Is This?
 
 You are trapped in the **Labyrinth of Tartarus** — a procedurally generated
