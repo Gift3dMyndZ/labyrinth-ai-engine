@@ -1,60 +1,93 @@
-# 🧩 LABYRINTH OF TARTARUS 🧩
+# 🔥 LABYRINTH OF TARTARUS 🔥
 
-## Adaptive Raycasting AI Simulation Engine
+### ΤΑΡΤΑΡΟΣ — Adaptive Raycasting AI Simulation Engine
 
-A first-person raycasting maze game set in Greek mythology's Tartarus.
-Navigate concentric ring mazes while hunted by an AI monster that
-learns your behavior through telemetry clustering.
-
-![Python](https://pfst.cf2.poecdn.net/base/image/eb0a896e8374c4fd9444d205422f34ab733dea13b665cfdbfcd909ebb940b5bd?pmaid=587912115)
-![FastAPI](https://pfst.cf2.poecdn.net/base/image/3e6659a8a421f5cb805567db450f3617c21b02fc62e3c268e7a86d6e8e33a4cc?pmaid=587912116)
-![SQLite](https://pfst.cf2.poecdn.net/base/image/c31e1e16b33ad45d4492179818eb80d827556269628f8a0fbb82922af611cee0?pmaid=587912117)
-![Docker](https://pfst.cf2.poecdn.net/base/image/3111f6a8fee083ed1ec8b43f904cc99eb163e57f72afe6a054602142dcc51642?pmaid=587912114)
-![License](https://pfst.cf2.poecdn.net/base/image/2c89badab92b5ee0afea1a6328677fab597eaa5d90b21f6a29384f9eaac3cbc0?pmaid=587912113)
-
-![LLM](https://img.shields.io/badge/LLM-Integrated-purple)
-![ML](https://img.shields.io/badge/Machine%20Learning-Enabled-orange)
-![ML Pipeline](https://img.shields.io/badge/ML-Pipeline%20Separated-orange)
-![AI Story Engine](https://img.shields.io/badge/AI-Story%20Engine-ff00ff)
-![CI](https://img.shields.io/github/actions/workflow/status/Gift3dMyndZ/labyrinth-ai-engine/main.yml?branch=main)
-
-![Deployment](https://img.shields.io/badge/Deployment-Render-46E3B7)
-![Tests](https://img.shields.io/badge/Tests-Pytest-blue)
-![Coverage](https://img.shields.io/badge/Coverage-85%25-brightgreen)
-![Model](https://img.shields.io/badge/Model-Scikit--Learn-orange)
-![Docs](https://img.shields.io/badge/API-OpenAPI-success)
-![Version](https://img.shields.io/github/v/tag/Gift3dMyndZ/labyrinth-ai-engine)
-
-![Python](https://img.shields.io/badge/Python-3.9%2B-blue)
-![Code Style](https://img.shields.io/badge/code%20style-black-000000.svg)
-![Architecture](https://img.shields.io/badge/Architecture-Service--Oriented-blueviolet)
-![Telemetry](https://img.shields.io/badge/Telemetry-Real--Time-red)
-![Inference](https://img.shields.io/badge/Inference-Online-success)
+![Python 3.9+](https://img.shields.io/badge/Python-3.9+-blue?logo=python)
+![FastAPI](https://img.shields.io/badge/FastAPI-API-green?logo=fastapi)
+![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-yellow?logo=javascript)
+![SQLite](https://img.shields.io/badge/Database-SQLite-lightblue)
+![License MIT](https://img.shields.io/badge/License-MIT-green)
+![AI Powered](https://img.shields.io/badge/AI-Powered-red)
 
 ---
 
-### Core Capabilities
-- Custom 3D raycasting renderer (no external libraries)
+> *Descend into the labyrinth. The walls remember. The Minotaur adapts.*
 
-- Procedural maze generation (iterative DFS / recursive backtracking)
+A browser-based 3D raycasting survival horror engine with a full-stack
+machine learning backend that dynamically adapts difficulty based on
+real-time behavioral telemetry.
 
-- Axis-separated collision detection with radius prevention
+Built entirely from scratch — no game engine, no 3D library, no shortcuts.
 
-- Real-time distance shading
+## 🎮 Live Demo
 
-- Device-pixel optimized floor rendering via ImageData
+### 🔥 [https://labyrinth-of-tartarus.onrender.com](https://labyrinth-of-tartarus.onrender.com) 🔥
 
-- Steering-based AI pursuit behavior
+> Free tier — first load may take ~30s to wake up.
 
-- Minimap overlay (player, monster, goal tracking)
+---
 
-- DPR-aware canvas scaling
+## 📸 Screenshots
 
-- CRT-inspired retro rendering aesthetic
+![Tartarus Gameplay](https://raw.githubusercontent.com/Gift3dMyndZ/labyrinth-ai-engine/main/static/screenshot.png)
 
-- Game state boot + restart system
+---
 
-- The engine is designed to demonstrate real-time rendering fundamentals, procedural systems, and deterministic game loop architecture.
+## 🏛️ What Is This?
+
+You are trapped in the **Labyrinth of Tartarus** — a procedurally generated
+3D maze inspired by Greek mythology. A creature stalks the corridors.
+It learns from your behavior. Every run is different.
+
+**This is not a game built with Unity or Unreal.**
+
+Every pixel is calculated from raw math:
+- Raycasting angles computed per screen column
+- Wall distances projected into perspective
+- Floor textures rendered with device-pixel optimization
+- Monster AI driven by steering behaviors
+
+The backend tracks your fear, aggression, and curiosity in real time,
+clustering player behavior to adapt the difficulty curve.
+
+---
+
+## ⚡ Core Features
+
+### 🎯 Raycasting Engine (Pure JavaScript)
+- Wolfenstein-style 3D renderer — zero external libraries
+- Real-time distance shading with brightness/gamma controls
+- CRT scanline post-processing aesthetic
+- DPR-aware canvas scaling for retina displays
+- Textured floor rendering via ImageData pixel manipulation
+
+### 🧠 AI Monster System
+- Steering-based pursuit with wall avoidance
+- State machine: `PATROLLING` → `CHASING` → `HUNTING`
+- Behavioral adaptation based on player telemetry
+- Difficulty multiplier scales per ring descent
+
+### 🗺️ Procedural Generation
+- Recursive backtracking maze algorithm
+- Guaranteed solvable paths to exit
+- Progressive ring system — deeper = harder
+- Dynamic maze size scaling
+
+### 📊 ML Backend (FastAPI + SQLite)
+- Real-time telemetry ingestion
+- Player behavior clustering (K-Means)
+- Difficulty recommendation engine
+- Session replay buffer for training
+- Leaderboard with score calculations
+
+### 🎨 Visual Design
+- Hellfire orange color palette
+- CRT monitor aesthetic with scanlines
+- Glowing text and UI elements
+- Minimap with real-time tracking
+- Boot screen with Greek typography
+
+--
 
 
 ##  🎮 Controls
@@ -67,197 +100,148 @@ learns your behavior through telemetry clustering.
 
 ##  🖱️ Click – Restart after defeat
 
-# 🚀 Live Demo
-### 🧩 (https://labyrinth-ai-engine.onrender.com) 🧩
 
-## 🎮 Features
 
-- 3D raycasting engine (Wolfenstein-style rendering)
-- Procedural maze generation using recursive backtracking
-- Textured floor rendering with device-pixel optimization
-- Real-time distance shading
-- AI-driven pursuing monster with steering behavior
-- Minimap overlay with player/goal/monster tracking
-- Boot screen state management
-- Restart system
-- DPR-aware canvas scaling
-- CRT retro visual aesthetic
+### 🧠 System Overview
 
-## 🧠 Technical Highlights
-
-- Custom raycasting implementation (no external libraries)
-- Axis-separated collision with radius prevention
-- Device-pixel optimized ImageData floor rendering
-- Steering-based AI pursuit system
-- Infrastructure-ready production structure
-
-## 🛠 Tech Stack
-
-- JavaScript (ES6+)
-- HTML5 Canvas
-- CSS3 (CRT visual effects)
-- Procedural texture generation
-- Git version control
-This project demonstrates production-style ML architecture inside an interactive simulation system.
-
----
+```
+LABYRINTH is structured as a full-stack ML simulation platform.
+labyrinth-ai-engine/
+├── app/
+│ ├── init.py
+│ ├── main.py # FastAPI application entry
+│ ├── config.py # Environment configuration
+│ ├── db/
+│ │ ├── init.py
+│ │ └── database.py # Raw SQLite — no ORM overhead
+│ ├── routes/
+│ │ ├── init.py
+│ │ ├── game.py # Stats & leaderboard endpoints
+│ │ └── telemetry.py # Telemetry ingestion API
+│ └── services/
+│ ├── init.py
+│ ├── features.py # Feature extraction pipeline
+│ ├── player_clustering.py # K-Means behavioral clustering
+│ ├── recommender.py # Difficulty adaptation engine
+│ ├── story_engine.py # Narrative event system
+│ ├── telemetry_logger.py
+│ └── telemetry_service.py
+├── static/
+│ ├── index.html # Game shell
+│ ├── style.css # CRT aesthetic
+│ └── game.js # Entire 3D engine (~2000 lines)
+├── tests/
+│ └── init.py
+├── requirements.txt
+├── Dockerfile
+├── .gitignore
+├── LICENSE
+└── README.md
+```
+Browser → Telemetry → FastAPI → ML Engine → Adaptive Output → Story Engine
 
 ## 🏗 System Architecture
 ```
-┌──────────────────────────┐
-│        Browser UI        │
-│  Raycasting + Telemetry  │
-└─────────────┬────────────┘
-              │
-              ▼
-┌──────────────────────────┐
-│        FastAPI API       │
-│  /telemetry  /train      │
-└─────────────┬────────────┘
-              │
-   ┌──────────┼──────────┐
-   ▼          ▼          ▼
-┌──────────┐ ┌──────────┐ ┌────────────┐
-│ ML Engine│ │ Story    │ │ Leaderboard│
-│Inference │ │ Engine   │ │ Analytics  │
-└──────────┘ └──────────┘ └────────────┘
-        │
-        ▼
-┌────────────────────────┐
-│ Adaptive Difficulty +  │
-│ Narrative Modulation   │
-└────────────────────────┘
+┌─────────────────────────────────┐
+│ Browser Client │
+│ 3D Raycasting + Telemetry TX │
+└───────────────┬─────────────────┘
+│
+▼
+┌─────────────────────────────────┐
+│ FastAPI Backend │
+│ /health /telemetry /game │
+└───────────────┬─────────────────┘
+│
+┌────────────┼────────────┐
+▼ ▼ ▼
+┌──────────┐ ┌───────────┐ ┌─────────────┐
+│ ML Engine│ │ Story │ │ Leaderboard │
+│ K-Means │ │ Engine │ │ Analytics │
+│ Clusters │ │ Narrative │ │ Rankings │
+└─────┬────┘ └─────┬─────┘ └──────┬──────┘
+│ │ │
+▼ ▼ ▼
+┌─────────────────────────────────────────┐
+│ SQLite (WAL Mode) │
+│ telemetry │ replay_buffer │ leaderboard│
+└───────────────────┬─────────────────────┘
+│
+▼
+┌─────────────────────────────────────────┐
+│ Adaptive Difficulty Engine │
+│ │
+│ Player Telemetry → Feature Extraction │
+│ → Behavioral Clustering → Archetype │
+│ → Difficulty Modifier → Game Engine │
+│ │
+│ 🏃 Runners → Faster monster │
+│ ⚔️ Fighters → Larger mazes │
+│ 🔍 Explorers → Complex layouts │
+└─────────────────────────────────────────┘
 ```
+### 📡 API Endpoints
+```
+Method	Endpoint	Description
+GET	/health	Service health check
+GET	/api/game/stats	Aggregate gameplay statistics
+GET	/api/game/leaderboard	Top survival scores
+POST	/api/telemetry/log	Ingest telemetry data
+GET	/api/telemetry/history/{session_id}	Session telemetry history
+```
+### 🧠 How the ML Pipeline Works
+```
+Player Actions
+     ↓
+Telemetry Logger → SQLite (fear, aggression, curiosity)
+     ↓
+Feature Extraction → Behavioral vectors
+     ↓
+K-Means Clustering → Player archetype identification
+     ↓
+Recommender Engine → Difficulty modifier (0.5x – 3.0x)
+     ↓
+Game Engine ← Adapted monster speed, maze size, spawn rates
+```
+## Player Archetypes:
 
-### 🧠 System Overview
-LABYRINTH is structured as a full-stack ML simulation platform.
+🏃 Runners — High fear, low aggression → Faster monster
+⚔️ Fighters — High aggression, low fear → Larger mazes
+🔍 Explorers — High curiosity → More complex layouts
 
-Browser → Telemetry → FastAPI → ML Engine → Adaptive Output → Story Engine
+## 📊 Database Schema
+```
+sql
+telemetry    — Per-tick behavioral snapshots
+leaderboard  — Top scores with difficulty weighting
+replay_buffer — Training data for clustering pipeline
+```
+### All queries are raw SQL. No ORM. Zero abstraction overhead.
 
-### 🖥 Frontend
-- Vanilla JavaScript raycasting renderer
-- Player movement + collision system
-- Monster AI pursuit logic
-- Survival time
-- Dynamic difficulty adjustments
+## 🔥 Technical Highlights
+Custom raycasting — Every 3D frame calculated from trigonometry
+No game engine — Pure <canvas> 2D context, no WebGL
+Sub-16ms frame budget — Smooth 60fps rendering
+Thread-local SQLite — Safe concurrent access with WAL
+Steering AI — Monster uses velocity-based pursuit, not pathfinding
+CRT shader — Pure CSS scanline + vignette post-processing
 
-### ⚙ Backend (FastAPI)
-- REST API architecture
-- Telemetry ingestion endpoint
-- ML inference service
-- Optional training trigger endpoint
-- Analytics hooks
-- Service-layer abstraction
+## 🛣️ Roadmap
+ Multi-floor descent with progressive difficulty
+ Sound engine — procedural audio cues
+ WebSocket real-time telemetry streaming
+ LLM-driven narrative events
+ Multiplayer spectator mode
+ Mobile touch controls
 
+## 📜 License
+MIT License — see LICENSE
 
-### POST /train
-
-Trigger model retraining (if enabled in configuration).
-
-Example Response:
-```josn
-{
-  "status": "training_started"
-}
-```
-
-### 🔹 Online Inference
-
-Located in:
-```
-app/services/ml_engine.py
-```
----
-
-## ⚙️ Local Development (macOS)
-
-### ✅ Requirements
-- macOS
-- Python 3.9+
-- Git
-### Verify Python installation:
-```
-bash
-python3 --version
-```
-### 1️⃣ Clone the Repository
-```
-bash
-git clone https://github.com/Gift3dMyndZ/labyrinth-ai-engine.git
-cd labyrinth-ai-engine
-```
-### 2️⃣ Create & Activate Virtual Environment
-```
-bash
-python3 -m venv venv
-source venv/bin/activate
-```
-
-### 3️⃣ Install Dependencies
-```
-bash
-pip install --upgrade pip
-pip install -r requirements.txt
-```
-### 4️⃣ Run the Application
-```
-bash
-uvicorn app.api.main:app --reload
-```
-
-#### If uvicorn is not recognized:
-```
-bash
-python3 -m uvicorn app.api.main:app --reload
-```
-
-### 5️⃣ Open in Browser
-
-http://127.0.0.1:8000
-
-### ✅ Notes
-- macOS uses python3 by default.
-- The --reload flag enables auto-restart during development.
-- Ensure models/model.pkl exists before running inference.
-
----
-
-## 🐳 Docker Deployment
-
-Build container:
-```
-docker build -t labyrinth-ai-engine .
-```
-Run container:
-```
-docker run -p 8000:8000 labyrinth-ai-engine
-```
----
-## 🔬 Design Principles
-```
-- Separation of concerns  
-- Modular architecture  
-- Reproducible ML workflows  
-- Clear training vs inference boundary  
-- Production-oriented folder structure 
-- Clean import safety via __init__.py   
-```
----
-
-## 🛣 Roadmap
-```
-- Behavioral clustering  
-- Hybrid psychological + telemetry modeling  
-- Persistent database integration  
-- Real-time difficulty recalibration  
-- CI/CD automation
-- Model versioning and artifact tracking
-- Cloud scaling configuration
-```
----
 
 # 👤 Author
 
 ## Developed by - Joshua Wolfe
 
-If you found this interesting, consider starring the repository ⭐
+Built from scratch as a full-stack AI engineering portfolio project.
+
+No Unity. No Unreal. No Three.js. Just math and madness. 🔥
