@@ -1,23 +1,26 @@
+<div align="center">
+
 # 🔥 LABYRINTH OF TARTARUS 🔥
 
 ### ΤΑΡΤΑΡΟΣ — Adaptive Raycasting AI Simulation Engine
 
-![Python 3.9+](https://img.shields.io/badge/Python-3.9+-blue?logo=python)
-![FastAPI](https://img.shields.io/badge/FastAPI-API-green?logo=fastapi)
-![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-yellow?logo=javascript)
-![SQLite](https://img.shields.io/badge/Database-SQLite-lightblue)
-![License MIT](https://img.shields.io/badge/License-MIT-green)
-![AI Powered](https://img.shields.io/badge/AI-Powered-red)
+[![Python](https://img.shields.io/badge/Python-3.9+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
+[![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
+[![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)](https://developer.mozilla.org)
+[![SQLite](https://img.shields.io/badge/SQLite-003B57?style=for-the-badge&logo=sqlite&logoColor=white)](https://sqlite.org)
+[![License](https://img.shields.io/badge/License-MIT-red?style=for-the-badge)](LICENSE)
+[![AI Powered](https://img.shields.io/badge/🧠_AI-Powered-FF4500?style=for-the-badge)](#-the-oracle--adaptive-ai-engine)
 
 ---
 
-> *Descend into the labyrinth. The walls remember. The Minotaur adapts.*
+*"τὸ λαβύρινθον τοῦ Ταρτάρου — Where Mortals Are Tested by Machine"*
 
-A browser-based 3D raycasting survival horror engine with a full-stack
-machine learning backend that dynamically adapts difficulty based on
-real-time behavioral telemetry.
+A first-person raycasting dungeon crawler powered by an adaptive AI engine that learns how you play, dynamically reshaping the labyrinth, enemy behavior, and difficulty in real time.
 
-Built entirely from scratch — no game engine, no 3D library, no shortcuts.
+</div>
+
+---
+
 
 **A first-person procedural maze crawler with adaptive AI, built in pure JavaScript + Python.**
 
@@ -34,215 +37,396 @@ The labyrinth watches. It learns. It adapts.
 
 ---
 
-## 🏛️ What Is This?
 
-You are trapped in the **Labyrinth of Tartarus** — a procedurally generated
-3D maze inspired by Greek mythology. A creature stalks the corridors.
-It learns from your behavior. Every run is different.
+## 🏛 Overview
 
-**This is not a game built with Unity or Unreal.**
+**Labyrinth of Tartarus** is a browser-based, first-person dungeon crawler that uses raycasting rendering inspired by classic titles like Wolfenstein 3D, combined with a modern adaptive AI backend. The game places players in a procedurally generated labyrinth modeled after the mythological Tartarus — the deepest abyss of the Greek underworld.
 
-Every pixel is calculated from raw math:
-- Raycasting angles computed per screen column
-- Wall distances projected into perspective
-- Floor textures rendered with device-pixel optimization
-- Monster AI driven by steering behaviors
-
-The backend tracks your fear, aggression, and curiosity in real time,
-clustering player behavior to adapt the difficulty curve.
+What sets this project apart is **The Oracle**, an AI simulation engine that observes player behavior in real time and continuously adapts the game world. Walls shift, enemies evolve, traps relocate, and the difficulty curve reshapes itself based on how you move, fight, and explore.
 
 ---
 
-## ⚡ Core Features
+## ✨ Features
 
-### 🎯 Raycasting Engine (Pure JavaScript)
-- Wolfenstein-style 3D renderer — zero external libraries
-- Real-time distance shading with brightness/gamma controls
-- CRT scanline post-processing aesthetic
-- DPR-aware canvas scaling for retina displays
-- Textured floor rendering via ImageData pixel manipulation
+### 🎮 Core Gameplay
+- **First-person raycasting engine** rendered entirely in the browser using HTML5 Canvas
+- **Procedurally generated labyrinths** with configurable size, complexity, and theme
+- **Real-time combat system** with melee and ranged mechanics
+- **Inventory and resource management** — torches, health potions, keys, and ancient relics
+- **Multiple dungeon floors** with increasing depth and danger
 
-### 🧠 AI Monster System
-- Steering-based pursuit with wall avoidance
-- State machine: `PATROLLING` → `CHASING` → `HUNTING`
-- Behavioral adaptation based on player telemetry
-- Difficulty multiplier scales per ring descent
+### 🧠 Adaptive AI
+- **Behavioral profiling** — the engine tracks movement patterns, combat tendencies, exploration habits, and decision-making speed
+- **Dynamic difficulty adjustment (DDA)** that goes beyond simple scaling — the world itself changes
+- **Enemy evolution** — creatures adapt tactics based on how you've defeated them before
+- **Procedural trap placement** guided by player path prediction
+- **Loot balancing** — resource scarcity and reward placement respond to player performance
 
-### 🗺️ Procedural Generation
-- Recursive backtracking maze algorithm
-- Guaranteed solvable paths to exit
-- Progressive ring system — deeper = harder
-- Dynamic maze size scaling
+### 🏗 Technical
+- **Modular Python backend** powered by FastAPI with WebSocket support for real-time communication
+- **SQLite persistence layer** for player profiles, session history, and AI model state
+- **RESTful API** for game state management, leaderboards, and configuration
+- **Lightweight frontend** with zero external framework dependencies — pure vanilla JavaScript
+- **Sub-50ms server response times** for seamless real-time gameplay
 
-### 📊 ML Backend (FastAPI + SQLite)
-- Real-time telemetry ingestion
-- Player behavior clustering (K-Means)
-- Difficulty recommendation engine
-- Session replay buffer for training
-- Leaderboard with score calculations
+---
 
-### 🎨 Visual Design
-- Hellfire orange color palette
-- CRT monitor aesthetic with scanlines
-- Glowing text and UI elements
-- Minimap with real-time tracking
-- Boot screen with Greek typography
+## 🧿 The Oracle — Adaptive AI Engine
 
---
+The Oracle is the heart of the Labyrinth of Tartarus. It is a multi-layered AI system that sits between the game world and the player, continuously observing and reacting.
 
+### How It Works
 
-##  🎮 Controls
+**Layer 1 — Observation**
+Every player action is captured as a timestamped event: movement direction, time between inputs, combat choices, items used, rooms explored vs. ignored, and even hesitation patterns. These events are streamed to the backend over WebSocket.
 
-### 🕹️ W / S – Move forward / backward
+**Layer 2 — Profiling**
+The engine maintains a rolling behavioral profile for each player session. Profiles are categorized along several axes: aggression (rusher vs. cautious), exploration (completionist vs. speedrunner), resource usage (hoarder vs. spender), and adaptability (pattern-follower vs. improviser).
 
-### 🕹️ A / D – Turn left / right
+**Layer 3 — World Mutation**
+Based on the active profile, The Oracle issues world mutation commands. These can include: sealing previously open corridors, spawning enemies with counter-tactics, adjusting lighting and visibility, relocating key items, and introducing environmental hazards along predicted paths.
 
-### 👾 ENTER – Start game
+**Layer 4 — Feedback Loop**
+After each mutation, the engine measures the player's response. Did they panic? Adapt? Backtrack? This feedback refines the profile and informs the next cycle of mutations. The result is a living dungeon that feels personally adversarial.
 
-##  🖱️ Click – Restart after defeat
+### Difficulty Philosophy
 
+The Oracle does not aim to make the game harder or easier. It aims to keep the player in a **flow state** — the psychological zone between boredom and frustration where engagement is highest. If you're breezing through, the labyrinth will tighten. If you're struggling, it may offer a hidden passage or a well-timed health drop — but never obviously enough to feel artificial.
 
+---
 
-### 🧠 System Overview
+## 🏗 Architecture
 
 ```
-LABYRINTH is structured as a full-stack ML simulation platform.
-labyrinth-ai-engine/
+┌─────────────────────────────────────────────────────┐
+│                    BROWSER CLIENT                    │
+│                                                     │
+│  ┌─────────────┐  ┌──────────┐  ┌───────────────┐  │
+│  │  Raycaster   │  │  Input   │  │  UI Overlay   │  │
+│  │  Renderer    │  │  Handler │  │  (HUD/Menu)   │  │
+│  └──────┬──────┘  └────┬─────┘  └───────┬───────┘  │
+│         │              │                │           │
+│         └──────────────┼────────────────┘           │
+│                        │                            │
+│                   WebSocket                         │
+└────────────────────────┼────────────────────────────┘
+                         │
+                         ▼
+┌────────────────────────┼────────────────────────────┐
+│                  FASTAPI SERVER                      │
+│                        │                            │
+│  ┌─────────────────────▼─────────────────────────┐  │
+│  │              Game State Manager                │  │
+│  └──┬──────────────┬────────────────┬────────────┘  │
+│     │              │                │               │
+│     ▼              ▼                ▼               │
+│  ┌──────┐   ┌───────────┐   ┌────────────────┐     │
+│  │ Map  │   │  Combat   │   │   The Oracle   │     │
+│  │ Gen  │   │  Engine   │   │   (AI Engine)  │     │
+│  └──┬───┘   └─────┬─────┘   └───────┬────────┘     │
+│     │             │                  │              │
+│     └─────────────┼──────────────────┘              │
+│                   │                                 │
+│                   ▼                                 │
+│           ┌──────────────┐                          │
+│           │    SQLite    │                          │
+│           │   Database   │                          │
+│           └──────────────┘                          │
+└─────────────────────────────────────────────────────┘
+```
+
+---
+
+## 🛠 Tech Stack
+
+| Layer       | Technology                          |
+|-------------|-------------------------------------|
+| Frontend    | HTML5 Canvas, Vanilla JavaScript    |
+| Backend     | Python 3.9+, FastAPI, Uvicorn       |
+| AI Engine   | Custom Python (NumPy, SciPy)        |
+| Database    | SQLite with aiosqlite               |
+| Transport   | WebSocket (real-time), REST (config) |
+| Map Gen     | Custom procedural generation module  |
+| Testing     | pytest, Jest                        |
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- **Python 3.9** or higher
+- **Node.js 16+** (optional, for frontend dev tooling)
+- **Git**
+
+### Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/labyrinth-of-tartarus.git
+cd labyrinth-of-tartarus
+
+# Create a virtual environment
+python -m venv venv
+source venv/bin/activate        # macOS/Linux
+# venv\Scripts\activate          # Windows
+
+# Install Python dependencies
+pip install -r requirements.txt
+
+# Initialize the database
+python scripts/init_db.py
+```
+
+### Running the Application
+
+```bash
+# Start the backend server
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+
+# Open your browser and navigate to:
+# http://localhost:8000
+```
+
+The game client is served directly by FastAPI as static files. No separate frontend build step is required.
+
+---
+
+## 📁 Project Structure
+
+```
+labyrinth-of-tartarus/
+│
 ├── app/
-│ ├── init.py
-│ ├── main.py # FastAPI application entry
-│ ├── config.py # Environment configuration
-│ ├── db/
-│ │ ├── init.py
-│ │ └── database.py # Raw SQLite — no ORM overhead
-│ ├── routes/
-│ │ ├── init.py
-│ │ ├── game.py # Stats & leaderboard endpoints
-│ │ └── telemetry.py # Telemetry ingestion API
-│ └── services/
-│ ├── init.py
-│ ├── features.py # Feature extraction pipeline
-│ ├── player_clustering.py # K-Means behavioral clustering
-│ ├── recommender.py # Difficulty adaptation engine
-│ ├── story_engine.py # Narrative event system
-│ ├── telemetry_logger.py
-│ └── telemetry_service.py
+│   ├── main.py                 # FastAPI application entry point
+│   ├── config.py               # Application configuration
+│   ├── models/
+│   │   ├── player.py           # Player data models
+│   │   ├── game_state.py       # Game state schema
+│   │   └── events.py           # WebSocket event definitions
+│   ├── routers/
+│   │   ├── game.py             # Game session endpoints
+│   │   ├── leaderboard.py      # Leaderboard endpoints
+│   │   └── ws.py               # WebSocket handler
+│   ├── engine/
+│   │   ├── map_generator.py    # Procedural labyrinth generation
+│   │   ├── combat.py           # Combat resolution logic
+│   │   ├── entities.py         # Enemy and NPC definitions
+│   │   └── items.py            # Item and loot tables
+│   ├── oracle/
+│   │   ├── observer.py         # Player behavior tracking
+│   │   ├── profiler.py         # Behavioral profile builder
+│   │   ├── mutator.py          # World mutation controller
+│   │   └── difficulty.py       # Flow-state difficulty manager
+│   └── database/
+│       ├── connection.py       # SQLite connection manager
+│       └── queries.py          # Database query definitions
+│
 ├── static/
-│ ├── index.html # Game shell
-│ ├── style.css # CRT aesthetic
-│ └── game.js # Entire 3D engine (~2000 lines)
+│   ├── index.html              # Game client entry point
+│   ├── css/
+│   │   └── styles.css          # UI styles
+│   ├── js/
+│   │   ├── raycaster.js        # Raycasting rendering engine
+│   │   ├── input.js            # Keyboard and mouse input
+│   │   ├── hud.js              # Heads-up display overlay
+│   │   ├── websocket.js        # Server communication layer
+│   │   └── audio.js            # Sound effects manager
+│   └── assets/
+│       ├── textures/           # Wall and floor textures
+│       ├── sprites/            # Enemy and item sprites
+│       └── sounds/             # Audio files
+│
+├── scripts/
+│   ├── init_db.py              # Database initialization
+│   └── seed_data.py            # Sample data seeder
+│
 ├── tests/
-│ └── init.py
+│   ├── test_map_generator.py
+│   ├── test_combat.py
+│   ├── test_oracle.py
+│   └── test_api.py
+│
 ├── requirements.txt
-├── Dockerfile
+├── .env.example
 ├── .gitignore
 ├── LICENSE
 └── README.md
 ```
-Browser → Telemetry → FastAPI → ML Engine → Adaptive Output → Story Engine
 
-## 🏗 System Architecture
+---
+
+## ⚙ Configuration
+
+Configuration is managed through environment variables. Copy `.env.example` to `.env` and adjust values as needed.
+
+| Variable                    | Default     | Description                                    |
+|-----------------------------|-------------|------------------------------------------------|
+| `TARTARUS_HOST`             | `0.0.0.0`  | Server bind address                            |
+| `TARTARUS_PORT`             | `8000`      | Server port                                    |
+| `TARTARUS_DB_PATH`          | `./data.db` | Path to SQLite database                       |
+| `TARTARUS_MAP_WIDTH`        | `32`        | Default labyrinth width                        |
+| `TARTARUS_MAP_HEIGHT`       | `32`        | Default labyrinth height                       |
+| `TARTARUS_ORACLE_ENABLED`   | `true`      | Enable/disable adaptive AI                     |
+| `TARTARUS_ORACLE_INTERVAL`  | `5000`      | AI evaluation interval in milliseconds         |
+| `TARTARUS_MAX_FLOOR_DEPTH`  | `9`         | Maximum dungeon floors                         |
+| `TARTARUS_LOG_LEVEL`        | `INFO`      | Logging verbosity                              |
+
+---
+
+## 📡 API Reference
+
+### REST Endpoints
+
+| Method | Endpoint                  | Description                        |
+|--------|---------------------------|------------------------------------|
+| POST   | `/api/game/new`           | Create a new game session          |
+| GET    | `/api/game/{session_id}`  | Retrieve current game state        |
+| DELETE | `/api/game/{session_id}`  | End and archive a game session     |
+| GET    | `/api/leaderboard`        | Retrieve global leaderboard        |
+| GET    | `/api/leaderboard/{floor}`| Retrieve leaderboard by floor      |
+| GET    | `/api/health`             | Server health check                |
+
+### WebSocket
+
+Connect to `ws://localhost:8000/ws/{session_id}` to establish a real-time game session.
+
+**Client → Server Events:**
+
+| Event             | Payload                              | Description                     |
+|-------------------|--------------------------------------|---------------------------------|
+| `player_move`     | `{ "direction": "N/S/E/W" }`       | Player movement                 |
+| `player_attack`   | `{ "type": "melee/ranged" }`        | Initiate attack                 |
+| `player_use_item` | `{ "item_id": "..." }`              | Use inventory item              |
+| `player_interact` | `{ "target_id": "..." }`            | Interact with environment       |
+
+**Server → Client Events:**
+
+| Event             | Payload                              | Description                     |
+|-------------------|--------------------------------------|---------------------------------|
+| `state_update`    | `{ "map": ..., "entities": ... }`   | Full game state refresh         |
+| `world_mutation`  | `{ "changes": [...] }`              | Oracle-driven world changes     |
+| `combat_result`   | `{ "damage": ..., "status": ... }`  | Combat resolution result        |
+| `floor_transition`| `{ "floor": ..., "map": ... }`      | Player descended to new floor   |
+
+---
+
+## ⚔ Game Mechanics
+
+### The Labyrinth
+
+Each floor of the labyrinth is procedurally generated using a modified recursive backtracking algorithm enhanced with room carving and loop injection. The Oracle may mutate the map during gameplay by sealing passages, opening hidden doors, or flooding corridors with darkness.
+
+### Combat
+
+Combat is resolved in real time. Melee attacks deal high damage at close range but leave the player vulnerable. Ranged attacks consume limited ammunition and require line-of-sight. Enemies have unique behaviors: some charge directly, some flank, some retreat and set traps. The Oracle adjusts enemy composition and tactics based on observed player combat patterns.
+
+### Enemies
+
+| Enemy          | Behavior       | Threat Level | Adapts Via                     |
+|----------------|----------------|--------------|--------------------------------|
+| Shade          | Patrol / Chase | ★☆☆☆☆       | Increases speed over time      |
+| Fury           | Flank / Ambush | ★★★☆☆       | Learns player dodge patterns   |
+| Minotaur       | Guard / Charge | ★★★★☆       | Blocks previously used routes  |
+| Titan Fragment  | Siege / Area   | ★★★★★       | Counters player's best weapon  |
+
+### Items
+
+| Item            | Effect                              | Rarity      |
+|-----------------|-------------------------------------|-------------|
+| Torch           | Increases visibility radius         | Common      |
+| Ichor Flask     | Restores health                     | Common      |
+| Bronze Key      | Opens locked gates                  | Uncommon    |
+| Thread of Ariadne | Reveals path to nearest exit     | Rare        |
+| Aegis Shard     | Temporary invulnerability           | Legendary   |
+
+---
+
+## 📸 Screenshots
+
+> *Screenshots will be added after the first visual release milestone.*
+
 ```
-┌─────────────────────────────────┐
-│ Browser Client │
-│ 3D Raycasting + Telemetry TX │
-└───────────────┬─────────────────┘
-│
-▼
-┌─────────────────────────────────┐
-│ FastAPI Backend │
-│ /health /telemetry /game │
-└───────────────┬─────────────────┘
-│
-┌────────────┼────────────┐
-▼ ▼ ▼
-┌──────────┐ ┌───────────┐ ┌─────────────┐
-│ ML Engine│ │ Story │ │ Leaderboard │
-│ K-Means │ │ Engine │ │ Analytics │
-│ Clusters │ │ Narrative │ │ Rankings │
-└─────┬────┘ └─────┬─────┘ └──────┬──────┘
-│ │ │
-▼ ▼ ▼
 ┌─────────────────────────────────────────┐
-│ SQLite (WAL Mode) │
-│ telemetry │ replay_buffer │ leaderboard│
-└───────────────────┬─────────────────────┘
-│
-▼
-┌─────────────────────────────────────────┐
-│ Adaptive Difficulty Engine │
-│ │
-│ Player Telemetry → Feature Extraction │
-│ → Behavioral Clustering → Archetype │
-│ → Difficulty Modifier → Game Engine │
-│ │
-│ 🏃 Runners → Faster monster │
-│ ⚔️ Fighters → Larger mazes │
-│ 🔍 Explorers → Complex layouts │
+│                                         │
+│     [First-Person Labyrinth View]       │
+│                                         │
+│     Raycasted corridors with dynamic    │
+│     lighting and textured walls         │
+│                                         │
+├─────────────────────────────────────────┤
+│                                         │
+│     [HUD Overlay]                       │
+│                                         │
+│     Health bar, minimap, inventory      │
+│     slots, floor indicator, and         │
+│     Oracle activity warning icon        │
+│                                         │
+├─────────────────────────────────────────┤
+│                                         │
+│     [Combat Encounter]                  │
+│                                         │
+│     Engaging a Fury in a narrow         │
+│     corridor while low on resources     │
+│                                         │
 └─────────────────────────────────────────┘
 ```
-### 📡 API Endpoints
-```
-Method	Endpoint	Description
-GET	/health	Service health check
-GET	/api/game/stats	Aggregate gameplay statistics
-GET	/api/game/leaderboard	Top survival scores
-POST	/api/telemetry/log	Ingest telemetry data
-GET	/api/telemetry/history/{session_id}	Session telemetry history
-```
-### 🧠 How the ML Pipeline Works
-```
-Player Actions
-     ↓
-Telemetry Logger → SQLite (fear, aggression, curiosity)
-     ↓
-Feature Extraction → Behavioral vectors
-     ↓
-K-Means Clustering → Player archetype identification
-     ↓
-Recommender Engine → Difficulty modifier (0.5x – 3.0x)
-     ↓
-Game Engine ← Adapted monster speed, maze size, spawn rates
-```
-## Player Archetypes:
 
-🏃 Runners — High fear, low aggression → Faster monster
-⚔️ Fighters — High aggression, low fear → Larger mazes
-🔍 Explorers — High curiosity → More complex layouts
+---
 
-## 📊 Database Schema
-```
-sql
-telemetry    — Per-tick behavioral snapshots
-leaderboard  — Top scores with difficulty weighting
-replay_buffer — Training data for clustering pipeline
-```
-### All queries are raw SQL. No ORM. Zero abstraction overhead.
+## 🗺 Roadmap
 
-## 🔥 Technical Highlights
-Custom raycasting — Every 3D frame calculated from trigonometry
-No game engine — Pure <canvas> 2D context, no WebGL
-Sub-16ms frame budget — Smooth 60fps rendering
-Thread-local SQLite — Safe concurrent access with WAL
-Steering AI — Monster uses velocity-based pursuit, not pathfinding
-CRT shader — Pure CSS scanline + vignette post-processing
+- [x] Core raycasting renderer
+- [x] Procedural map generation
+- [x] FastAPI backend with WebSocket support
+- [x] Basic combat system
+- [x] The Oracle — observation and profiling layers
+- [ ] The Oracle — world mutation layer
+- [ ] The Oracle — feedback loop and flow-state tuning
+- [ ] Audio system with spatial sound
+- [ ] Multiple texture themes per floor
+- [ ] Persistent player accounts and progression
+- [ ] Multiplayer cooperative mode
+- [ ] Community-created labyrinth templates
+- [ ] Mobile touch controls
+- [ ] Speedrun leaderboards with replay system
 
-## 🛣️ Roadmap
- Multi-floor descent with progressive difficulty
- Sound engine — procedural audio cues
- WebSocket real-time telemetry streaming
- LLM-driven narrative events
- Multiplayer spectator mode
- Mobile touch controls
+---
+
+## 🤝 Contributing
+
+Contributions are welcome and encouraged. Whether you're fixing a bug, adding a feature, or improving documentation, every contribution helps.
+
+1. **Fork** the repository
+2. **Create** a feature branch (`git checkout -b feature/your-feature`)
+3. **Commit** your changes (`git commit -m "Add your feature"`)
+4. **Push** to the branch (`git push origin feature/your-feature`)
+5. **Open** a Pull Request
+
+Please read the [Code of Conduct](CODE_OF_CONDUCT.md) before contributing.
+
+---
 
 ## 📜 License
-MIT License — see LICENSE
 
+This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) file for details.
 
-# 👤 Author
+---
 
-## Developed by - Joshua Wolfe
+## 🙏 Acknowledgments
 
-Built from scratch as a full-stack AI engineering portfolio project.
+- **Wolfenstein 3D** and **DOOM** for pioneering the raycasting technique that inspired the rendering engine
+- **Mihaly Csikszentmihalyi** for the concept of flow state that guides The Oracle's design philosophy
+- **Greek mythology** for providing an endlessly rich thematic foundation
+- The open-source community for the incredible tools that make projects like this possible
 
-No Unity. No Unreal. No Three.js. Just math and madness. 🔥
+---
+
+<div align="center">
+
+*"Abandon all hope, ye who enter here — unless The Oracle decides otherwise."*
+
+**⬇ Descend into Tartarus ⬇**
+
+### 🔥 [Play Labyrinth of Tartarus](https://labyrinth-ai-engine-1.onrender.com) 🔥🔥
+
