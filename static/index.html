@@ -20,6 +20,7 @@
     <h1 class="title glow">LABYRINTH OF TARTARUS</h1>
     <div class="crt-wrapper">
         <canvas id="game"></canvas>
+        <canvas id="sky-canvas"></canvas>
         <div class="scanlines"></div>
     </div>
     <div class="controls">
@@ -29,9 +30,29 @@
         <label>GAMMA
             <input type="range" min="0.6" max="1.6" step="0.01" value="1" id="gammaSlider">
         </label>
+        <label>COLOR TINT
+            <input type="range" min="0" max="360" step="1" value="0" id="hueSlider">
+        </label>
     </div>
 </div>
 
+<!-- TOUCH OVERLAY -->
+<div id="touch-overlay">
+    <div id="move-stick" class="joystick">
+        <div class="stick"></div>
+    </div>
+    <div id="look-stick" class="joystick">
+        <div class="stick"></div>
+    </div>
+    <button id="attack-btn" class="action-btn">⚔️</button>
+    <button id="interact-btn" class="action-btn">🔍</button>
+</div>
+
 <script src="game.js"></script>
+<script src="websocket/connection.js"></script>
+<script src="websocket/audio-manager.js"></script>
+<script src="websocket/audio-loader.js"></script>
+<script src="websocket/mobile-tester.js"></script>
+<script src="websocket/oracle-client.js"></script>
 </body>
 </html>

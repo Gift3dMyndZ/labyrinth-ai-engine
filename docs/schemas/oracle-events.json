@@ -1,0 +1,128 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Labyrinth of Tartarus - Oracle Event Schemas",
+  "description": "WebSocket message specifications for player-Oracle communication",
+  "type": "object",
+  "oneOf": [
+    {
+      "title": "Player Movement",
+      "properties": {
+        "type": { "const": "player_move" },
+        "direction": { "enum": ["forward", "backward", "left", "right", "strafe_left", "strafe_right"] },
+        "speed": { "type": "number", "minimum": 0, "maximum": 1 },
+        "timestamp": { "type": "number" }
+      },
+      "required": ["type", "direction", "speed"]
+    },
+    {
+      "title": "Player Look",
+      "properties": {
+        "type": { "const": "player_look" },
+        "deltaX": { "type": "number", "description": "Horizontal look delta" },
+        "deltaY": { "type": "number", "description": "Vertical look delta (optional)" },
+        "timestamp": { "type": "number" }
+      },
+      "required": ["type", "deltaX"]
+    },
+    {
+      "title": "Player Action",
+      "properties": {
+        "type": { "const": "player_action" },
+        "action": { "enum": ["attack", "interact", "use_item", "pause"] },
+        "target": { "type": "string", "description": "Optional target identifier" },
+        "timestamp": { "type": "number" }
+      },
+      "required": ["type", "action"]
+    },
+    {
+      "title": "Player Visual Preference",
+      "properties": {
+        "type": { "const": "player_visual_preference" },
+        "hue": { "type": "integer", "minimum": 0, "maximum": 360, "description": "Hue rotation in degrees" },
+        "saturation": { "type": "number", "minimum": 0, "maximum": 2, "description": "Optional saturation multiplier" },
+        "brightness": { "type": "number", "minimum": 0.5, "maximum": 1.5, "description": "Optional brightness multiplier" },
+        "timestamp": { "type": "number" }
+      },
+      "required": ["type", "hue"]
+    },
+    {
+      "title": "Player Touch Pattern",
+      "properties": {
+        "type": { "const": "player_touch_pattern" },
+        "pattern": { "enum": ["joystick_move", "joystick_look", "button_press", "double_tap", "swipe"] },
+        "duration": { "type": "number", "description": "Touch duration in milliseconds" },
+        "intensity": { "type": "number", "minimum": 0, "maximum": 1, "description": "Touch pressure/intensity" },
+        "timestamp": { "type": "number" }
+      },
+      "required": ["type", "pattern"]
+    },
+    {
+      "title": "Player Behavior Metrics",
+      "properties": {
+        "type": { "const": "player_behavior" },
+        "fear_level": { "type": "number", "minimum": 0, "maximum": 1 },
+        "curiosity_level": { "type": "number", "minimum": 0, "maximum": 1 },
+        "aggression_level": { "type": "number", "minimum": 0, "maximum": 1 },
+        "backtracking_ratio": { "type": "number", "minimum": 0, "maximum": 1 },
+        "exploration_efficiency": { "type": "number", "minimum": 0, "maximum": 1 },
+        "timestamp": { "type": "number" }
+      },
+      "required": ["type"]
+    },
+    {
+      "title": "Oracle State Update",
+      "properties": {
+        "type": { "const": "oracle_state" },
+        "mood": { "enum": ["calm", "curious", "hungry", "enraged", "deceptive"] },
+        "awareness": { "type": "number", "minimum": 0, "maximum": 1 },
+        "difficulty_modifier": { "type": "number", "minimum": 0.5, "maximum": 3.0 },
+        "timestamp": { "type": "number" }
+      },
+      "required": ["type", "mood", "awareness"]
+    },
+    {
+      "title": "Oracle Audio Command",
+      "properties": {
+        "type": { "const": "audio_state" },
+        "mood": { "enum": ["calm", "omen", "panic", "triumph", "defeat"] },
+        "intensity": { "type": "number", "minimum": 0, "maximum": 1 },
+        "layers": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Active audio layer names"
+        },
+        "timestamp": { "type": "number" }
+      },
+      "required": ["type", "mood"]
+    },
+    {
+      "title": "Oracle Visual Command",
+      "properties": {
+        "type": { "const": "visual_state" },
+        "effect": { "enum": ["shadows", "embers", "fog", "tendrils", "silhouettes"] },
+        "intensity": { "type": "number", "minimum": 0, "maximum": 1 },
+        "position": {
+          "type": "object",
+          "properties": {
+            "x": { "type": "number" },
+            "y": { "type": "number" }
+          }
+        },
+        "timestamp": { "type": "number" }
+      },
+      "required": ["type", "effect", "intensity"]
+    },
+    {
+      "title": "Game State Sync",
+      "properties": {
+        "type": { "const": "game_state" },
+        "state": { "enum": ["boot", "playing", "paused", "dead", "escaped"] },
+        "floor": { "type": "integer", "minimum": 1 },
+        "survival_time": { "type": "number" },
+        "monster_distance": { "type": "number" },
+        "timestamp": { "type": "number" }
+      },
+      "required": ["type", "state"]
+    }
+  ]
+}

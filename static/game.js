@@ -50,6 +50,58 @@
   const gameContainer = document.getElementById("gameContainer");
   const canvas        = document.getElementById("game");
   const ctx           = canvas.getContext("2d");
+  const skyCanvas     = document.getElementById("sky-canvas");
+  const skyCtx        = skyCanvas.getContext("2d");
+  const touchOverlay  = document.getElementById("touch-overlay");
+  const moveStick     = document.getElementById("move-stick");
+  const lookStick     = document.getElementById("look-stick");
+  const attackBtn     = document.getElementById("attack-btn");
+  const interactBtn   = document.getElementById("interact-btn");
+
+  /* =========================================================
+     TOUCH DEVICE DETECTION
+  ========================================================= */
+
+  isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+  if (isTouchDevice) {
+    touchOverlay.style.display = 'block';
+    initTouchControls();
+  }
+
+  /* =========================================================
+     AUDIO INITIALIZATION
+  ========================================================= */
+
+  function initAudio() {
+    // Placeholder for background music
+    // bgMusic = new Audio("/assets/audio/infernal_ambient.mp3");
+    // bgMusic.loop = true;
+    // bgMusic.volume = 0.4;
+
+    // For now, we'll skip actual audio to avoid copyright issues
+    // User interaction will be required to play audio on mobile
+  }
+
+  /* =========================================================
+     SKY SHADOWS INITIALIZATION
+  ========================================================= */
+
+  function initSkyShadows() {
+    skyShadows = [];
+    // Create some initial shadows
+    for (let i = 0; i < 5; i++) {
+      skyShadows.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height * 0.3, // Top third of screen
+        size: 20 + Math.random() * 40,
+        speed: 0.5 + Math.random() * 1.5,
+        alpha: 0.1 + Math.random() * 0.2
+      });
+    }
+  }
+
+  initAudio();
+  initSkyShadows();
 
   /* =========================================================
      GAME STATE
@@ -59,6 +111,8 @@
   let player    = { x: 0, y: 0, angle: 0 };
   let goalX     = 0, goalY = 0;
   let keys      = {};
+  let touchInput = { moveX: 0, moveY: 0, lookX: 0, lookY: 0, attack: false, interact: false };
+  let isTouchDevice = false;
   let gameState = "boot";
   let startTime = 0;
   let survivalTime  = 0;
@@ -68,6 +122,14 @@
   let animFrameId   = null;
   let lastTime      = 0;
   let sessionId     = Date.now().toString(36) + Math.random().toString(36).slice(2);
+
+  /* =========================================================
+     AUDIO & SKY STATE
+  ========================================================= */
+
+  let bgMusic = null;
+  let skyShadows = [];
+  let lastSkyUpdate = 0;
 
   /* =========================================================
      MONSTER STATE
@@ -285,6 +347,93 @@
   });
 
   /* =========================================================
+     TOUCH CONTROLS
+  ========================================================= */
+
+  function initTouchControls() {
+    // Virtual joysticks
+    setupVirtualJoystick(moveStick, (dx, dy) => {
+      touchInput.moveX = dx * CFG.MOVE;
+      touchInput.moveY = dy * CFG.MOVE;
+    });
+
+    setupVirtualJoystick(lookStick, (dx, dy) => {
+      touchInput.lookX = dx;
+      touchInput.lookY = dy;
+    });
+
+    // Action buttons
+    attackBtn.addEventListener("touchstart", () => {
+      touchInput.attack = true;
+    });
+    attackBtn.addEventListener("touchend", () => {
+      touchInput.attack = false;
+    });
+
+    interactBtn.addEventListener("touchstart", () => {
+      touchInput.interact = true;
+    });
+    interactBtn.addEventListener("touchend", () => {
+      touchInput.interact = false;
+    });
+  }
+
+  function setupVirtualJoystick(joystick, onMove) {
+    const stick = joystick.querySelector('.stick');
+    let isDragging = false;
+    let startX = 0, startY = 0;
+    let currentX = 0, currentY = 0;
+
+    function handleStart(e) {
+      e.preventDefault();
+      isDragging = true;
+      const rect = joystick.getBoundingClientRect();
+      startX = rect.left + rect.width / 2;
+      startY = rect.top + rect.height / 2;
+      stick.classList.add('active');
+    }
+
+    function handleMove(e) {
+      if (!isDragging) return;
+      e.preventDefault();
+
+      const touch = e.touches[0];
+      currentX = touch.clientX;
+      currentY = touch.clientY;
+
+      const deltaX = (currentX - startX) / (joystick.offsetWidth / 2);
+      const deltaY = (currentY - startY) / (joystick.offsetHeight / 2);
+
+      const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+      const clampedDistance = Math.min(distance, 1);
+
+      const normalizedX = distance > 0 ? (deltaX / distance) * clampedDistance : 0;
+      const normalizedY = distance > 0 ? (deltaY / distance) * clampedDistance : 0;
+
+      // Update stick position
+      const stickX = normalizedX * 30;
+      const stickY = normalizedY * 30;
+      stick.style.transform = `translate(calc(-50% + ${stickX}px), calc(-50% + ${stickY}px))`;
+
+      onMove(normalizedX, normalizedY);
+    }
+
+    function handleEnd(e) {
+      if (!isDragging) return;
+      e.preventDefault();
+      isDragging = false;
+      stick.classList.remove('active');
+      stick.style.transform = 'translate(-50%, -50%)';
+      onMove(0, 0);
+    }
+
+    joystick.addEventListener('touchstart', handleStart);
+    joystick.addEventListener('touchmove', handleMove);
+    joystick.addEventListener('touchend', handleEnd);
+    joystick.addEventListener('touchcancel', handleEnd);
+  }
+
+  /* =========================================================
      COLLISION
   ========================================================= */
 
@@ -306,6 +455,12 @@
   function updatePlayer() {
     let dx = 0, dy = 0;
 
+    // Touch input (normalized to same scale as keyboard)
+    dx += touchInput.moveX;
+    dy += touchInput.moveY;
+    player.angle += touchInput.lookX * CFG.MOUSE_SENS * 2; // Scale for sensitivity
+
+    // Keyboard input
     if (keys["w"] || keys["arrowup"]) {
       dx += Math.cos(player.angle) * CFG.MOVE;
       dy += Math.sin(player.angle) * CFG.MOVE;
@@ -324,6 +479,21 @@
     if (keys["e"]) {
       dx += Math.cos(player.angle + Math.PI / 2) * CFG.MOVE;
       dy += Math.sin(player.angle + Math.PI / 2) * CFG.MOVE;
+    }
+
+    // Touch action buttons (map to keyboard equivalents for now)
+    if (touchInput.attack) {
+      // Placeholder for attack action
+      keys[" "] = true; // Space for attack
+    } else {
+      keys[" "] = false;
+    }
+
+    if (touchInput.interact) {
+      // Placeholder for interact action
+      keys["f"] = true; // F for interact
+    } else {
+      keys["f"] = false;
     }
 
     if (canMove(player.x + dx, player.y + dy)) {
@@ -419,6 +589,11 @@
     if (dist < 0.5) {
       gameState = "dead";
       sendFinalTelemetry("killed");
+
+      // Notify Oracle of player death
+      if (window.oracleClient) {
+        window.oracleClient.sendGameState("dead", floorReached, survivalTime);
+      }
     }
   }
 
@@ -637,6 +812,40 @@
     // Overlays
     if (gameState === "dead")    renderDeathScreen(W, H);
     if (gameState === "escaped") renderEscapeScreen(W, H);
+  }
+
+  /* =========================================================
+     SKY RENDERING (INFERNAL VISUALS)
+  ========================================================= */
+
+  function updateSkyShadows() {
+    const now = performance.now();
+    if (now - lastSkyUpdate < 100) return; // Update at ~10fps for performance
+    lastSkyUpdate = now;
+
+    skyShadows.forEach(shadow => {
+      shadow.x += shadow.speed;
+      if (shadow.x > canvas.width + shadow.size) {
+        shadow.x = -shadow.size;
+        shadow.y = Math.random() * canvas.height * 0.3;
+      }
+    });
+  }
+
+  function renderSky() {
+    updateSkyShadows();
+
+    skyCtx.clearRect(0, 0, skyCanvas.width, skyCanvas.height);
+
+    skyShadows.forEach(shadow => {
+      skyCtx.save();
+      skyCtx.globalAlpha = shadow.alpha;
+      skyCtx.fillStyle = "#000";
+      skyCtx.beginPath();
+      skyCtx.arc(shadow.x, shadow.y, shadow.size, 0, Math.PI * 2);
+      skyCtx.fill();
+      skyCtx.restore();
+    });
   }
 
   /* =========================================================
@@ -893,6 +1102,8 @@
     if (w > 0 && h > 0) {
       canvas.width = w;
       canvas.height = h;
+      skyCanvas.width = w;
+      skyCanvas.height = h;
     }
   }
 
@@ -905,6 +1116,7 @@
 
     if (gameState !== "playing") {
       render();
+      renderSky();
       return;
     }
 
@@ -920,6 +1132,11 @@
     if (gd < 1.0) {
       gameState = "escaped";
       sendFinalTelemetry("escaped");
+
+      // Notify Oracle of successful escape
+      if (window.oracleClient) {
+        window.oracleClient.sendGameState("escaped", floorReached, survivalTime);
+      }
     }
 
     if (performance.now() - lastTelemetryTime > CFG.TELEMETRY_MS) {
@@ -928,6 +1145,7 @@
     }
 
     render();
+    renderSky();
   }
 
   /* =========================================================
@@ -974,6 +1192,11 @@
     survivalTime = 0;
     score = 0;
 
+    // Notify Oracle of game start
+    if (window.oracleClient) {
+      window.oracleClient.sendGameState("playing", floorReached, 0);
+    }
+
     animFrameId = requestAnimationFrame(loop);
   }
 
@@ -983,11 +1206,22 @@
 
   const bs = document.getElementById("brightnessSlider");
   const gs = document.getElementById("gammaSlider");
+  const hs = document.getElementById("hueSlider");
+  let currentHue = 0;
+
   if (bs) bs.addEventListener("input", function () {
     document.documentElement.style.setProperty("--brightness", this.value);
   });
   if (gs) gs.addEventListener("input", function () {
     document.documentElement.style.setProperty("--gamma", this.value);
+  });
+  if (hs) hs.addEventListener("input", function () {
+    currentHue = parseInt(this.value);
+    document.documentElement.style.setProperty("--hue", currentHue + "deg");
+    // Send color preference to Oracle
+    if (window.oracleClient) {
+      window.oracleClient.sendVisualPreference(currentHue);
+    }
   });
 
 })();

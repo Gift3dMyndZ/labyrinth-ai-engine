@@ -1,0 +1,66 @@
+// static/config/mobile-test-config.json
+{
+  "testDevices": {
+    "iphone-se": {
+      "name": "iPhone SE (2020)",
+      "viewport": { "width": 375, "height": 667 },
+      "pixelRatio": 2,
+      "touchSupport": true,
+      "hardwareConcurrency": 2,
+      "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15"
+    },
+    "pixel-4a": {
+      "name": "Pixel 4a",
+      "viewport": { "width": 393, "height": 851 },
+      "pixelRatio": 2.75,
+      "touchSupport": true,
+      "hardwareConcurrency": 4,
+      "userAgent": "Mozilla/5.0 (Linux; Android 11; Pixel 4a) AppleWebKit/537.36"
+    },
+    "ipad-mini": {
+      "name": "iPad Mini",
+      "viewport": { "width": 768, "height": 1024 },
+      "pixelRatio": 2,
+      "touchSupport": true,
+      "hardwareConcurrency": 2,
+      "userAgent": "Mozilla/5.0 (iPad; CPU OS 14_0 like Mac OS X) AppleWebKit/605.1.15"
+    },
+    "galaxy-a52": {
+      "name": "Samsung Galaxy A52",
+      "viewport": { "width": 412, "height": 915 },
+      "pixelRatio": 2.63,
+      "touchSupport": true,
+      "hardwareConcurrency": 8,
+      "userAgent": "Mozilla/5.0 (Linux; Android 11; SM-A525F) AppleWebKit/537.36"
+    }
+  },
+  "performanceTargets": {
+    "targetFps": 30,
+    "maxFrameTime": 33,
+    "maxMemoryMB": 50,
+    "maxLoadTime": 3000,
+    "maxTouchLatency": 100
+  },
+  "testScenarios": {
+    "touchControls": {
+      "description": "Test virtual joysticks and action buttons",
+      "duration": 10000,
+      "actions": ["move_joystick", "look_joystick", "attack_button", "interact_button"]
+    },
+    "visualModifiers": {
+      "description": "Test color tint system performance",
+      "duration": 5000,
+      "actions": ["hue_slider_sweep", "brightness_adjust"]
+    },
+    "atmosphericEffects": {
+      "description": "Test sky shadows and audio integration",
+      "duration": 8000,
+      "actions": ["sky_rendering", "audio_loading"]
+    },
+    "oracleIntegration": {
+      "description": "Test WebSocket communication and Oracle responses",
+      "duration": 15000,
+      "actions": ["websocket_connect", "behavior_tracking", "oracle_responses"]
+    }
+  }
+}

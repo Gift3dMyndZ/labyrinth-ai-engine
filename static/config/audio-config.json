@@ -1,0 +1,45 @@
+// static/config/audio-config.json
+{
+  "audioTracks": {
+    "calm-drone": {
+      "url": "/assets/audio/ambient/calm-drone.mp3",
+      "description": "Calm exploration atmosphere",
+      "duration": 180,
+      "source": "CC0 - Freesound.org",
+      "mood": "calm"
+    },
+    "tension-build": {
+      "url": "/assets/audio/ambient/tension-build.mp3",
+      "description": "Rising tension when monster is near",
+      "duration": 120,
+      "source": "CC0 - OpenGameArt.org",
+      "mood": "omen"
+    },
+    "danger-pulse": {
+      "url": "/assets/audio/ambient/danger-pulse.mp3",
+      "description": "High danger pulsing rhythm",
+      "duration": 90,
+      "source": "CC0 - Zapsplat.com",
+      "mood": "panic"
+    },
+    "victory-chorus": {
+      "url": "/assets/audio/ambient/victory-chorus.mp3",
+      "description": "Triumphant resolution",
+      "duration": 15,
+      "source": "CC0 - Freesound.org",
+      "mood": "triumph"
+    }
+  },
+  "audioSettings": {
+    "masterVolume": 0.4,
+    "fadeTime": 2.0,
+    "crossfadeTime": 3.0,
+    "preloadOnMobile": false,
+    "maxConcurrentTracks": 2
+  },
+  "mobileOptimizations": {
+    "reduceQuality": true,
+    "limitTracks": true,
+    "shorterFades": true
+  }
+}
