@@ -1,101 +1,155 @@
+
 <div align="center">
 
 # 🔥 LABYRINTH OF TARTARUS 🔥
-
-### ΤΑΡΤΑΡΟΣ — Adaptive Raycasting AI Simulation Engine
-
 [![Python](https://img.shields.io/badge/Python-3.9+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
-[![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
 [![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)](https://developer.mozilla.org)
-[![SQLite](https://img.shields.io/badge/SQLite-003B57?style=for-the-badge&logo=sqlite&logoColor=white)](https://sqlite.org)
+[![FastAPI](https://img.shields.io/badge/FastAPI-Async-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
+[![SQLite](https://img.shields.io/badge/SQLite-Embedded-003B57?style=for-the-badge&logo=sqlite&logoColor=white)](https://sqlite.org)
+
+<!-- ───── Systems Layer ───── -->
+[![Simulation](https://img.shields.io/badge/Simulation-Real--Time-8A2BE2?style=for-the-badge)](#)
+[![Procedural Generation](https://img.shields.io/badge/Procedural-Generation-013220?style=for-the-badge)](#)
+[![Difficulty](https://img.shields.io/badge/Difficulty-Flow--State-8A2BE2?style=for-the-badge)](#)
+
+<!-- ───── Runtime / Networking ───── -->
+[![Uvicorn](https://img.shields.io/badge/Uvicorn-ASGI-4051B5?style=for-the-badge)](https://www.uvicorn.org/)
+[![WebSockets](https://img.shields.io/badge/WebSockets-Real--Time-4A90E2?style=for-the-badge)](https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API)
+
+<!-- ───── Engine Layer ───── -->
+[![Rendering](https://img.shields.io/badge/Rendering-Raycasting-critical?style=for-the-badge)](#)
+[![Game Engine](https://img.shields.io/badge/Game-Engine--Like-8A2BE2?style=for-the-badge)](#)
+
+<!-- ───── Narrow Apex: Quality & Intelligence ───── -->
+[![Testing](https://img.shields.io/badge/Testing-pytest-blue?style=for-the-badge&logo=pytest&logoColor=white)](https://pytest.org)
+
+[![AI Powered](https://img.shields.io/badge/🧠_AI-The_Oracle-FF4500?style=for-the-badge)](#-the-oracle--adaptive-ai-engine)
+
+<img
+  src="https://raw.githubusercontent.com/yourusername/labyrinth-of-tartarus/main/assets/badges/oracle-pulse.gif"
+  alt="The Oracle — Adaptive AI Engine"
+  height="28"
+/><!-- ───── Tip of the Pyramid ───── -->
 [![License](https://img.shields.io/badge/License-MIT-red?style=for-the-badge)](LICENSE)
-[![AI Powered](https://img.shields.io/badge/🧠_AI-Powered-FF4500?style=for-the-badge)](#-the-oracle--adaptive-ai-engine)
 
 ---
+### *“τὸ λαβύρινθον τοῦ Ταρτάρου· Ἀπολίπετε πᾶσαν ἐλπίδα, οἱ εἰσιόντες ἐνθάδε.”*  
+### *“The Labyrinth of Tartarus: Abandon all hope, you who enter here.”*
 
-*"τὸ λαβύρινθον τοῦ Ταρτάρου — Where Mortals Are Tested by Machine"*
+### 🔥 ▶ [Play Now](https://labyrinth-ai-engine-1.onrender.com)
 
-A first-person raycasting dungeon crawler powered by an adaptive AI engine that learns how you play, dynamically reshaping the labyrinth, enemy behavior, and difficulty in real time.
+<img
+  width="1757"
+  height="1261"
+  alt="Labyrinth of Tartarus Gameplay"
+  src="https://github.com/user-attachments/assets/4c295120-33cb-4198-a0b2-570a9c89efbd"
+/>
 
 </div>
 
----
 
+### ΤΑΡΤΑΡΟΣ — Adaptive Raycasting AI Simulation Engine
 
-**A first-person procedural maze crawler with adaptive AI, built in pure JavaScript + Python.**
+Inspired by *Wolfenstein 3D*, powered by FastAPI + WebSockets, and driven by a custom behavioral AI engine (**The Oracle**),  
 
-The labyrinth watches. It learns. It adapts.
-
-<img width="1757" height="1261" alt="Labyrinth" src="https://github.com/user-attachments/assets/4c295120-33cb-4198-a0b2-570a9c89efbd" />
-
-
-## 🎮 Live Demo
-
-### 🔥 [Play Labyrinth of Tartarus](https://labyrinth-ai-engine-1.onrender.com) 🔥🔥
-
-> Free tier — first load may take ~30s to wake up.
+*Labyrinth of Tartarus* is a living dungeon that observes, profiles, and mutates in real time to keep players in a constant **flow state**
 
 ---
 
+## Why This Project Exists
 
-## 🏛 Overview
+Most games adjust difficulty by scaling numbers.
 
-**Labyrinth of Tartarus** is a browser-based, first-person dungeon crawler that uses raycasting rendering inspired by classic titles like Wolfenstein 3D, combined with a modern adaptive AI backend. The game places players in a procedurally generated labyrinth modeled after the mythological Tartarus — the deepest abyss of the Greek underworld.
+**Tartarus changes the world instead.**
 
-What sets this project apart is **The Oracle**, an AI simulation engine that observes player behavior in real time and continuously adapts the game world. Walls shift, enemies evolve, traps relocate, and the difficulty curve reshapes itself based on how you move, fight, and explore.
+Rather than inflating enemy health or damage, the dungeon itself adapts:
+- Corridors seal or open
+- Enemies evolve counter‑tactics
+- Resources relocate
+- Safe paths disappear
+
+The goal is not to punish or assist the player—but to maintain **flow**: the psychological state between boredom and frustration where engagement is highest.
 
 ---
 
-## ✨ Features
+## ✨ Key Features
 
-### 🎮 Core Gameplay
-- **First-person raycasting engine** rendered entirely in the browser using HTML5 Canvas
-- **Procedurally generated labyrinths** with configurable size, complexity, and theme
-- **Real-time combat system** with melee and ranged mechanics
-- **Inventory and resource management** — torches, health potions, keys, and ancient relics
-- **Multiple dungeon floors** with increasing depth and danger
+### 🎮 Gameplay
+- First‑person raycasting engine (HTML5 Canvas)
+- Procedurally generated, multi‑floor labyrinths
+- Real‑time melee and ranged combat
+- Inventory, keys, relics, and exploration layers
 
-### 🧠 Adaptive AI
-- **Behavioral profiling** — the engine tracks movement patterns, combat tendencies, exploration habits, and decision-making speed
-- **Dynamic difficulty adjustment (DDA)** that goes beyond simple scaling — the world itself changes
-- **Enemy evolution** — creatures adapt tactics based on how you've defeated them before
-- **Procedural trap placement** guided by player path prediction
-- **Loot balancing** — resource scarcity and reward placement respond to player performance
+### 🧠 Adaptive AI — *The Oracle*
+- Behavioral profiling via real‑time WebSocket events
+- World mutation instead of numeric difficulty scaling
+- Enemies adapt based on prior encounters
+- Trap and loot placement guided by path prediction
 
 ### 🏗 Technical
-- **Modular Python backend** powered by FastAPI with WebSocket support for real-time communication
-- **SQLite persistence layer** for player profiles, session history, and AI model state
-- **RESTful API** for game state management, leaderboards, and configuration
-- **Lightweight frontend** with zero external framework dependencies — pure vanilla JavaScript
-- **Sub-50ms server response times** for seamless real-time gameplay
+- FastAPI backend with WebSocket transport
+- SQLite persistence for player profiles and AI state
+- Sub‑50ms server response times
+- Zero frontend frameworks (pure vanilla JavaScript)
 
 ---
 
 ## 🧿 The Oracle — Adaptive AI Engine
 
-The Oracle is the heart of the Labyrinth of Tartarus. It is a multi-layered AI system that sits between the game world and the player, continuously observing and reacting.
+The Oracle is a real‑time simulation engine that sits between the player and the world, continuously observing behavior and reshaping the dungeon in response.
 
 ### How It Works
 
-**Layer 1 — Observation**
-Every player action is captured as a timestamped event: movement direction, time between inputs, combat choices, items used, rooms explored vs. ignored, and even hesitation patterns. These events are streamed to the backend over WebSocket.
+**1. Observe**  
+Movement, combat choices, hesitation patterns, input timing, exploration vs. avoidance.
 
-**Layer 2 — Profiling**
-The engine maintains a rolling behavioral profile for each player session. Profiles are categorized along several axes: aggression (rusher vs. cautious), exploration (completionist vs. speedrunner), resource usage (hoarder vs. spender), and adaptability (pattern-follower vs. improviser).
+**2. Profile**  
+Players are modeled along multiple axes:
+- Aggression (rusher ↔ cautious)
+- Exploration (completionist ↔ speedrunner)
+- Resource usage (hoarder ↔ spender)
+- Adaptability (pattern‑follower ↔ improviser)
 
-**Layer 3 — World Mutation**
-Based on the active profile, The Oracle issues world mutation commands. These can include: sealing previously open corridors, spawning enemies with counter-tactics, adjusting lighting and visibility, relocating key items, and introducing environmental hazards along predicted paths.
+**3. Mutate**  
+The Oracle issues world‑level changes:
+- Altering map topology
+- Spawning enemies with counter‑tactics
+- Adjusting lighting and visibility
+- Relocating critical resources
 
-**Layer 4 — Feedback Loop**
-After each mutation, the engine measures the player's response. Did they panic? Adapt? Backtrack? This feedback refines the profile and informs the next cycle of mutations. The result is a living dungeon that feels personally adversarial.
+**4. Measure**  
+Player response feeds back into the profile, refining the next mutation cycle.
+
+The result is a dungeon that feels personal, adversarial, and alive.
 
 ### Difficulty Philosophy
 
-The Oracle does not aim to make the game harder or easier. It aims to keep the player in a **flow state** — the psychological zone between boredom and frustration where engagement is highest. If you're breezing through, the labyrinth will tighten. If you're struggling, it may offer a hidden passage or a well-timed health drop — but never obviously enough to feel artificial.
+The Oracle does not try to make the game harder or easier—it tries to keep you **engaged**.  
+If you dominate, the labyrinth tightens. If you struggle, it may offer subtle relief—but never in a way that breaks immersion.
 
 ---
 
-## 🏗 Architecture
+## 🗺 Roadmap
+
+### ✅ Completed
+- Core raycasting renderer
+- Procedural map generation
+- FastAPI backend with WebSockets
+- Real‑time combat system
+- The Oracle (observation → profiling → mutation → feedback)
+- Spatial audio system
+- Multiple texture themes per floor
+- Persistent player progression
+
+### 🚧 Planned / In Progress
+- Mobile touch controls
+- Speedrun leaderboards (with ghost replays)
+- Community‑created labyrinth templates
+- Cooperative multiplayer (long‑term)
+
+---
+
+## 🏗 Architecture Overview
 
 ```
 ┌─────────────────────────────────────────────────────┐
@@ -342,24 +396,6 @@ Combat is resolved in real time. Melee attacks deal high damage at close range b
 
 ---
 
----
-
-## 🗺 Roadmap
-
-- [x] Core raycasting renderer
-- [x] Procedural map generation
-- [x] FastAPI backend with WebSocket support
-- [x] Basic combat system
-- [x] The Oracle — observation and profiling layers
-- [ ] The Oracle — world mutation layer
-- [ ] The Oracle — feedback loop and flow-state tuning
-- [ ] Audio system with spatial sound
-- [ ] Multiple texture themes per floor
-- [ ] Persistent player accounts and progression
-- [ ] Multiplayer cooperative mode
-- [ ] Community-created labyrinth templates
-- [ ] Mobile touch controls
-- [ ] Speedrun leaderboards with replay system
 
 ---
 
@@ -391,12 +427,4 @@ This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) f
 - The open-source community for the incredible tools that make projects like this possible
 
 ---
-
-<div align="center">
-
-*"Abandon all hope, ye who enter here — unless The Oracle decides otherwise."*
-
-**⬇ Descend into Tartarus ⬇**
-
-### 🔥 [Play Labyrinth of Tartarus](https://labyrinth-ai-engine-1.onrender.com) 🔥🔥
 
