@@ -342,36 +342,6 @@ Combat is resolved in real time. Melee attacks deal high damage at close range b
 
 ---
 
-## 📸 Screenshots
-
-> *Screenshots will be added after the first visual release milestone.*
-
-```
-┌─────────────────────────────────────────┐
-│                                         │
-│     [First-Person Labyrinth View]       │
-│                                         │
-│     Raycasted corridors with dynamic    │
-│     lighting and textured walls         │
-│                                         │
-├─────────────────────────────────────────┤
-│                                         │
-│     [HUD Overlay]                       │
-│                                         │
-│     Health bar, minimap, inventory      │
-│     slots, floor indicator, and         │
-│     Oracle activity warning icon        │
-│                                         │
-├─────────────────────────────────────────┤
-│                                         │
-│     [Combat Encounter]                  │
-│                                         │
-│     Engaging a Fury in a narrow         │
-│     corridor while low on resources     │
-│                                         │
-└─────────────────────────────────────────┘
-```
-
 ---
 
 ## 🗺 Roadmap
