@@ -104,6 +104,36 @@
   initSkyShadows();
 
   /* =========================================================
+     CANVAS FOCUS & GLOBAL INPUT HANDLERS
+  ========================================================= */
+
+  // Make canvas focusable and focused for keyboard events
+  canvas.focus();
+
+  // Global keyboard listener (bypasses focus issues)
+  window.addEventListener("keydown", (e) => {
+    const key = e.key.toLowerCase();
+    
+    if (e.key === "Enter" || e.key === " ") {
+      console.log("[INPUT] ENTER/SPACE detected, gameState:", gameState);
+      inputState.start = true;
+    }
+    if (key === "arrowup" || key === "w") inputState.up = true;
+    if (key === "arrowdown" || key === "s") inputState.down = true;
+    if (key === "arrowleft" || key === "a") inputState.left = true;
+    if (key === "arrowright" || key === "d") inputState.right = true;
+  });
+
+  window.addEventListener("keyup", (e) => {
+    const key = e.key.toLowerCase();
+    
+    if (key === "arrowup" || key === "w") inputState.up = false;
+    if (key === "arrowdown" || key === "s") inputState.down = false;
+    if (key === "arrowleft" || key === "a") inputState.left = false;
+    if (key === "arrowright" || key === "d") inputState.right = false;
+  });
+
+  /* =========================================================
      GAME STATE
   ========================================================= */
 
@@ -122,6 +152,30 @@
   let animFrameId   = null;
   let lastTime      = 0;
   let sessionId     = Date.now().toString(36) + Math.random().toString(36).slice(2);
+
+  /* =========================================================
+     INPUT STATE (GLOBAL - checked by game loop)
+  ========================================================= */
+
+  const inputState = {
+    start: false,    // ENTER or click to start
+    up: false,
+    down: false,
+    left: false,
+    right: false,
+  };
+
+  /* =========================================================
+     INPUT STATE (GLOBAL)
+  ========================================================= */
+
+  const inputState = {
+    start: false,    // ENTER or click to start
+    up: false,
+    down: false,
+    left: false,
+    right: false,
+  };
 
   /* =========================================================
      AUDIO & SKY STATE
@@ -318,17 +372,18 @@
      INPUT
   ========================================================= */
 
-  document.addEventListener("keydown", e => {
-    keys[e.key.toLowerCase()] = true;
-    if (e.key === "Enter") {
-      if (gameState === "boot") startGame();
-      else if (gameState === "dead" || gameState === "escaped") startGame();
-    }
-  });
+  const startButton = document.getElementById("startButton");
 
-  document.addEventListener("keyup", e => {
-    keys[e.key.toLowerCase()] = false;
-  });
+  // Boot screen input handler - consumes inputState
+  if (startButton) {
+    startButton.addEventListener("click", e => {
+      e.stopPropagation();
+      console.log("[UI] Start button clicked");
+      if (gameState === "boot" || gameState === "dead" || gameState === "escaped") {
+        startGame();
+      }
+    });
+  }
 
   let mouseLocked = false;
 
@@ -1113,6 +1168,14 @@
 
   function loop(timestamp) {
     animFrameId = requestAnimationFrame(loop);
+
+    // Boot screen input: consumes inputState.start
+    if ((gameState === "boot" || gameState === "dead" || gameState === "escaped") && inputState.start) {
+      console.log("[LOOP] State:", gameState, "inputState.start=true, starting game");
+      startGame();
+      inputState.start = false;
+      return;
+    }
 
     if (gameState !== "playing") {
       render();

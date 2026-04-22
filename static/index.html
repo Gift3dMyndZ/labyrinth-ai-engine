@@ -12,14 +12,15 @@
 <div id="bootScreen" class="screen">
     <h2 class="glow">ΤΑΡΤΑΡΟΣ</h2>
     <p class="subtitle">LABYRINTH OF TARTARUS</p>
-    <p class="blink">Press ENTER to descend</p>
+    <p class="blink">Press ENTER or click/tap to descend</p>
+    <button id="startButton" class="start-button">START</button>
 </div>
 
 <!-- GAME CONTAINER -->
 <div id="gameContainer">
     <h1 class="title glow">LABYRINTH OF TARTARUS</h1>
     <div class="crt-wrapper">
-        <canvas id="game"></canvas>
+        <canvas id="game" tabindex="0"></canvas>
         <canvas id="sky-canvas"></canvas>
         <div class="scanlines"></div>
     </div>

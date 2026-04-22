@@ -204,6 +204,24 @@ canvas {
   margin-bottom: 30px;
 }
 
+.start-button {
+  margin-top: 12px;
+  padding: 14px 30px;
+  border: 2px solid #ff6600;
+  border-radius: 8px;
+  background: rgba(255, 102, 0, 0.1);
+  color: #ffcc99;
+  font-size: 14px;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.start-button:hover {
+  background: rgba(255, 102, 0, 0.25);
+  transform: translateY(-1px);
+}
+
 .hidden {
   display: none;
 }
