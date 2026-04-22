@@ -1,59 +1,115 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>LABYRINTH OF TARTARUS</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
+(function () {
+  "use strict";
 
-<!-- BOOT SCREEN -->
-<div id="bootScreen" class="screen">
-    <h2 class="glow">ΤΑΡΤΑΡΟΣ</h2>
-    <p class="subtitle">LABYRINTH OF TARTARUS</p>
-    <p class="blink">Press ENTER or click/tap to descend</p>
-    <button id="startButton" class="start-button">START</button>
-</div>
+  /* ============================
+     DOM REFERENCES
+  ============================ */
 
-<!-- GAME CONTAINER -->
-<div id="gameContainer">
-    <h1 class="title glow">LABYRINTH OF TARTARUS</h1>
-    <div class="crt-wrapper">
-        <canvas id="game" tabindex="0"></canvas>
-        <canvas id="sky-canvas"></canvas>
-        <div class="scanlines"></div>
-    </div>
-    <div class="controls">
-        <label>BRIGHTNESS
-            <input type="range" min="0.6" max="1.6" step="0.01" value="1" id="brightnessSlider">
-        </label>
-        <label>GAMMA
-            <input type="range" min="0.6" max="1.6" step="0.01" value="1" id="gammaSlider">
-        </label>
-        <label>COLOR TINT
-            <input type="range" min="0" max="360" step="1" value="0" id="hueSlider">
-        </label>
-    </div>
-</div>
+  const bootScreen = document.getElementById("bootScreen");
+  const gameContainer = document.getElementById("gameContainer");
+  const canvas = document.getElementById("game");
+  const ctx = canvas.getContext("2d");
 
-<!-- TOUCH OVERLAY -->
-<div id="touch-overlay">
-    <div id="move-stick" class="joystick">
-        <div class="stick"></div>
-    </div>
-    <div id="look-stick" class="joystick">
-        <div class="stick"></div>
-    </div>
-    <button id="attack-btn" class="action-btn">⚔️</button>
-    <button id="interact-btn" class="action-btn">🔍</button>
-</div>
+  const brightnessSlider = document.getElementById("brightnessSlider");
+  const gammaSlider = document.getElementById("gammaSlider");
 
-<script src="game.js"></script>
-<script src="websocket/connection.js"></script>
-<script src="websocket/audio-manager.js"></script>
-<script src="websocket/audio-loader.js"></script>
-<script src="websocket/mobile-tester.js"></script>
-<script src="websocket/oracle-client.js"></script>
-</body>
-</html>
+  /* ============================
+     INPUT STATE
+  ============================ */
+
+  const inputState = {
+    start: false,
+  };
+
+  /* ============================
+     GAME STATE
+  ============================ */
+
+  let gameState = "boot";
+  let animFrame = null;
+
+  /* ============================
+     KEYBOARD HANDLING
+  ============================ */
+
+  // Make canvas focusable and focused
+  canvas.focus();
+
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      inputState.start = true;
+    }
+  });
+
+  /* ============================
+     START GAME
+  ============================ */
+
+  function startGame() {
+    if (animFrame) cancelAnimationFrame(animFrame);
+
+    // ✅ critical fix: refocus after click/key
+    canvas.focus();
+
+    bootScreen.style.display = "none";
+    gameContainer.style.display = "flex";
+
+    gameState = "playing";
+    animFrame = requestAnimationFrame(loop);
+  }
+
+  /* ============================
+     GAME LOOP
+  ============================ */
+
+  function loop() {
+    animFrame = requestAnimationFrame(loop);
+
+    if (gameState === "boot" && inputState.start) {
+      inputState.start = false;
+      startGame();
+      return;
+    }
+
+    render();
+  }
+
+  /* ============================
+     RENDER
+  ============================ */
+
+  function render() {
+    const w = canvas.width = canvas.clientWidth;
+    const h = canvas.height = canvas.clientHeight;
+
+    ctx.fillStyle = "#000";
+    ctx.fillRect(0, 0, w, h);
+
+    ctx.fillStyle = "#ff6600";
+    ctx.font = "20px Courier New";
+    ctx.textAlign = "center";
+    ctx.fillText("TARTARUS DESCENDED", w / 2, h / 2);
+  }
+
+  /* ============================
+     SLIDERS
+  ============================ */
+
+  if (brightnessSlider) {
+    brightnessSlider.addEventListener("input", () => {
+      document.documentElement.style.setProperty(
+        "--brightness",
+        brightnessSlider.value
+      );
+    });
+  }
+
+  if (gammaSlider) {
+    gammaSlider.addEventListener("input", () => {
+      document.documentElement.style.setProperty(
+        "--gamma",
+        gammaSlider.value
+      );
+    });
+  }
+})();

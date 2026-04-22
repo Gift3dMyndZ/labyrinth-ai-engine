@@ -5,7 +5,7 @@ Labyrinth of Tartarus — Main Application
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from app.db.database import init_db
-from app.routes import game, telemetry, websocket
+from app.routes import game, telemetry
 
 app = FastAPI(title="Labyrinth of Tartarus")
 
@@ -22,6 +22,5 @@ def health():
 
 app.include_router(game.router)
 app.include_router(telemetry.router)
-app.include_router(websocket.router)
 
 app.mount("/", StaticFiles(directory="static", html=True), name="static")
