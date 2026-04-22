@@ -20,7 +20,9 @@ def health():
     return {"status": "alive", "engine": "tartarus"}
 
 
+# ✅ API routes only
 app.include_router(game.router)
 app.include_router(telemetry.router)
 
-app.mount("/", StaticFiles(directory="static", html=True), name="static")
+# ✅ Static assets served raw, never templated
+app.mount("/static", StaticFiles(directory="static"), name="static")

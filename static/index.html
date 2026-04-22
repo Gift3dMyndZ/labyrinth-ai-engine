@@ -1,115 +1,28 @@
-(function () {
-  "use strict";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>LABYRINTH OF TARTARUS</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  /* ============================
-     DOM REFERENCES
-  ============================ */
+  <link rel="stylesheet" href="/static/style.css">
+</head>
 
-  const bootScreen = document.getElementById("bootScreen");
-  const gameContainer = document.getElementById("gameContainer");
-  const canvas = document.getElementById("game");
-  const ctx = canvas.getContext("2d");
+<body>
 
-  const brightnessSlider = document.getElementById("brightnessSlider");
-  const gammaSlider = document.getElementById("gammaSlider");
+  <!-- BOOT SCREEN -->
+  <div id="bootScreen" class="screen">
+    <h2>ΤΑΡΤΑΡΟΣ</h2>
+    <p>LABYRINTH OF TARTARUS</p>
+    <p>Press ENTER to descend</p>
+  </div>
 
-  /* ============================
-     INPUT STATE
-  ============================ */
+  <!-- GAME CONTAINER -->
+  <div id="gameContainer" style="display:none;">
+    <canvas id="game" tabindex="0"></canvas>
+  </div>
 
-  const inputState = {
-    start: false,
-  };
+  <script src="/static/game.js"></script>
 
-  /* ============================
-     GAME STATE
-  ============================ */
-
-  let gameState = "boot";
-  let animFrame = null;
-
-  /* ============================
-     KEYBOARD HANDLING
-  ============================ */
-
-  // Make canvas focusable and focused
-  canvas.focus();
-
-  window.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-      inputState.start = true;
-    }
-  });
-
-  /* ============================
-     START GAME
-  ============================ */
-
-  function startGame() {
-    if (animFrame) cancelAnimationFrame(animFrame);
-
-    // ✅ critical fix: refocus after click/key
-    canvas.focus();
-
-    bootScreen.style.display = "none";
-    gameContainer.style.display = "flex";
-
-    gameState = "playing";
-    animFrame = requestAnimationFrame(loop);
-  }
-
-  /* ============================
-     GAME LOOP
-  ============================ */
-
-  function loop() {
-    animFrame = requestAnimationFrame(loop);
-
-    if (gameState === "boot" && inputState.start) {
-      inputState.start = false;
-      startGame();
-      return;
-    }
-
-    render();
-  }
-
-  /* ============================
-     RENDER
-  ============================ */
-
-  function render() {
-    const w = canvas.width = canvas.clientWidth;
-    const h = canvas.height = canvas.clientHeight;
-
-    ctx.fillStyle = "#000";
-    ctx.fillRect(0, 0, w, h);
-
-    ctx.fillStyle = "#ff6600";
-    ctx.font = "20px Courier New";
-    ctx.textAlign = "center";
-    ctx.fillText("TARTARUS DESCENDED", w / 2, h / 2);
-  }
-
-  /* ============================
-     SLIDERS
-  ============================ */
-
-  if (brightnessSlider) {
-    brightnessSlider.addEventListener("input", () => {
-      document.documentElement.style.setProperty(
-        "--brightness",
-        brightnessSlider.value
-      );
-    });
-  }
-
-  if (gammaSlider) {
-    gammaSlider.addEventListener("input", () => {
-      document.documentElement.style.setProperty(
-        "--gamma",
-        gammaSlider.value
-      );
-    });
-  }
-})();
+</body>
+</html>
