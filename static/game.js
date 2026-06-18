@@ -782,47 +782,47 @@
      MINIMAP
   ========================================================= */
 
-  function renderMinimap(W, H) {
-    const size = Math.floor(Math.min(W, H) * 0.17);
-    const ox = W - size - 10;
-    const oy = H - size - 10;
-    const cs = size / CFG.GRID;
+function renderMinimap(W, H) {
+    const size = Math.floor(Math.min(W, H) * 0.17);
+    const ox = W - size - 10;
+    const oy = H - size - 10;
+    const cs = size / CFG.GRID;
 
-    ctx.globalAlpha = 0.45;
-    ctx.fillStyle = "#100300";
-    ctx.fillRect(ox, oy, size, size);
+    ctx.globalAlpha = 0.45;
+    ctx.fillStyle = "#020000";
+    ctx.fillRect(ox, oy, size, size);
 
-    for (let y = 0; y < CFG.GRID; y++) {
-      for (let x = 0; x < CFG.GRID; x++) {
-        if (map[y][x] === 1) {
-          ctx.fillStyle = "#6847e184";
-          ctx.fillRect(ox + x * cs, oy + y * cs, Math.ceil(cs), Math.ceil(cs));
-        }
-      }
-    }
+    for (let y = 0; y < CFG.GRID; y++) {
+      for (let x = 0; x < CFG.GRID; x++) {
+        if (map[y][x] === 1) {
+          ctx.fillStyle = "#ff5a00cc";
+          ctx.fillRect(ox + x * cs, oy + y * cs, Math.ceil(cs), Math.ceil(cs));
+        }
+      }
+    }
 
-    ctx.globalAlpha = 0.9;
+    ctx.globalAlpha = 0.9;
 
-    ctx.fillStyle = "#ffaa00";
-    ctx.fillRect(ox + player.x*cs - 2, oy + player.y*cs - 2, 4, 4);
+    ctx.fillStyle = "#00eaff";
+    ctx.fillRect(ox + player.x*cs - 2, oy + player.y*cs - 2, 4, 4);
 
-    ctx.strokeStyle = "#ffaa00";
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(ox + player.x*cs, oy + player.y*cs);
-    ctx.lineTo(ox + (player.x + Math.cos(player.angle)*2.5)*cs,
-               oy + (player.y + Math.sin(player.angle)*2.5)*cs);
-    ctx.stroke();
+    ctx.strokeStyle = "#00eaff";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(ox + player.x*cs, oy + player.y*cs);
+    ctx.lineTo(ox + (player.x + Math.cos(player.angle)*2.5)*cs,
+               oy + (player.y + Math.sin(player.angle)*2.5)*cs);
+    ctx.stroke();
 
-    const mp = 0.5 + 0.5 * Math.sin(performance.now() / 180);
-    ctx.fillStyle = `rgba(255,40,0,${mp})`;
-    ctx.fillRect(ox + monster.x*cs - 2, oy + monster.y*cs - 2, 4, 4);
+    const mp = 0.5 + 0.5 * Math.sin(performance.now() / 180);
+    ctx.fillStyle = `rgba(255,0,90,${mp})`;
+    ctx.fillRect(ox + monster.x*cs - 2, oy + monster.y*cs - 2, 4, 4);
 
-    ctx.fillStyle = "#ffcc00";
-    ctx.fillRect(ox + goalX*cs - 2, oy + goalY*cs - 2, 4, 4);
+    ctx.fillStyle = "#39ff14";
+    ctx.fillRect(ox + goalX*cs - 2, oy + goalY*cs - 2, 4, 4);
 
-    ctx.globalAlpha = 1;
-  }
+    ctx.globalAlpha = 1;
+  }
 
   /* =========================================================
      OVERLAY SCREENS
