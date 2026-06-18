@@ -795,7 +795,7 @@
     for (let y = 0; y < CFG.GRID; y++) {
       for (let x = 0; x < CFG.GRID; x++) {
         if (map[y][x] === 1) {
-          ctx.fillStyle = "#3a1000";
+          ctx.fillStyle = "#6847e184";
           ctx.fillRect(ox + x * cs, oy + y * cs, Math.ceil(cs), Math.ceil(cs));
         }
       }
