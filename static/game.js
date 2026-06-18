@@ -55,8 +55,9 @@
      GAME STATE
   ========================================================= */
 
-  let audioEnabled = true;
-  let ambientAudio = null;
+let audioEnabled = true;
+let ambientAudio = null;
+let bootAudioStarted = false;
   let map       = [];
   let player    = { x: 0, y: 0, angle: 0 };
   let goalX     = 0, goalY = 0;
@@ -258,13 +259,25 @@
      INPUT
   ========================================================= */
 
-  document.addEventListener("keydown", e => {
+
+document.addEventListener("keydown", e => {
     keys[e.key.toLowerCase()] = true;
+
+    if (gameState === "boot") {
+      playBootAudio();
+    }
+
     if (e.key === "Enter") {
       if (gameState === "boot") startGame();
       else if (gameState === "dead" || gameState === "escaped") startGame();
     }
-  });
+});
+
+document.addEventListener("click", () => {
+    if (gameState === "boot") {
+      playBootAudio();
+    }
+});
 
   document.addEventListener("keyup", e => {
     keys[e.key.toLowerCase()] = false;
@@ -972,46 +985,44 @@
   ========================================================= */
 
 function renderMinimap(W, H) {
-    const size = Math.floor(Math.min(W, H) * 0.17);
-    const ox = W - size - 10;
-    const oy = H - size - 10;
-    const cs = size / CFG.GRID;
+const size = Math.floor(Math.min(W, H) * 0.17);
+const ox = W - size - 10;
+const oy = H - size - 10;
+ const cs = size / CFG.GRID;
 
-    ctx.globalAlpha = 0.45;
-    ctx.fillStyle = "#000814";
-    ctx.fillRect(ox, oy, size, size);
+ctx.globalAlpha = 0.45;
+ctx.fillStyle = "#000814";
+ctx.fillRect(ox, oy, size, size);
 
-    for (let y = 0; y < CFG.GRID; y++) {
-      for (let x = 0; x < CFG.GRID; x++) {
-        if (map[y][x] === 1) {
-          ctx.fillStyle = "#00eaffcc";
-          ctx.fillRect(ox + x * cs, oy + y * cs, Math.ceil(cs), Math.ceil(cs));
-        }
-      }
-    }
+ for (let y = 0; y < CFG.GRID; y++) { for (let x = 0; x < CFG.GRID; x++) { if (map[y][x] === 1) {
+ ctx.fillStyle = "#00eaffcc";
+ctx.fillRect(ox + x * cs, oy + y * cs, Math.ceil(cs), Math.ceil(cs));
+ }
+ }
+ }
 
-    ctx.globalAlpha = 0.9;
+ ctx.globalAlpha = 0.9;
 
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(ox + player.x*cs - 2, oy + player.y*cs - 2, 4, 4);
+ ctx.fillStyle = "#ffffff";
+ ctx.fillRect(ox + player.x*cs - 2, oy + player.y*cs - 2, 4, 4);
 
-    ctx.strokeStyle = "#ffffff";
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(ox + player.x*cs, oy + player.y*cs);
-    ctx.lineTo(ox + (player.x + Math.cos(player.angle)*2.5)*cs,
-               oy + (player.y + Math.sin(player.angle)*2.5)*cs);
-    ctx.stroke();
+ ctx.strokeStyle = "#ffffff";
+  ctx.lineWidth = 1;
+ ctx.beginPath();
+ ctx.moveTo(ox + player.x*cs, oy + player.y*cs);
+ ctx.lineTo(ox + (player.x + Math.cos(player.angle)*2.5)*cs,
+ oy + (player.y + Math.sin(player.angle)*2.5)*cs);
+ ctx.stroke();
 
-    const mp = 0.5 + 0.5 * Math.sin(performance.now() / 180);
-    ctx.fillStyle = `rgba(255,0,140,${mp})`;
-    ctx.fillRect(ox + monster.x*cs - 2, oy + monster.y*cs - 2, 4, 4);
+ const mp = 0.5 + 0.5 * Math.sin(performance.now() / 180);
+ ctx.fillStyle = `rgba(255,0,140,${mp})`;
+ ctx.fillRect(ox + monster.x*cs - 2, oy + monster.y*cs - 2, 4, 4);
 
-    ctx.fillStyle = "#39ff14";
-    ctx.fillRect(ox + goalX*cs - 2, oy + goalY*cs - 2, 4, 4);
+ ctx.fillStyle = "#39ff14";
+ ctx.fillRect(ox + goalX*cs - 2, oy + goalY*cs - 2, 4, 4);
 
-    ctx.globalAlpha = 1;
-  }
+ ctx.globalAlpha = 1;
+ }
 
   /* =========================================================
      OVERLAY SCREENS
@@ -1038,7 +1049,7 @@ function renderMinimap(W, H) {
     ctx.fillText(`Survived: ${survivalTime.toFixed(1)}s  |  Score: ${score}`, W/2, H*0.55);
 
     const bk = 0.5 + 0.5 * Math.sin(performance.now() / 400);
-    cctx.fillStyle = `rgba(0,234,255,${bk})`;
+    ctx.fillStyle = `rgba(0,234,255,${bk})`;
     ctx.fillText("Press ENTER to descend again", W/2, H*0.68);
     ctx.restore();
   }
@@ -1157,16 +1168,21 @@ function renderMinimap(W, H) {
     monster.speed = CFG.MONSTER_SPEED;
 
 
-    gameState = "playing";
-    startTime = performance.now();
-    lastTime = performance.now();
-    lastTelemetryTime = performance.now();
-    survivalTime = 0;
-    score = 0;
 
-    playAudio();
+gameState = "playing";
+startTime = performance.now();
+lastTime = performance.now();
+lastTelemetryTime = performance.now();
+survivalTime = 0;
+score = 0;
 
-    animFrameId = requestAnimationFrame(loop);
+if (ambientAudio) {
+  ambientAudio.volume = 0.35;
+}
+
+playAudio();
+
+animFrameId = requestAnimationFrame(loop);
 
   }
 
@@ -1194,12 +1210,26 @@ function playAudio() {
     }
 }
 
+function playBootAudio() {
+    if (!audioEnabled || bootAudioStarted) return;
+
+    initAudio();
+
+    if (ambientAudio) {
+      ambientAudio.volume = 0.22;
+      ambientAudio.play().then(() => {
+        bootAudioStarted = true;
+      }).catch(() => {
+        // Browser may block audio until first user interaction.
+      });
+    }
+}
+
 function stopAudio() {
     if (ambientAudio) {
       ambientAudio.pause();
     }
 }
-
   /* =========================================================
      SLIDER BINDINGS
   ========================================================= */
