@@ -213,11 +213,146 @@ canvas#game {
   text-align: center;
 }
 
+/* MOVING SHADOW PEOPLE ON BOOT SCREEN */
+
+.shadow-layer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.screen h2,
+.screen p {
+  position: relative;
+  z-index: 2;
+}
+
+.screen::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at center, rgba(255, 60, 0, 0.08), transparent 42%),
+    radial-gradient(circle at 20% 80%, rgba(80, 0, 0, 0.12), transparent 35%),
+    radial-gradient(circle at 80% 70%, rgba(80, 0, 0, 0.10), transparent 35%);
+  animation: hellPulse 6s ease-in-out infinite;
+  z-index: 0;
+}
+
+.shadow-person {
+  position: absolute;
+  bottom: 5%;
+  width: 70px;
+  height: 190px;
+  opacity: 0.18;
+  filter: blur(3px);
+  background:
+    radial-gradient(circle at 50% 14%, rgba(0, 0, 0, 0.98) 0 18px, transparent 19px),
+    radial-gradient(ellipse at 50% 58%, rgba(0, 0, 0, 0.94) 0 34px, transparent 36px),
+    linear-gradient(
+      to bottom,
+      transparent 0%,
+      rgba(0, 0, 0, 0.98) 35%,
+      rgba(0, 0, 0, 0.55) 100%
+    );
+  transform-origin: bottom center;
+  animation-name: shadowDrift;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+
+.shadow-one {
+  left: 6%;
+  animation-duration: 18s;
+  animation-delay: -2s;
+}
+
+.shadow-two {
+  left: 23%;
+  height: 230px;
+  width: 85px;
+  opacity: 0.12;
+  animation-duration: 24s;
+  animation-delay: -9s;
+}
+
+.shadow-three {
+  right: 12%;
+  height: 210px;
+  width: 75px;
+  opacity: 0.15;
+  animation-duration: 21s;
+  animation-delay: -5s;
+}
+
+.shadow-four {
+  right: 32%;
+  height: 170px;
+  width: 60px;
+  opacity: 0.10;
+  animation-duration: 27s;
+  animation-delay: -13s;
+}
+
+.shadow-five {
+  left: 48%;
+  height: 260px;
+  width: 95px;
+  opacity: 0.08;
+  animation-duration: 30s;
+  animation-delay: -17s;
+}
+
+@keyframes shadowDrift {
+  0% {
+    transform: translateX(-45px) scaleX(0.85) scaleY(1);
+    opacity: 0.04;
+  }
+
+  25% {
+    opacity: 0.18;
+  }
+
+  50% {
+    transform: translateX(35px) scaleX(1.1) scaleY(1.04);
+    opacity: 0.12;
+  }
+
+  75% {
+    opacity: 0.22;
+  }
+
+  100% {
+    transform: translateX(-45px) scaleX(0.85) scaleY(1);
+    opacity: 0.04;
+  }
+}
+
+@keyframes hellPulse {
+  0%, 100% {
+    opacity: 0.45;
+  }
+
+  50% {
+    opacity: 0.85;
+  }
+}
+
 .screen h2 {
   margin-bottom: 20px;
   letter-spacing: 3px;
   font-size: 48px;
+  color: #ff8a3d;
+  text-shadow:
+    0 0 4px #ffcc99,
+    0 0 10px #ff8844,
+    0 0 22px #ff5500,
+    0 0 42px rgba(255, 80, 0, 0.75),
+    0 0 70px rgba(255, 40, 0, 0.45);
 }
+
 
 .screen .subtitle {
   color: #884400;
