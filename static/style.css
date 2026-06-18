@@ -61,17 +61,39 @@ body {
   align-items: center;
 }
 
+/* PLAYING TITLE */
+
+.game-title {
+  font-size: clamp(32px, 5vw, 58px);
+  letter-spacing: 8px;
+  margin-top: 18px;
+  margin-bottom: 14px;
+  text-align: center;
+  color: #ff8a3d;
+  font-family: "Courier New", monospace;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.glow-title {
+  text-shadow:
+    0 0 4px #ffcc99,
+    0 0 10px #ff8844,
+    0 0 22px #ff5500,
+    0 0 42px rgba(255, 80, 0, 0.75),
+    0 0 70px rgba(255, 40, 0, 0.45);
+}
 /* CRT WRAPPER */
 
 .crt-wrapper {
   position: relative;
   width: min(92vw, 1000px);
-  margin: 30px auto;
+  margin: 0 auto 18px auto;
 }
 
 /* CANVAS */
 
-canvas {
+canvas#game {
   display: block;
   width: 100%;
   aspect-ratio: 4 / 3;
@@ -163,7 +185,7 @@ canvas {
   -webkit-appearance: none;
   width: 14px;
   height: 14px;
-  background: #ff6600;
+  background: #ffea00;
   border-radius: 50%;
   box-shadow: 0 0 10px #ff4400;
   cursor: pointer;
@@ -172,7 +194,7 @@ canvas {
 .controls input[type="range"]::-moz-range-thumb {
   width: 14px;
   height: 14px;
-  background: #ff6600;
+  background: #ffea00;
   border-radius: 50%;
   cursor: pointer;
 }
@@ -280,6 +302,24 @@ canvas {
   display: none; /* Hidden by default, shown on touch devices */
 }
 
+.audio-button {
+  padding: 6px 14px;
+  border: 1px solid #ff6600;
+  border-radius: 4px;
+  background: rgba(255, 102, 0, 0.12);
+  color: #ffcc99;
+  font-family: "Courier New", monospace;
+  letter-spacing: 2px;
+  cursor: pointer;
+  box-shadow:
+    0 0 8px rgba(255, 80, 0, 0.5),
+    inset 0 0 8px rgba(255, 80, 0, 0.15);
+}
+
+.audio-button:hover {
+  background: rgba(255, 102, 0, 0.25);
+  color: #ffffff;
+}
 .joystick {
   position: absolute;
   bottom: 10%;
