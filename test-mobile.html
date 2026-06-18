@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Mobile Test Runner - Labyrinth of Tartarus</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background: #000;
+            color: #ff8844;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        h1, h2 {
+            color: #ff6600;
+            text-shadow: 0 0 10px #ff4400;
+        }
+        .test-section {
+            background: rgba(255, 136, 68, 0.1);
+            border: 1px solid #ff8844;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        button {
+            background: #ff6600;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 14px;
+        }
+        button:hover {
+            background: #ff8844;
+        }
+        button:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+        .status {
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 3px;
+        }
+        .success { color: #4CAF50; }
+        .warning { color: #FF9800; }
+        .error { color: #F44336; }
+        .device-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin: 15px 0;
+        }
+        .device-card {
+            background: rgba(255, 136, 68, 0.05);
+            border: 1px solid #ff8844;
+            padding: 10px;
+            border-radius: 3px;
+            text-align: center;
+        }
+        .device-card button {
+            width: 100%;
+            margin: 5px 0;
+        }
+        .console-output {
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #666;
+            padding: 15px;
+            margin: 15px 0;
+            height: 300px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Mobile Test Runner</h1>
+        <p>Test Labyrinth of Tartarus on simulated mobile devices</p>
+
+        <div class="test-section">
+            <h2>📱 Device Simulation</h2>
+            <p>Select a device to simulate:</p>
+            <div class="device-grid">
+                <div class="device-card">
+                    <h3>iPhone SE</h3>
+                    <p>375×667 @2x<br>2 cores</p>
+                    <button onclick="testDevice('iphone-se')">Simulate</button>
+                </div>
+                <div class="device-card">
+                    <h3>Pixel 4a</h3>
+                    <p>393×851 @2.75x<br>4 cores</p>
+                    <button onclick="testDevice('pixel-4a')">Simulate</button>
+                </div>
+                <div class="device-card">
+                    <h3>iPad Mini</h3>
+                    <p>768×1024 @2x<br>2 cores</p>
+                    <button onclick="testDevice('ipad-mini')">Simulate</button>
+                </div>
+                <div class="device-card">
+                    <h3>Galaxy A52</h3>
+                    <p>412×915 @2.63x<br>8 cores</p>
+                    <button onclick="testDevice('galaxy-a52')">Simulate</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>🧪 Individual Tests</h2>
+            <p>Run specific test components:</p>
+            <button onclick="testPerformance()">Performance Test</button>
+            <button onclick="testTouch()">Touch Controls</button>
+            <button onclick="testAudio()">Audio System</button>
+            <button onclick="testOracle()">Oracle Integration</button>
+        </div>
+
+        <div class="test-section">
+            <h2>🚀 Full Test Suite</h2>
+            <p>Run complete mobile compatibility test:</p>
+            <button onclick="runMobileTests()" id="fullTestBtn">Run Full Test Suite</button>
+            <div class="status" id="testStatus">Ready to test</div>
+        </div>
+
+        <div class="test-section">
+            <h2>📊 Test Results</h2>
+            <div class="console-output" id="consoleOutput">Test output will appear here...</div>
+            <button onclick="clearConsole()">Clear Console</button>
+        </div>
+
+        <div class="test-section">
+            <h2>🎮 Game Access</h2>
+            <p>Test the actual game with mobile features:</p>
+            <a href="index.html"><button>Launch Game</button></a>
+        </div>
+    </div>
+
+    <script>
+        // Override console.log to capture output
+        const originalLog = console.log;
+        const originalError = console.error;
+        const originalWarn = console.warn;
+        const consoleOutput = document.getElementById('consoleOutput');
+        const testStatus = document.getElementById('testStatus');
+
+        function addToConsole(message, type = 'log') {
+            const timestamp = new Date().toLocaleTimeString();
+            const line = `[${timestamp}] ${message}\n`;
+            consoleOutput.textContent += line;
+            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+
+            // Update status based on message content
+            if (message.includes('✅')) {
+                testStatus.className = 'status success';
+                testStatus.textContent = 'Test passed';
+            } else if (message.includes('⚠️') || message.includes('❌')) {
+                testStatus.className = 'status warning';
+                testStatus.textContent = 'Test completed with warnings';
+            }
+        }
+
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            addToConsole(args.join(' '), 'log');
+        };
+
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            addToConsole('ERROR: ' + args.join(' '), 'error');
+        };
+
+        console.warn = function(...args) {
+            originalWarn.apply(console, args);
+            addToConsole('WARN: ' + args.join(' '), 'warning');
+        };
+
+        function clearConsole() {
+            consoleOutput.textContent = '';
+            testStatus.className = 'status';
+            testStatus.textContent = 'Ready to test';
+        }
+
+        // Test runner functions (will be available after scripts load)
+        window.testDevice = function(device) {
+            if (window.mobileTester) {
+                window.mobileTester.simulateDevice(device);
+            } else {
+                addToConsole('Mobile tester not loaded yet', 'error');
+            }
+        };
+
+        window.testPerformance = function() {
+            if (window.mobileTester) {
+                window.mobileTester.runPerformanceTest(3000);
+            } else {
+                addToConsole('Mobile tester not loaded yet', 'error');
+            }
+        };
+
+        window.testTouch = function() {
+            if (window.mobileTester) {
+                window.mobileTester.runTouchTest();
+            } else {
+                addToConsole('Mobile tester not loaded yet', 'error');
+            }
+        };
+
+        window.testAudio = function() {
+            if (window.mobileTester) {
+                window.mobileTester.runAudioTest();
+            } else {
+                addToConsole('Mobile tester not loaded yet', 'error');
+            }
+        };
+
+        window.testOracle = function() {
+            if (window.mobileTester) {
+                window.mobileTester.runOracleTest();
+            } else {
+                addToConsole('Mobile tester not loaded yet', 'error');
+            }
+        };
+
+        window.runMobileTests = async function() {
+            const btn = document.getElementById('fullTestBtn');
+            btn.disabled = true;
+            btn.textContent = 'Running Tests...';
+
+            try {
+                if (window.mobileTester) {
+                    await window.mobileTester.runFullTestSuite();
+                } else {
+                    addToConsole('Mobile tester not loaded yet', 'error');
+                }
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Run Full Test Suite';
+            }
+        };
+
+        // Load the game scripts
+        function loadScript(src) {
+            return new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = src;
+                script.onload = resolve;
+                script.onerror = reject;
+                document.head.appendChild(script);
+            });
+        }
+
+        // Load required scripts
+        async function loadTestScripts() {
+            try {
+                await loadScript('websocket/connection.js');
+                await loadScript('websocket/audio-manager.js');
+                await loadScript('websocket/audio-loader.js');
+                await loadScript('websocket/mobile-tester.js');
+                await loadScript('websocket/oracle-client.js');
+
+                addToConsole('Test scripts loaded successfully');
+            } catch (error) {
+                addToConsole('Failed to load test scripts: ' + error, 'error');
+            }
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            loadTestScripts();
+            addToConsole('Mobile Test Runner initialized');
+        });
+    </script>
+</body>
+</html>
