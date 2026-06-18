@@ -519,24 +519,24 @@
     const H = canvas.height;
     if (W === 0 || H === 0) return;
 
-    ctx.fillStyle = "#000";
+    ctx.fillStyle = "#02020a";
     ctx.fillRect(0, 0, W, H);
 
     zBuffer = new Array(W);
 
     // Ceiling
     const ceilG = ctx.createLinearGradient(0, 0, 0, H / 2);
-    ceilG.addColorStop(0, "#050000");
-    ceilG.addColorStop(0.6, "#120300");
-    ceilG.addColorStop(1, "#1f0700");
+    ceilG.addColorStop(0, "#030014");
+    ceilG.addColorStop(0.6, "#09001f");
+    ceilG.addColorStop(1, "#16002e");
     ctx.fillStyle = ceilG;
     ctx.fillRect(0, 0, W, H / 2);
 
     // Floor
     const flrG = ctx.createLinearGradient(0, H / 2, 0, H);
-    flrG.addColorStop(0, "#1f0700");
-    flrG.addColorStop(0.4, "#150400");
-    flrG.addColorStop(1, "#080100");
+    flrG.addColorStop(0, "#18002f");
+    flrG.addColorStop(0.4, "#0b001a");
+    flrG.addColorStop(1, "#020008");
     ctx.fillStyle = flrG;
     ctx.fillRect(0, H / 2, W, H / 2);
 
@@ -597,20 +597,20 @@
       let r, g, b;
 
       if (side === 0) {
-        r = Math.floor(190 * sh);
-        g = Math.floor(75 * sh);
-        b = Math.floor(18 * sh);
+        r = Math.floor(170 * sh);
+        g = Math.floor(45 * sh);
+        b = Math.floor(255 * sh);
       } else {
-        r = Math.floor(140 * sh);
-        g = Math.floor(50 * sh);
-        b = Math.floor(12 * sh);
+        r = Math.floor(95 * sh);
+        g = Math.floor(20 * sh);
+        b = Math.floor(190 * sh);
       }
 
       ctx.fillStyle = `rgb(${r},${g},${b})`;
       ctx.fillRect(x, ds, 1, de - ds);
 
       if (wallX < 0.03 || wallX > 0.97) {
-        ctx.fillStyle = `rgba(60,20,5,${0.6 * sh})`;
+        ctx.fillStyle = `rgba(0,255,255,${0.35 * sh})`;
         ctx.fillRect(x, ds, 1, de - ds);
       }
     }
@@ -621,7 +621,7 @@
 
     // Torch flicker
     const flicker = 0.02 + Math.random() * 0.03;
-    ctx.fillStyle = `rgba(255,80,0,${flicker})`;
+    ctx.fillStyle = `rgba(180,0,255,${flicker})`;
     ctx.fillRect(0, 0, W, H);
 
     // Vignette
@@ -661,16 +661,16 @@
     const bw = Math.max(6, 50 / ty);
 
     const grad = ctx.createLinearGradient(scrX, H/2 - h/2, scrX, H/2 + h/2);
-    grad.addColorStop(0, `rgba(255,220,80,${0.9 * pulse})`);
-    grad.addColorStop(0.5, `rgba(255,150,0,${0.7 * pulse})`);
-    grad.addColorStop(1, `rgba(200,60,0,${0.4 * pulse})`);
+    grad.addColorStop(0, `rgba(220,255,120,${0.9 * pulse})`);
+    grad.addColorStop(0.5, `rgba(57,255,20,${0.7 * pulse})`);
+    grad.addColorStop(1, `rgba(0,180,120,${0.4 * pulse})`)
     ctx.fillStyle = grad;
     ctx.fillRect(scrX - bw/2, H/2 - h/2, bw, h);
 
     const gr = bw * 4;
     const gg = ctx.createRadialGradient(scrX, H/2, 0, scrX, H/2, gr);
-    gg.addColorStop(0, `rgba(255,180,50,${0.15 * pulse})`);
-    gg.addColorStop(1, "rgba(255,100,0,0)");
+    gg.addColorStop(0, `rgba(57,255,20,${0.15 * pulse})`);
+    gg.addColorStop(1, "rgba(0,255,180,0)");
     ctx.fillStyle = gg;
     ctx.fillRect(scrX - gr, H/2 - gr, gr*2, gr*2);
   }
@@ -710,9 +710,9 @@
         if (zBuffer[cc] < ty) continue;
 
         const bri = Math.min(255, Math.floor((320 / (ty + 0.8)) * pulse));
-        const r = Math.min(255, bri + 80);
-        const g = Math.min(255, Math.floor(bri * 0.45) + 20);
-        const b = Math.floor(bri * 0.08);
+        const r = Math.min(255, bri + 120);
+        const g = Math.min(255, Math.floor(bri * 0.08) + 10);
+        const b = Math.min(255, Math.floor(bri * 0.55) + 90);
 
         ctx.fillStyle = `rgb(${r},${g},${b})`;
         ctx.fillRect(px, py, pxSz, pxSz);
@@ -721,8 +721,8 @@
 
     const glR = totW * 0.9;
     const gg = ctx.createRadialGradient(scrX, stY + totH/2, 0, scrX, stY + totH/2, glR);
-    gg.addColorStop(0, `rgba(255,60,0,${0.22 * pulse})`);
-    gg.addColorStop(1, "rgba(255,30,0,0)");
+    gg.addColorStop(0, `rgba(255,0,140,${0.28 * pulse})`);
+    gg.addColorStop(1, "rgba(120,0,255,0)");
     ctx.fillStyle = gg;
     ctx.fillRect(scrX - glR, stY + totH/2 - glR, glR*2, glR*2);
   }
@@ -736,12 +736,12 @@
     const fs = Math.max(12, Math.floor(H * 0.032));
     ctx.font = `${fs}px "Courier New", monospace`;
     ctx.textBaseline = "top";
-    ctx.shadowColor = "#ff4400";
+    ctx.shadowColor = "#00eaff";
     ctx.shadowBlur = 6;
 
     const p = 10;
 
-    ctx.fillStyle = "#ff9944";
+    ctx.fillStyle = "#00eaff";
     ctx.textAlign = "left";
     ctx.fillText(`XPONOE: ${survivalTime.toFixed(1)}`, p, p);
     ctx.fillText(`SCORE: ${score}`, p, p + fs * 1.4);
@@ -750,14 +750,14 @@
     ctx.fillText(`EXIT: ${gDist}m`, p, p + fs * 2.8);
 
     ctx.textAlign = "right";
-    ctx.fillStyle = "#884422";
+    ctx.fillStyle = "#b26cff";
     ctx.fillText(`RING ${floorReached} | x${monster.difficultyMod.toFixed(1)}`, W - p, p);
 
     const stateNames = {
       patrol: "PATROLLING", chase: "HUNTING", flank: "FLANKING",
       ambush: "AMBUSH", investigate: "INVESTIGATING"
     };
-    ctx.fillStyle = "#663311";
+    ctx.fillStyle = "#7a3cff";
     ctx.fillText(stateNames[monster.state] || monster.state, W - p, p + fs * 1.4);
 
     const mDist = Math.sqrt((monster.x-player.x)**2 + (monster.y-player.y)**2);
@@ -765,11 +765,11 @@
       const wp = 0.5 + 0.5 * Math.sin(performance.now() / 120);
       ctx.textAlign = "center";
       if (mDist < 3) {
-        ctx.fillStyle = `rgba(255,30,0,${wp})`;
+        ctx.fillStyle = `rgba(255,0,120,${wp})`;
         ctx.font = `bold ${fs * 1.3}px "Courier New", monospace`;
         ctx.fillText("!! DEATH !!", W / 2, p);
       } else {
-        ctx.fillStyle = `rgba(255,100,0,${wp * 0.6})`;
+        ctx.fillStyle = `rgba(0,234,255,${wp * 0.6})`;
         ctx.fillText("~ Presence felt...", W / 2, p);
       }
     }
@@ -789,13 +789,13 @@ function renderMinimap(W, H) {
     const cs = size / CFG.GRID;
 
     ctx.globalAlpha = 0.45;
-    ctx.fillStyle = "#020000";
+    ctx.fillStyle = "#000814";
     ctx.fillRect(ox, oy, size, size);
 
     for (let y = 0; y < CFG.GRID; y++) {
       for (let x = 0; x < CFG.GRID; x++) {
         if (map[y][x] === 1) {
-          ctx.fillStyle = "#ff5a00cc";
+          ctx.fillStyle = "#00eaffcc";
           ctx.fillRect(ox + x * cs, oy + y * cs, Math.ceil(cs), Math.ceil(cs));
         }
       }
@@ -803,10 +803,10 @@ function renderMinimap(W, H) {
 
     ctx.globalAlpha = 0.9;
 
-    ctx.fillStyle = "#00eaff";
+    ctx.fillStyle = "#ffffff";
     ctx.fillRect(ox + player.x*cs - 2, oy + player.y*cs - 2, 4, 4);
 
-    ctx.strokeStyle = "#00eaff";
+    ctx.strokeStyle = "#ffffff";
     ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.moveTo(ox + player.x*cs, oy + player.y*cs);
@@ -815,7 +815,7 @@ function renderMinimap(W, H) {
     ctx.stroke();
 
     const mp = 0.5 + 0.5 * Math.sin(performance.now() / 180);
-    ctx.fillStyle = `rgba(255,0,90,${mp})`;
+    ctx.fillStyle = `rgba(255,0,140,${mp})`;
     ctx.fillRect(ox + monster.x*cs - 2, oy + monster.y*cs - 2, 4, 4);
 
     ctx.fillStyle = "#39ff14";
@@ -829,48 +829,48 @@ function renderMinimap(W, H) {
   ========================================================= */
 
   function renderDeathScreen(W, H) {
-    ctx.fillStyle = "rgba(80,0,0,0.75)";
+    ctx.fillStyle = "rgba(30,0,50,0.78)";
     ctx.fillRect(0, 0, W, H);
 
     ctx.save();
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.shadowColor = "#ff0000";
+    ctx.shadowColor = "#ff008c";
     ctx.shadowBlur = 25;
 
     ctx.font = `bold ${Math.floor(H*0.09)}px "Courier New", monospace`;
-    ctx.fillStyle = "#ff2200";
+    ctx.fillStyle = "#ff008c";
     ctx.fillText("DEATH", W/2, H*0.33);
 
     ctx.shadowBlur = 8;
     ctx.font = `${Math.floor(H*0.035)}px "Courier New", monospace`;
-    ctx.fillStyle = "#cc6600";
+    ctx.fillStyle = "#b26cff";
     ctx.fillText("The labyrinth claims another soul", W/2, H*0.48);
     ctx.fillText(`Survived: ${survivalTime.toFixed(1)}s  |  Score: ${score}`, W/2, H*0.55);
 
     const bk = 0.5 + 0.5 * Math.sin(performance.now() / 400);
-    ctx.fillStyle = `rgba(255,120,0,${bk})`;
+    cctx.fillStyle = `rgba(0,234,255,${bk})`;
     ctx.fillText("Press ENTER to descend again", W/2, H*0.68);
     ctx.restore();
   }
 
   function renderEscapeScreen(W, H) {
-    ctx.fillStyle = "rgba(40,25,0,0.75)";
+    ctx.fillStyle = "rgba(0,35,28,0.78)";
     ctx.fillRect(0, 0, W, H);
 
     ctx.save();
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.shadowColor = "#ffaa00";
+    ctx.shadowColor = "#39ff14";
     ctx.shadowBlur = 25;
 
     ctx.font = `bold ${Math.floor(H*0.09)}px "Courier New", monospace`;
-    ctx.fillStyle = "#ffcc00";
+    ctx.fillStyle = "#39ff14";
     ctx.fillText("FREEDOM", W/2, H*0.33);
 
     ctx.shadowBlur = 8;
     ctx.font = `${Math.floor(H*0.035)}px "Courier New", monospace`;
-    ctx.fillStyle = "#ffaa44";
+    ctx.fillStyle = "#00eaff";
     ctx.fillText("You have escaped Tartarus", W/2, H*0.48);
     ctx.fillText(`Time: ${survivalTime.toFixed(1)}s  |  Score: ${score}`, W/2, H*0.55);
 
