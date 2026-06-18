@@ -631,6 +631,10 @@
     ctx.fillStyle = vig;
     ctx.fillRect(0, 0, W, H);
 
+
+    // First-person candle / torch overlay
+    renderCandleHand(W, H);
+
     // HUD
     renderHUD(W, H);
 
@@ -725,6 +729,189 @@
     gg.addColorStop(1, "rgba(120,0,255,0)");
     ctx.fillStyle = gg;
     ctx.fillRect(scrX - glR, stY + totH/2 - glR, glR*2, glR*2);
+  }
+
+  
+
+  /* =========================================================
+     FIRST PERSON POV
+  ========================================================= */
+
+  function renderCandleHand(W, H) {
+    ctx.save();
+
+    const t = performance.now() / 1000;
+
+    const moving =
+      keys["w"] || keys["s"] ||
+      keys["arrowup"] || keys["arrowdown"] ||
+      keys["q"] || keys["e"];
+
+    const bob = moving ? Math.sin(t * 8) * 7 : Math.sin(t * 3) * 3;
+    const sway = moving ? Math.sin(t * 4) * 5 : Math.sin(t * 2) * 2;
+    const flicker = 0.78 + Math.random() * 0.22;
+
+    const cx = W * 0.50 + sway;
+    const cy = H * 0.78 + bob;
+
+    /* Candle glow */
+    const glow = ctx.createRadialGradient(
+      cx,
+      cy - H * 0.30,
+      0,
+      cx,
+      cy - H * 0.30,
+      H * 0.48
+    );
+    glow.addColorStop(0, `rgba(255,190,80,${0.30 * flicker})`);
+    glow.addColorStop(0.28, `rgba(255,95,20,${0.16 * flicker})`);
+    glow.addColorStop(0.62, `rgba(150,40,255,${0.08 * flicker})`);
+    glow.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.fillStyle = glow;
+    ctx.fillRect(0, 0, W, H);
+
+    /* Left sleeve */
+    ctx.fillStyle = "#151936";
+    ctx.beginPath();
+    ctx.moveTo(cx - W * 0.23, H);
+    ctx.lineTo(cx - W * 0.10, cy + H * 0.06);
+    ctx.lineTo(cx - W * 0.03, cy + H * 0.16);
+    ctx.lineTo(cx - W * 0.11, H);
+    ctx.closePath();
+    ctx.fill();
+
+    /* Right sleeve */
+    ctx.fillStyle = "#10152f";
+    ctx.beginPath();
+    ctx.moveTo(cx + W * 0.22, H);
+    ctx.lineTo(cx + W * 0.10, cy + H * 0.05);
+    ctx.lineTo(cx + W * 0.03, cy + H * 0.16);
+    ctx.lineTo(cx + W * 0.11, H);
+    ctx.closePath();
+    ctx.fill();
+
+    /* Left hand shape */
+    ctx.fillStyle = "#b85f3a";
+    ctx.beginPath();
+    ctx.ellipse(cx - W * 0.055, cy + H * 0.02, W * 0.045, H * 0.035, -0.55, 0, Math.PI * 2);
+    ctx.fill();
+
+    /* Right hand shape */
+    ctx.fillStyle = "#c96d43";
+    ctx.beginPath();
+    ctx.ellipse(cx + W * 0.055, cy + H * 0.02, W * 0.045, H * 0.035, 0.55, 0, Math.PI * 2);
+    ctx.fill();
+
+    /* Left fingers around candle */
+    ctx.fillStyle = "#e28a58";
+    ctx.beginPath();
+    ctx.ellipse(cx - W * 0.030, cy - H * 0.005, W * 0.014, H * 0.040, -0.22, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.ellipse(cx - W * 0.006, cy + H * 0.002, W * 0.012, H * 0.036, -0.10, 0, Math.PI * 2);
+    ctx.fill();
+
+    /* Right fingers around candle */
+    ctx.fillStyle = "#f09a62";
+    ctx.beginPath();
+    ctx.ellipse(cx + W * 0.026, cy - H * 0.002, W * 0.014, H * 0.040, 0.24, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.ellipse(cx + W * 0.002, cy + H * 0.005, W * 0.012, H * 0.036, 0.08, 0, Math.PI * 2);
+    ctx.fill();
+
+    /* Raised finger silhouette */
+    ctx.fillStyle = "#e98955";
+    ctx.beginPath();
+    ctx.ellipse(cx - W * 0.080, cy - H * 0.105, W * 0.012, H * 0.070, -0.18, 0, Math.PI * 2);
+    ctx.fill();
+
+    /* Candle body */
+    const candleW = W * 0.035;
+    const candleH = H * 0.22;
+    const candleX = cx - candleW / 2;
+    const candleY = cy - H * 0.18;
+
+    ctx.fillStyle = "#fff2d0";
+    ctx.fillRect(candleX, candleY, candleW, candleH);
+
+    /* Candle side shadow */
+    ctx.fillStyle = "#e0b77d";
+    ctx.fillRect(candleX + candleW * 0.68, candleY, candleW * 0.32, candleH);
+
+    /* Melted wax detail */
+    ctx.fillStyle = "#ffdca3";
+    ctx.beginPath();
+    ctx.moveTo(candleX, candleY + H * 0.035);
+    ctx.quadraticCurveTo(candleX + candleW * 0.28, candleY + H * 0.065, candleX + candleW * 0.48, candleY + H * 0.028);
+    ctx.quadraticCurveTo(candleX + candleW * 0.68, candleY + H * 0.000, candleX + candleW, candleY + H * 0.030);
+    ctx.lineTo(candleX + candleW, candleY);
+    ctx.lineTo(candleX, candleY);
+    ctx.closePath();
+    ctx.fill();
+
+    /* Wick */
+    ctx.strokeStyle = "#1a0b05";
+    ctx.lineWidth = Math.max(1, W * 0.003);
+    ctx.beginPath();
+    ctx.moveTo(cx, candleY);
+    ctx.lineTo(cx + W * 0.005, candleY - H * 0.030);
+    ctx.stroke();
+
+    /* Flame outer */
+    const flameX = cx + W * 0.006;
+    const flameY = candleY - H * 0.050;
+
+    ctx.fillStyle = `rgba(255,82,18,${0.96 * flicker})`;
+    ctx.beginPath();
+    ctx.moveTo(flameX, flameY - H * 0.075);
+    ctx.bezierCurveTo(
+      flameX - W * 0.040, flameY - H * 0.020,
+      flameX - W * 0.025, flameY + H * 0.035,
+      flameX,
+      flameY + H * 0.030
+    );
+    ctx.bezierCurveTo(
+      flameX + W * 0.040, flameY + H * 0.010,
+      flameX + W * 0.030, flameY - H * 0.045,
+      flameX,
+      flameY - H * 0.075
+    );
+    ctx.fill();
+
+    /* Flame inner */
+    ctx.fillStyle = `rgba(255,220,80,${0.95 * flicker})`;
+    ctx.beginPath();
+    ctx.moveTo(flameX + W * 0.002, flameY - H * 0.045);
+    ctx.bezierCurveTo(
+      flameX - W * 0.018, flameY - H * 0.005,
+      flameX - W * 0.010, flameY + H * 0.025,
+      flameX + W * 0.004,
+      flameY + H * 0.018
+    );
+    ctx.bezierCurveTo(
+      flameX + W * 0.022, flameY + H * 0.000,
+      flameX + W * 0.018, flameY - H * 0.030,
+      flameX + W * 0.002,
+      flameY - H * 0.045
+    );
+    ctx.fill();
+
+    /* Flame core */
+    ctx.fillStyle = `rgba(255,255,220,${0.75 * flicker})`;
+    ctx.beginPath();
+    ctx.ellipse(flameX + W * 0.002, flameY + H * 0.003, W * 0.006, H * 0.020, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    /* Small sparks */
+    ctx.fillStyle = `rgba(255,210,90,${0.55 * flicker})`;
+    ctx.fillRect(flameX - W * 0.050, flameY - H * 0.075, 2, 2);
+    ctx.fillRect(flameX + W * 0.045, flameY - H * 0.050, 2, 2);
+    ctx.fillRect(flameX + W * 0.020, flameY - H * 0.095, 2, 2);
+
+    ctx.restore();
   }
 
   /* =========================================================
