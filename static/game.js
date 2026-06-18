@@ -50,11 +50,13 @@
   const gameContainer = document.getElementById("gameContainer");
   const canvas        = document.getElementById("game");
   const ctx           = canvas.getContext("2d");
-
+  const audioToggle = document.getElementById("audioToggle");
   /* =========================================================
      GAME STATE
   ========================================================= */
 
+  let audioEnabled = true;
+  let ambientAudio = null;
   let map       = [];
   let player    = { x: 0, y: 0, angle: 0 };
   let goalX     = 0, goalY = 0;
@@ -1154,6 +1156,7 @@ function renderMinimap(W, H) {
     monster.patrolAngle = Math.random() * Math.PI * 2;
     monster.speed = CFG.MONSTER_SPEED;
 
+
     gameState = "playing";
     startTime = performance.now();
     lastTime = performance.now();
@@ -1161,8 +1164,41 @@ function renderMinimap(W, H) {
     survivalTime = 0;
     score = 0;
 
+    playAudio();
+
     animFrameId = requestAnimationFrame(loop);
+
   }
+
+/* =========================================================
+   AUDIO
+========================================================= */
+
+function initAudio() {
+    if (ambientAudio) return;
+
+    ambientAudio = new Audio("/static/assets/audio/ambient.mp3");
+    ambientAudio.loop = true;
+    ambientAudio.volume = 0.35;
+}
+
+function playAudio() {
+    if (!audioEnabled) return;
+
+    initAudio();
+
+    if (ambientAudio) {
+      ambientAudio.play().catch(() => {
+        // Browser may block autoplay until player interaction.
+      });
+    }
+}
+
+function stopAudio() {
+    if (ambientAudio) {
+      ambientAudio.pause();
+    }
+}
 
   /* =========================================================
      SLIDER BINDINGS
@@ -1177,4 +1213,23 @@ function renderMinimap(W, H) {
     document.documentElement.style.setProperty("--gamma", this.value);
   });
 
+
+/* =========================================================
+   AUDIO TOGGLE BINDING
+========================================================= */
+
+if (audioToggle) {
+  audioToggle.addEventListener("click", function () {
+    audioEnabled = !audioEnabled;
+    audioToggle.textContent = audioEnabled ? "ON" : "OFF";
+
+    if (audioEnabled) {
+      playAudio();
+    } else {
+      stopAudio();
+    }
+  });
+}
+
 })();
+

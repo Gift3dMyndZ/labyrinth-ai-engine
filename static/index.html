@@ -13,13 +13,34 @@
   <!-- BOOT SCREEN -->
   <div id="bootScreen" class="screen">
     <h2>ΤΑΡΤΑΡΟΣ</h2>
-    <p>LABYRINTH OF TARTARUS</p>
     <p>Press ENTER to descend</p>
   </div>
 
   <!-- GAME CONTAINER -->
   <div id="gameContainer" style="display:none;">
-    <canvas id="game" tabindex="0"></canvas>
+    <h1 class="game-title glow-title">LABYRINTH OF TARTARUS</h1>
+
+    <div class="crt-wrapper">
+      <canvas id="game" tabindex="0"></canvas>
+      <div class="scanlines"></div>
+    </div>
+
+    <div class="controls">
+      <label>
+        BRIGHTNESS
+        <input id="brightnessSlider" type="range" min="0.5" max="1.8" step="0.05" value="1">
+      </label>
+
+      <label>
+        GAMMA
+        <input id="gammaSlider" type="range" min="0.5" max="1.8" step="0.05" value="1">
+      </label>
+
+      <label>
+        AUDIO
+        <button id="audioToggle" class="audio-button" type="button">ON</button>
+      </label>
+    </div>
   </div>
 
   <script src="/static/game.js"></script>
