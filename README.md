@@ -1,734 +1,451 @@
-<div align="center">
-
-<img src="https://readme-typing-svg.herokuapp.com?font=Cinzel&size=42&pause=1000&color=FF4500&center=true&vCenter=true&width=900&lines=LABYRINTH+OF+TARTARUS;THE+LABYRINTH+WATCHES;THE+ORACLE+LEARNS;ABANDON+ALL+HOPE" />
+<img src="https://readme-typing-svg.herokuapp.com?font=Cinzel&size=42&pause=1000&color=FF4500&center=true&vCenter=true&width=900&lines=LABYRINTH+OF+TARTARUS;THE+LABYRINTH+WATCHES;THE+ORACLE+LEARNS;ABANDON+ALL+HOPE" alt="Labyrinth of Tartarus animated title" />
 
 <br>
 
-<img src="https://capsule-render.vercel.app/api?type=waving&height=160&color=0:000000,35:2B0000,65:8B0000,100:1A1A1A&text=Adaptive%20Raycasting%20AI%20Simulation%20Engine&fontColor=ffffff&fontSize=28&fontAlignY=35&desc=FastAPI%20%E2%80%A2%20WebSockets%20%E2%80%A2%20SQLite%20%E2%80%A2%20Procedural%20Mutation&descAlignY=58&animation=fadeIn" />
+<img src="https://capsule-render.vercel.app/api?type=waving&height=160&color=0:000000,35:2B0000,65:8B0000,100:1A1A1A&text=Adaptive%20Raycasting%20AI%20Simulation%20Engine&fontColor=ffffff&fontSize=28&fontAlignY=35&desc=FastAPI%20%E2%80%A2%20WebSockets%20%E2%80%A2%20SQLite%20%E2%80%A2%20Procedural%20Mutation&descAlignY=58&animation=fadeIn" alt="Adaptive Raycasting AI Simulation Engine" />
 
-</div>
-
-<div align="center">
+<br>
 
 [![Python](https://img.shields.io/badge/Python-3.9+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
 [![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)](https://developer.mozilla.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-Async-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
 [![SQLite](https://img.shields.io/badge/SQLite-Embedded-003B57?style=for-the-badge&logo=sqlite&logoColor=white)](https://sqlite.org)
-
-<br>
-
-[![Simulation](https://img.shields.io/badge/Simulation-Real--Time-8A2BE2?style=for-the-badge)](#)
-[![Procedural Generation](https://img.shields.io/badge/Procedural-Generation-013220?style=for-the-badge)](#)
-[![Difficulty](https://img.shields.io/badge/Difficulty-Flow--State-8A2BE2?style=for-the-badge)](#)
-[![Uvicorn](https://img.shields.io/badge/Uvicorn-ASGI-4051B5?style=for-the-badge)](https://www.uvicorn.org/)
-[![WebSockets](https://img.shields.io/badge/WebSockets-Real--Time-4A90E2?style=for-the-badge)](https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API)
-
-<br>
-
-[![Rendering](https://img.shields.io/badge/Rendering-Raycasting-critical?style=for-the-badge)](#)
-[![Game Engine](https://img.shields.io/badge/Game-Engine--Like-8A2BE2?style=for-the-badge)](#)
-[![Testing](https://img.shields.io/badge/Testing-pytest-blue?style=for-the-badge&logo=pytest&logoColor=white)](https://pytest.org)
-[![AI Powered](https://img.shields.io/badge/🧠_AI-The_Oracle-FF4500?style=for-the-badge)](#-the-oracle--adaptive-ai-engine)
+[![Rendering](https://img.shields.io/badge/Rendering-Raycasting-critical?style=for-the-badge)](#rendering-and-gameplay)
+[![AI](https://img.shields.io/badge/AI-The_Oracle-FF4500?style=for-the-badge)](#the-oracle)
+[![Mobile](https://img.shields.io/badge/Mobile-Touch_Controls-8A2BE2?style=for-the-badge)](#mobile-controls)
 [![License](https://img.shields.io/badge/License-MIT-red?style=for-the-badge)](LICENSE)
 
-⚱️ ⚔️ 🏺 ⚔️ ⚱️
-
-══════════════════════════════════════
-
-⚱️ ⚔️ 🏺 ⚔️ ⚱️
-<div align="center">
-<p align="center">
-
-🕯️ <strong>Dungeon Status:</strong><br>
-██████████ 100%
-
-👁️ <strong>Oracle Status:</strong><br>
-OBSERVING...
-
-💀 <strong>Threat Level:</strong><br>
-EXTREME
-
-🔥 <strong>Flow-State Engine:</strong><br>
-ACTIVE
-
-⚱️ ⚔️ 🏺 ⚔️ ⚱️
-
-══════════════════════════════════════
-
-⚱️ ⚔️ 🏺 ⚔️ ⚱️
-</p>
-</div>
-<img
-  src="https://raw.githubusercontent.com/yourusername/labyrinth-of-tartarus/main/assets/badges/oracle-pulse.gif"
-  alt="The Oracle — Adaptive AI Engine"
-  height="32"
-/>
-
-<br><br>
-
-<img height="170" src="https://github-readme-stats.vercel.app/api?username=Gift3dMyndZ&show_icons=true&theme=radical"/>
-<img height="170" src="https://github-readme-streak-stats.herokuapp.com/?user=Gift3dMyndZ&theme=radical"/>
-
-</div>
-
-<div align="center">
-
-⚱️ ⚔️ 🏺 ⚔️ ⚱️
-
-══════════════════════════════════════
-
-⚱️ ⚔️ 🏺 ⚔️ ⚱️
-
-</div>
-
-<div align="center">
-
-# 🚪 THE GATES OF TARTARUS 🚪
-
-⚰️ ⚰️ ⚰️ ⚰️ ⚰️
+<br>
 
 <a href="https://labyrinth-ai-engine-1.onrender.com">
-  <img src="https://img.shields.io/badge/☠️_ENTER_THE_LABYRINTH-8B0000?style=for-the-badge&logoColor=white" height="60"/>
+  <img src="https://img.shields.io/badge/ENTER_THE_LABYRINTH-8B0000?style=for-the-badge&logoColor=white" height="52" alt="Enter the Labyrinth" />
 </a>
 
-⚰️ ⚰️ ⚰️ ⚰️ ⚰️
+### The Oracle awaits
 
-### 👁️ The Oracle Awaits
+*A living adversarial simulation engine disguised as an infernal maze crawler.*
 
-<p><em>A living adversarial simulation engine disguised as a dungeon crawler.</em></p>
 
-</div>
+---
 
-<div align="center">
+# Labyrinth of Tartarus
 
-### *“τὸ λαβύρινθον τοῦ Ταρτάρου· Ἀπολίπετε πᾶσαν ἐλπίδα, οἱ εἰσιόντες ἐνθάδε.”*  
-### *“The Labyrinth of Tartarus: Abandon all hope, you who enter here.”*
+**Labyrinth of Tartarus** is a browser-based first-person raycasting experience backed by FastAPI and SQLite. A procedural labyrinth, an adaptive monster, behavioral telemetry, persistent run history, an executive dashboard, and a mobile-ready control layer combine into a simulation designed around sustained player pressure.
 
-<br>
+The project is built with vanilla JavaScript and HTML5 Canvas on the client, with Python and FastAPI on the server. No frontend framework or separate build step is required.
 
-<img
-  width="100%"
-  alt="Labyrinth of Tartarus Gameplay"
-  src="https://github.com/user-attachments/assets/4c295120-33cb-4198-a0b2-570a9c89efbd"
-/>
+> The labyrinth does not merely become harder. The labyrinth observes how the player moves, adapts its pressure, and remembers completed runs.
 
-</div>
+## Live application
 
-<div align="center">
+- Game: <https://labyrinth-ai-engine-1.onrender.com>
+- Local game: <http://127.0.0.1:8000/>
+- Local dashboard: <http://127.0.0.1:8000/dashboard>
 
-# ☠️ DUNGEON TELEMETRY ☠️
+---
 
-</div>
+## Current feature set
 
-```diff
-+ Oracle Active
-+ Flow-State Monitoring
-+ Procedural Mutation Enabled
-+ Behavioral Profiling Enabled
-+ Adaptive Enemy Intelligence
+### Rendering and gameplay
 
-! Warning:
-! Dungeon topology may change during play
+- First-person HTML5 Canvas raycasting renderer
+- Procedurally generated labyrinth layouts
+- Multi-floor progression and increasing difficulty
+- Collision-aware forward, reverse, rotation, and strafing movement
+- Adaptive monster states including patrol, chase, flank, ambush, and investigate
+- Atmospheric boot sequence, ambient audio, infernal lighting, and shadow figures
+- Desktop pointer-lock mouse look
+- Touch-safe boot flow and persistent player identity
 
-- No two runs are identical
-```
+### The Oracle
 
-<p align="center"><em>System state is unstable by design.</em></p>
+The Oracle observes gameplay signals and adapts local difficulty pressure. Current behavioral telemetry includes:
 
-<div align="center">
+- Fear signal
+- Aggression signal
+- Curiosity signal
+- Survival time
+- Difficulty modifier
+- Floor reached
+- Maze size
+- Oracle mutation count
+- Device type
+- Run outcome
 
-⚱️ ⚔️ 🏺 ⚔️ ⚱️
+Periodic telemetry is throttled to approximately one request every five seconds. Death and escape events are submitted immediately.
 
-══════════════════════════════════════
+> Gameplay telemetry is currently client-reported. It should not be treated as authoritative competitive scoring without additional server-side validation.
 
-⚱️ ⚔️ 🏺 ⚔️ ⚱️
+### Persistence and executive dashboard
 
-</div>
+The SQLite-backed service supports:
 
-## ΤΑΡΤΑΡΟΣ — Adaptive Raycasting AI Simulation Engine
+- Player identity
+- Leaderboard records
+- Recent completed runs
+- Session and device telemetry
+- Backward-compatible database migrations
+- Dashboard summary metrics
+- Responsive dashboard views
 
-Inspired by *Wolfenstein 3D*, powered by **FastAPI + WebSockets**, and driven by a custom behavioral AI engine (**The Oracle**), *Labyrinth of Tartarus* is a living dungeon that observes, profiles, and mutates in real time to keep players in a constant **flow state**.
-
-Rather than inflating enemy health or damage, the labyrinth itself adapts — sealing corridors, relocating resources, evolving encounter pressure, and adjusting danger based on how the player thinks, moves, fights, and survives.
-
-<div align="center">
-
-⚱️ ⚔️ 🏺 ⚔️ ⚱️
-
-══════════════════════════════════════
-
-⚱️ ⚔️ 🏺 ⚔️ ⚱️
-
-</div>
-
-## Why This Project Exists
-
-Most games adjust difficulty by scaling numbers.
-
-## **Tartarus changes the world instead.**
-
-Rather than inflating enemy health or damage, the dungeon itself adapts:
-
-- Corridors seal or open
-- Enemies evolve counter‑tactics
-- Resources relocate
-- Safe paths disappear
-- Pressure escalates dynamically
-- Exploration patterns are reshaped over time
-
-The goal is not to punish or assist the player — but to maintain **flow**: the psychological state between boredom and frustration where engagement is highest.
-
-<div align="center">
-
-⚱️ ⚔️ 🏺 ⚔️ ⚱️
-
-══════════════════════════════════════
-
-⚱️ ⚔️ 🏺 ⚔️ ⚱️
-
-</div>
-
-## ✨ Key Features
-
-### 🎮 Gameplay
-- First‑person raycasting engine (**HTML5 Canvas**)
-- Procedurally generated, multi‑floor labyrinths
-- Real‑time melee and ranged combat
-- Inventory, keys, relics, and exploration layers
-
-### 🧠 Adaptive AI — *The Oracle*
-- Behavioral profiling via real‑time **WebSocket events**
-- World mutation instead of numeric difficulty scaling
-- Enemies adapt based on prior encounters
-- Trap and loot placement guided by path prediction
-
-### 🏗 Technical
-- **FastAPI** backend with **WebSocket transport**
-- **SQLite** persistence for player profiles and AI state
-- Sub‑50ms server response targets
-- Zero frontend frameworks (**pure vanilla JavaScript**)
-
-<div align="center">
-
-⚱️ ⚔️ 🏺 ⚔️ ⚱️
-
-══════════════════════════════════════
-
-⚱️ ⚔️ 🏺 ⚔️ ⚱️
-
-</div>
-
-<div align="center">
-
-# 👁️ THE ORACLE 👁️
-
-<img src="https://readme-typing-svg.herokuapp.com?font=Fira+Code&size=22&pause=1500&color=FF0000&center=true&width=800&lines=Observing+Player...;Profiling+Behavior...;Predicting+Decisions...;Mutating+Dungeon...;Flow+State+Maintained" />
-
-<br><br>
-
-<img
-  src="https://raw.githubusercontent.com/yourusername/labyrinth-of-tartarus/main/assets/badges/oracle-pulse.gif"
-  alt="The Oracle — Adaptive AI Engine"
-  height="50"
-/>
-
-<p><strong>The world does not react randomly. It remembers.</strong></p>
-
-</div>
-
-The Oracle is a real‑time simulation engine that sits between the player and the world, continuously observing behavior and reshaping the dungeon in response.
-
-## How It Works
+Open the local dashboard at:
 
 ```text
-╔══════════════════╗
-║     OBSERVE      ║
-╚═══════╤══════════╝
-        ▼
-╔══════════════════╗
-║     PROFILE      ║
-╚═══════╤══════════╝
-        ▼
-╔══════════════════╗
-║      MUTATE      ║
-╚═══════╤══════════╝
-        ▼
-╔══════════════════╗
-║     MEASURE      ║
-╚═══════╤══════════╝
-        ▼
-      REPEAT
+http://127.0.0.1:8000/dashboard
 ```
 
-### 1. Observe
-The Oracle captures:
-- Movement patterns
-- Combat choices
-- Hesitation timing
-- Exploration vs. avoidance behavior
-- Resource usage
-- Repeated path decisions
+---
 
-### 2. Profile
-Players are modeled along multiple behavioral axes:
-- **Aggression** → rusher ↔ cautious
-- **Exploration** → completionist ↔ speedrunner
-- **Resource Usage** → hoarder ↔ spender
-- **Adaptability** → pattern‑follower ↔ improviser
+## ORACLE NAV
 
-### 3. Mutate
-The Oracle issues world‑level changes:
-- Altering map topology
-- Spawning enemies with counter‑tactics
-- Adjusting lighting and visibility
-- Relocating critical resources
-- Changing pressure without breaking immersion
+ORACLE NAV replaces the original flat minimap with a local isometric mini-maze.
 
-### 4. Measure
-Player response feeds back into the profile, refining the next mutation cycle.
+### Navigation legend
 
-The result is a dungeon that feels **personal**, **adversarial**, and **alive**.
+- **Gold `YOU` marker:** player position and facing direction
+- **Cyan raised blocks:** nearby maze walls
+- **Dark blue diamonds:** walkable floor cells
+- **Orange diamonds:** the next route steps toward the exit
+- **Green `EXIT` beacon:** the exit when it enters the local navigation radius
+- **Orange compass:** exit direction relative to player facing
+- **Pink `ENEMY` marker:** monster inside the local threat radius
+- **Pink directional marker:** nearby monster outside the visible local map
 
-### Difficulty Philosophy
+The exit route uses cached breadth-first search. The route is recalculated when the player enters a new grid cell or when the destination changes. Only a short route segment is exposed so navigation remains useful without revealing the entire labyrinth.
 
-The Oracle does not try to make the game harder or easier — it tries to keep the player **engaged**.
+---
 
-If the player dominates, the labyrinth tightens.  
-If the player struggles, it may offer subtle relief — but never in a way that breaks immersion.
+## Controls
 
-<div align="center">
+### Desktop controls
 
-⚱️ ⚔️ 🏺 ⚔️ ⚱️
+- `W` or `Arrow Up`: move forward
+- `S` or `Arrow Down`: move backward
+- `A` or `Arrow Left`: rotate left
+- `D` or `Arrow Right`: rotate right
+- Mouse movement while pointer-locked: look left or right
+- `M`: show or hide ORACLE NAV
+- `Enter`: start or restart a run
+- `Escape`: release pointer lock
 
-══════════════════════════════════════
+### Mobile controls
 
-⚱️ ⚔️ 🏺 ⚔️ ⚱️
+- **Left virtual joystick**
+  - Drag upward to move forward
+  - Drag downward to move backward
+  - Drag left or right to strafe
+- **Right touch zone**
+  - Swipe horizontally to rotate the view
+- **MAP ON / MAP OFF**
+  - Show or hide ORACLE NAV
 
-</div>
+The joystick and look zone support simultaneous multi-touch input. Mobile input resets after pointer cancellation, window blur, page visibility changes, and orientation changes to prevent stuck movement.
 
-<div align="center">
+### Mobile layout guidance
 
-# 🏺 DESCENT INTO TARTARUS 🏺
+- Landscape is the recommended gameplay orientation.
+- Controls use device safe-area insets.
+- Touch targets are designed to remain finger-sized.
+- The release target is a sustained 30 FPS or better on supported mobile devices.
 
-Floor 1  ▰▱▱▱▱▱▱▱▱  
-Floor 2  ▰▰▱▱▱▱▱▱▱  
-Floor 3  ▰▰▰▱▱▱▱▱▱  
-Floor 4  ▰▰▰▰▱▱▱▱▱  
-Floor 5  ▰▰▰▰▰▱▱▱▱  
-Floor 6  ▰▰▰▰▰▰▱▱▱  
-Floor 7  ▰▰▰▰▰▰▰▱▱  
-Floor 8  ▰▰▰▰▰▰▰▰▱  
-Floor 9  ▰▰▰▰▰▰▰▰▰  
+---
 
-<br>
-
-☠️ TITAN FRAGMENT DETECTED ☠️
-
-</div>
-
-<div align="center">
-
-⚱️ ⚔️ 🏺 ⚔️ ⚱️
-
-══════════════════════════════════════
-
-⚱️ ⚔️ 🏺 ⚔️ ⚱️
-
-</div>
-
-## 🗺 Roadmap
-
-### ✅ Completed
-- Core raycasting renderer
-- Procedural map generation
-- FastAPI backend with WebSockets
-- Real‑time combat system
-- The Oracle (**observation → profiling → mutation → feedback**)
-- Spatial audio system
-- Multiple texture themes per floor
-- Persistent player progression
-
-### 🚧 Planned / In Progress
-- Mobile touch controls
-- Speedrun leaderboards (with ghost replays)
-- Community‑created labyrinth templates
-- Cooperative multiplayer (long‑term)
-
-<div align="center">
-
-⚱️ ⚔️ 🏺 ⚔️ ⚱️
-
-══════════════════════════════════════
-
-⚱️ ⚔️ 🏺 ⚔️ ⚱️
-
-</div>
-
-## 🏗 Architecture Overview
+## Architecture
 
 ```text
-┌─────────────────────────────────────────────────────┐
-│                    BROWSER CLIENT                    │
-│                                                     │
-│  ┌─────────────┐  ┌──────────┐  ┌───────────────┐  │
-│  │  Raycaster  │  │  Input   │  │  UI Overlay   │  │
-│  │  Renderer   │  │  Handler │  │  (HUD/Menu)   │  │
-│  └──────┬──────┘  └────┬─────┘  └───────┬───────┘  │
-│         │              │                │           │
-│         └──────────────┼────────────────┘           │
-│                        │                            │
-│                   WebSocket                         │
-└────────────────────────┼────────────────────────────┘
-                         │
-                         ▼
-┌────────────────────────┼────────────────────────────┐
-│                  FASTAPI SERVER                      │
-│                                                     │
-│  ┌─────────────────────▼─────────────────────────┐  │
-│  │              Game State Manager                │  │
-│  └──┬──────────────┬────────────────┬────────────┘  │
-│     │              │                │               │
-│     ▼              ▼                ▼               │
-│  ┌──────┐   ┌───────────┐   ┌────────────────┐     │
-│  │ Map  │   │  Combat   │   │   The Oracle   │     │
-│  │ Gen  │   │  Engine   │   │   (AI Engine)  │     │
-│  └──┬───┘   └─────┬─────┘   └───────┬────────┘     │
-│     │             │                  │              │
-│     └─────────────┼──────────────────┘              │
-│                   │                                 │
-│                   ▼                                 │
-│           ┌──────────────┐                          │
-│           │    SQLite    │                          │
-│           │   Database   │                          │
-│           └──────────────┘                          │
-└─────────────────────────────────────────────────────┘
+Browser Client
+├── Canvas raycaster
+├── Procedural local game state
+├── Keyboard, mouse, and touch input
+├── ORACLE NAV isometric renderer
+├── Player identity persistence
+└── Telemetry client
+        │
+        ├── REST telemetry and run persistence
+        └── WebSocket adaptation channel
+        │
+FastAPI Service
+├── Static game and dashboard hosting
+├── Game routes
+├── Telemetry routes
+├── Dashboard APIs
+└── SQLite persistence
 ```
 
-<div align="center">
+### Technology stack
 
-⚱️ ⚔️ 🏺 ⚔️ ⚱️
+**Frontend**
 
-══════════════════════════════════════
-
-⚱️ ⚔️ 🏺 ⚔️ ⚱️
-
-</div>
-
-## 🛠 Tech Stack
-
-### Frontend
 - HTML5 Canvas
 - Vanilla JavaScript
 - CSS
+- Pointer Events API
+- Web Audio and browser media playback
 
-### Backend
+**Backend**
+
 - Python 3.9+
 - FastAPI
 - Uvicorn
 - WebSockets
 
-### AI Engine
-- Custom Python simulation logic
-- NumPy
-- SciPy
-- Behavioral profiling
-- Real-time world mutation
+**Persistence**
 
-### Database
 - SQLite
-- aiosqlite
+- Backward-compatible schema migrations
 
-### Transport
-- WebSocket (real-time)
-- REST (configuration / utility endpoints)
+**Validation and tooling**
 
-### Testing
-- pytest
-- Jest
+- Python bytecode compilation
+- Node.js syntax validation
+- SQLite integrity checks
+- Git whitespace validation
 
-<div align="center">
+---
 
-⚱️ ⚔️ 🏺 ⚔️ ⚱️
-
-══════════════════════════════════════
-
-⚱️ ⚔️ 🏺 ⚔️ ⚱️
-
-</div>
-
-## 🚀 Getting Started
+## Getting started
 
 ### Prerequisites
-- **Python 3.9** or higher
-- **Node.js 16+** (optional, for frontend dev tooling)
-- **Git**
 
-### Installation
+- Python 3.9 or newer
+- Git
+- Node.js for JavaScript syntax validation
+- SQLite CLI for database inspection
+
+### Clone and install
 
 ```bash
-# Clone the repository
-git clone https://github.com/yourusername/labyrinth-of-tartarus.git
-cd labyrinth-of-tartarus
+git clone https://github.com/Gift3dMyndZ/labyrinth-ai-engine.git
+cd labyrinth-ai-engine
 
-# Create a virtual environment
-python -m venv venv
-source venv/bin/activate        # macOS/Linux
-# venv\Scripts\activate         # Windows
+python -m venv .venv
+source .venv/bin/activate
 
-# Install Python dependencies
 pip install -r requirements.txt
-
-# Initialize the database
-python scripts/init_db.py
 ```
 
-### Running the Application
+### Run locally
 
 ```bash
-# Start the backend server
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+source .venv/bin/activate
+uvicorn app.main:app --host 0.0.0.0 --port 8000
 ```
 
-Then open:
-
-```bash
-http://localhost:8000
-```
-
-The game client is served directly by FastAPI as static files. No separate frontend build step is required.
-
-<div align="center">
-
-⚱️ ⚔️ 🏺 ⚔️ ⚱️
-
-══════════════════════════════════════
-
-⚱️ ⚔️ 🏺 ⚔️ ⚱️
-
-</div>
-
-## 📁 Project Structure
+Open:
 
 ```text
-labyrinth-of-tartarus/
-│
+http://127.0.0.1:8000/
+```
+
+Dashboard:
+
+```text
+http://127.0.0.1:8000/dashboard
+```
+
+### Test on a phone
+
+Connect the phone and development machine to the same local network.
+
+Find the active interface:
+
+```bash
+route get default | grep interface
+```
+
+Retrieve the local address using the interface reported by the previous command:
+
+```bash
+ipconfig getifaddr en1
+```
+
+Replace `en1` when another interface is reported, then open:
+
+```text
+http://IMAC_IP:8000/
+```
+
+Close older game tabs before testing so multiple telemetry loops do not remain active.
+
+---
+
+## API overview
+
+The exact OpenAPI contract is available from the running FastAPI application:
+
+```text
+http://127.0.0.1:8000/docs
+```
+
+Important application-facing routes include:
+
+- Game page: `/`
+- Dashboard page: `/dashboard`
+- Gameplay telemetry: `POST /api/telemetry/log`
+- Dashboard APIs under the configured game and telemetry routers
+- Health endpoint exposed by the FastAPI application
+
+Use `/docs` as the source of truth for request and response schemas.
+
+---
+
+## Validation
+
+### Source validation
+
+```bash
+python -m py_compile \
+  app/main.py \
+  app/db/database.py \
+  app/routes/game.py \
+  app/routes/telemetry.py
+
+node --check static/game.js
+node --check static/dashboard.js
+
+git diff --check
+```
+
+### Database integrity
+
+```bash
+sqlite3 data/tartarus.db 'PRAGMA integrity_check;'
+```
+
+Expected result:
+
+```text
+ok
+```
+
+### Desktop acceptance checklist
+
+- Boot input accepts mouse focus
+- DESCEND and Enter start a run
+- Keyboard movement and mouse look work
+- Wall collision and wall sliding work
+- ORACLE NAV displays and toggles with `M`
+- Route, exit, compass, and monster indicators render
+- Death and restart work
+- Telemetry returns HTTP 200
+- No fatal browser-console exceptions occur
+
+### Mobile acceptance checklist
+
+- Player-name field accepts touch focus
+- DESCEND starts exactly one run
+- Joystick supports forward, reverse, and strafing
+- Touch-look rotates the view
+- Joystick and look operate simultaneously
+- MAP ON / MAP OFF toggles navigation
+- App switching and orientation changes reset active input
+- Controls hide on death or escape and return on restart
+- Portrait remains functional
+- Landscape remains the recommended orientation
+- Sustained gameplay meets the 30 FPS release target
+
+---
+
+## Repository layout
+
+```text
+labyrinth-ai-engine/
 ├── app/
-│   ├── main.py                 # FastAPI application entry point
-│   ├── config.py               # Application configuration
-│   ├── models/
-│   │   ├── player.py           # Player data models
-│   │   ├── game_state.py       # Game state schema
-│   │   └── events.py           # WebSocket event definitions
-│   ├── routers/
-│   │   ├── game.py             # Game session endpoints
-│   │   ├── leaderboard.py      # Leaderboard endpoints
-│   │   └── ws.py               # WebSocket handler
-│   ├── engine/
-│   │   ├── map_generator.py    # Procedural labyrinth generation
-│   │   ├── combat.py           # Combat resolution logic
-│   │   ├── entities.py         # Enemy and NPC definitions
-│   │   └── items.py            # Item and loot tables
-│   ├── oracle/
-│   │   ├── observer.py         # Player behavior tracking
-│   │   ├── profiler.py         # Behavioral profile builder
-│   │   ├── mutator.py          # World mutation controller
-│   │   └── difficulty.py       # Flow-state difficulty manager
-│   └── database/
-│       ├── connection.py       # SQLite connection manager
-│       └── queries.py          # Database query definitions
-│
+│   ├── db/
+│   │   └── database.py
+│   ├── routes/
+│   │   ├── game.py
+│   │   └── telemetry.py
+│   └── main.py
 ├── static/
-│   ├── index.html              # Game client entry point
-│   ├── css/
-│   │   └── styles.css          # UI styles
-│   ├── js/
-│   │   ├── raycaster.js        # Raycasting rendering engine
-│   │   ├── input.js            # Keyboard and mouse input
-│   │   ├── hud.js              # Heads-up display overlay
-│   │   ├── websocket.js        # Server communication layer
-│   │   └── audio.js            # Sound effects manager
-│   └── assets/
-│       ├── textures/           # Wall and floor textures
-│       ├── sprites/            # Enemy and item sprites
-│       └── sounds/             # Audio files
-│
-├── scripts/
-│   ├── init_db.py              # Database initialization
-│   └── seed_data.py            # Sample data seeder
-│
+│   ├── assets/
+│   │   └── audio/
+│   ├── dashboard.css
+│   ├── dashboard.html
+│   ├── dashboard.js
+│   ├── game.js
+│   ├── index.html
+│   └── style.css
+├── data/
+│   └── tartarus.db
 ├── tests/
-│   ├── test_map_generator.py
-│   ├── test_combat.py
-│   ├── test_oracle.py
-│   └── test_api.py
-│
 ├── requirements.txt
-├── .env.example
-├── .gitignore
 ├── LICENSE
 └── README.md
 ```
 
-<div align="center">
+Runtime databases should remain outside version control in production workflows unless a deliberate seed database is supplied.
 
-⚱️ ⚔️ 🏺 ⚔️ ⚱️
+---
 
-══════════════════════════════════════
+## Roadmap
 
-⚱️ ⚔️ 🏺 ⚔️ ⚱️
+### Completed
 
-</div>
+- Core raycasting renderer
+- Procedural labyrinth generation
+- FastAPI backend and WebSocket adaptation
+- SQLite persistence and migrations
+- Player identity and run persistence
+- Executive dashboard
+- Isometric ORACLE NAV
+- Cached route guidance
+- Exit compass and beacon
+- Monster proximity navigation
+- Desktop and mobile map toggles
+- Mobile joystick and touch-look controls
+- Mobile input interruption recovery
+- Multicolor boot-screen shadow effects
+- Touch-safe boot flow
+- Telemetry throttling
 
-## ⚙ Configuration
+### Future work
 
-Configuration is managed through environment variables. Copy `.env.example` to `.env` and adjust values as needed.
+- Server-authoritative competitive validation
+- Expanded automated browser testing
+- Additional mobile-device performance profiles
+- Optional combat and interaction systems
+- Ghost replay support
+- Community labyrinth templates
+- Cooperative multiplayer research
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `TARTARUS_HOST` | `0.0.0.0` | Server bind address |
-| `TARTARUS_PORT` | `8000` | Server port |
-| `TARTARUS_DB_PATH` | `./data.db` | Path to SQLite database |
-| `TARTARUS_MAP_WIDTH` | `32` | Default labyrinth width |
-| `TARTARUS_MAP_HEIGHT` | `32` | Default labyrinth height |
-| `TARTARUS_ORACLE_ENABLED` | `true` | Enable/disable adaptive AI |
-| `TARTARUS_ORACLE_INTERVAL` | `5000` | AI evaluation interval in milliseconds |
-| `TARTARUS_MAX_FLOOR_DEPTH` | `9` | Maximum dungeon floors |
-| `TARTARUS_LOG_LEVEL` | `INFO` | Logging verbosity |
+---
 
-<div align="center">
+## Current limitations
 
-⚱️ ⚔️ 🏺 ⚔️ ⚱️
+- Gameplay telemetry is client-reported.
+- Competitive leaderboard integrity requires server-authoritative validation.
+- Attack and interaction controls are not exposed until corresponding mechanics are implemented.
+- Mobile behavior should be revalidated on each target browser and device class.
+- Landscape is the recommended mobile gameplay orientation.
+- External decorative README services may be unavailable or rate-limited.
 
-══════════════════════════════════════
+---
 
-⚱️ ⚔️ 🏺 ⚔️ ⚱️
+## Contributing
 
-</div>
+1. Fork the repository.
+2. Create a feature branch.
+3. Make focused changes with tests or validation notes.
+4. Run the source and database validation commands.
+5. Commit and push the branch.
+6. Open a pull request against the active development branch.
 
-## 📡 API Reference
+Please review the repository license and contribution standards before submitting changes.
 
-### REST Endpoints
+---
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/game/new` | Create a new game session |
-| GET | `/api/game/{session_id}` | Retrieve current game state |
-| DELETE | `/api/game/{session_id}` | End and archive a game session |
-| GET | `/api/leaderboard` | Retrieve global leaderboard |
-| GET | `/api/leaderboard/{floor}` | Retrieve leaderboard by floor |
-| GET | `/api/health` | Server health check |
+## Acknowledgments
 
-### WebSocket
+- *Wolfenstein 3D* and *DOOM* for pioneering first-person raycasting techniques
+- Mihaly Csikszentmihalyi for the flow-state framework that informs The Oracle's design philosophy
+- Greek mythology for the Tartarus and labyrinth themes
+- The open-source communities behind Python, FastAPI, SQLite, JavaScript, and browser graphics tooling
 
-Connect to `ws://localhost:8000/ws/{session_id}` to establish a real-time game session.
+---
 
-#### Client → Server Events
+<img src="https://capsule-render.vercel.app/api?type=waving&height=180&text=THE%20LABYRINTH%20REMEMBERS&fontSize=40&fontColor=ffffff&color=0:000000,100:8B0000" alt="The Labyrinth Remembers" />
 
-| Event | Payload | Description |
-|-------|---------|-------------|
-| `player_move` | `{ "direction": "N/S/E/W" }` | Player movement |
-| `player_attack` | `{ "type": "melee/ranged" }` | Initiate attack |
-| `player_use_item` | `{ "item_id": "..." }` | Use inventory item |
-| `player_interact` | `{ "target_id": "..." }` | Interact with environment |
-
-#### Server → Client Events
-
-| Event | Payload | Description |
-|-------|---------|-------------|
-| `state_update` | `{ "map": ..., "entities": ... }` | Full game state refresh |
-| `world_mutation` | `{ "changes": [...] }` | Oracle-driven world changes |
-| `combat_result` | `{ "damage": ..., "status": ... }` | Combat resolution result |
-| `floor_transition` | `{ "floor": ..., "map": ... }` | Player descended to new floor |
-
-<div align="center">
-
-⚱️ ⚔️ 🏺 ⚔️ ⚱️
-
-══════════════════════════════════════
-
-⚱️ ⚔️ 🏺 ⚔️ ⚱️
-
-</div>
-
-## ⚔ Game Mechanics
-
-### The Labyrinth
-Each floor of the labyrinth is procedurally generated using a modified recursive backtracking algorithm enhanced with room carving and loop injection. The Oracle may mutate the map during gameplay by sealing passages, opening hidden doors, or flooding corridors with darkness.
-
-### Combat
-Combat is resolved in real time. Melee attacks deal high damage at close range but leave the player vulnerable. Ranged attacks consume limited ammunition and require line-of-sight. Enemies have unique behaviors: some charge directly, some flank, some retreat and set traps. The Oracle adjusts enemy composition and tactics based on observed player combat patterns.
-
-### Enemies
-
-| Enemy | Behavior | Threat Level | Adapts Via |
-|-------|----------|--------------|------------|
-| Shade | Patrol / Chase | ★☆☆☆☆ | Increases speed over time |
-| Fury | Flank / Ambush | ★★★☆☆ | Learns player dodge patterns |
-| Minotaur | Guard / Charge | ★★★★☆ | Blocks previously used routes |
-| Titan Fragment | Siege / Area | ★★★★★ | Counters player's best weapon |
-
-### Items
-
-| Item | Effect | Rarity |
-|------|--------|--------|
-| Torch | Increases visibility radius | Common |
-| Ichor Flask | Restores health | Common |
-| Bronze Key | Opens locked gates | Uncommon |
-| Thread of Ariadne | Reveals path to nearest exit | Rare |
-| Aegis Shard | Temporary invulnerability | Legendary |
-
-<div align="center">
-
-⚱️ ⚔️ 🏺 ⚔️ ⚱️
-
-══════════════════════════════════════
-
-⚱️ ⚔️ 🏺 ⚔️ ⚱️
-
-</div>
-
-## 🤝 Contributing
-
-Contributions are welcome and encouraged. Whether you're fixing a bug, adding a feature, or improving documentation, every contribution helps.
-
-1. **Fork** the repository  
-2. **Create** a feature branch (`git checkout -b feature/your-feature`)  
-3. **Commit** your changes (`git commit -m "Add your feature"`)  
-4. **Push** to the branch (`git push origin feature/your-feature`)  
-5. **Open** a Pull Request  
-
-Please read the [Code of Conduct](CODE_OF_CONDUCT.md) before contributing.
-
-<div align="center">
-
-<img height="170" src="https://github-readme-stats.vercel.app/api?username=Gift3dMyndZ&show_icons=true&theme=radical"/>
-<img height="170" src="https://github-readme-streak-stats.herokuapp.com/?user=Gift3dMyndZ&theme=radical"/>
-
-</div>
-
-<div align="center">
-
-⚱️ ⚔️ 🏺 ⚔️ ⚱️
-
-══════════════════════════════════════
-
-⚱️ ⚔️ 🏺 ⚔️ ⚱️
-
-</div>
-
-## 🙏 Acknowledgments
-
-- **Wolfenstein 3D** and **DOOM** for pioneering the raycasting technique that inspired the rendering engine
-- **Mihaly Csikszentmihalyi** for the concept of flow state that guides The Oracle's design philosophy
-- **Greek mythology** for providing an endlessly rich thematic foundation
-- The open-source community for the incredible tools that make projects like this possible
-
-<div align="center">
-
-<img src="https://capsule-render.vercel.app/api?type=waving&height=180&text=THE%20LABYRINTH%20REMEMBERS&fontSize=40&fontColor=ffffff&color=0:000000,100:8B0000"/>
-
-### 👁️ The Oracle Never Sleeps  
-### ☠️ Every Choice Is Remembered  
-### 🔥 Every Path Has Consequences
-
-</div>
+### The Oracle never sleeps
+### Every choice is remembered
+### Every path has consequences
