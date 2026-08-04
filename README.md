@@ -1,8 +1,8 @@
-<img src="https://readme-typing-svg.herokuapp.com?font=Cinzel&size=42&pause=1000&color=FF4500&center=true&vCenter=true&width=900&lines=LABYRINTH+OF+TARTARUS;THE+LABYRINTH+WATCHES;THE+ORACLE+LEARNS;ABANDON+ALL+HOPE" alt="Labyrinth of Tartarus animated title" />
+<img src="https://readme-typing-svg.herokuapp.com?font=Cinzel&size=42&pause=1000&color=FF4500&vCenter=true&width=900&lines=LABYRINTH+OF+TARTARUS;THE+LABYRINTH+WATCHES;THE+ORACLE+LEARNS;ABANDON+ALL+HOPE" alt="Labyrinth of Tartarus animated title">
 
 <br>
 
-<img src="https://capsule-render.vercel.app/api?type=waving&height=160&color=0:000000,35:2B0000,65:8B0000,100:1A1A1A&text=Adaptive%20Raycasting%20AI%20Simulation%20Engine&fontColor=ffffff&fontSize=28&fontAlignY=35&desc=FastAPI%20%E2%80%A2%20WebSockets%20%E2%80%A2%20SQLite%20%E2%80%A2%20Procedural%20Mutation&descAlignY=58&animation=fadeIn" alt="Adaptive Raycasting AI Simulation Engine" />
+<img src="https://capsule-render.vercel.app/api?type=waving&height=160&color=0:000000,35:2B0000,65:8B0000,100:1A1A1A&text=Adaptive%20Raycasting%20AI%20Simulation%20Engine&fontColor=ffffff&fontSize=28&fontAlignY=35&desc=FastAPI%20%E2%80%A2%20WebSockets%20%E2%80%A2%20SQLite%20%E2%80%A2%20Procedural%20Mutation&descAlignY=58&animation=fadeIn" alt="Adaptive Raycasting AI Simulation Engine">
 
 <br>
 
@@ -18,21 +18,20 @@
 <br>
 
 <a href="https://labyrinth-ai-engine-1.onrender.com">
-  <img src="https://img.shields.io/badge/ENTER_THE_LABYRINTH-8B0000?style=for-the-badge&logoColor=white" height="52" alt="Enter the Labyrinth" />
+  <img src="https://img.shields.io/badge/ENTER_THE_LABYRINTH-8B0000?style=for-the-badge&logoColor=white" height="52" alt="Enter the Labyrinth">
 </a>
 
 ### The Oracle awaits
 
 *A living adversarial simulation engine disguised as an infernal maze crawler.*
 
-
 ---
 
 # Labyrinth of Tartarus
 
-**Labyrinth of Tartarus** is a browser-based first-person raycasting experience backed by FastAPI and SQLite. A procedural labyrinth, an adaptive monster, behavioral telemetry, persistent run history, an executive dashboard, and a mobile-ready control layer combine into a simulation designed around sustained player pressure.
+**Labyrinth of Tartarus** is a browser-based first-person raycasting experience backed by FastAPI and SQLite. A procedural labyrinth, an adaptive monster, behavioral telemetry, persistent run history, an executive dashboard, and mobile-ready controls combine into a simulation designed around sustained player pressure.
 
-The project is built with vanilla JavaScript and HTML5 Canvas on the client, with Python and FastAPI on the server. No frontend framework or separate build step is required.
+The client uses vanilla JavaScript and HTML5 Canvas. The service uses Python, FastAPI, WebSockets, and SQLite. No frontend framework or separate build step is required.
 
 > The labyrinth does not merely become harder. The labyrinth observes how the player moves, adapts its pressure, and remembers completed runs.
 
@@ -41,6 +40,7 @@ The project is built with vanilla JavaScript and HTML5 Canvas on the client, wit
 - Game: <https://labyrinth-ai-engine-1.onrender.com>
 - Local game: <http://127.0.0.1:8000/>
 - Local dashboard: <http://127.0.0.1:8000/dashboard>
+- Local OpenAPI documentation: <http://127.0.0.1:8000/docs>
 
 ---
 
@@ -50,12 +50,13 @@ The project is built with vanilla JavaScript and HTML5 Canvas on the client, wit
 
 - First-person HTML5 Canvas raycasting renderer
 - Procedurally generated labyrinth layouts
-- Multi-floor progression and increasing difficulty
+- Multi-floor progression and dynamic difficulty
 - Collision-aware forward, reverse, rotation, and strafing movement
 - Adaptive monster states including patrol, chase, flank, ambush, and investigate
-- Atmospheric boot sequence, ambient audio, infernal lighting, and shadow figures
+- Atmospheric boot sequence, ambient audio, infernal lighting, and multicolor shadow figures
 - Desktop pointer-lock mouse look
 - Touch-safe boot flow and persistent player identity
+- Responsive desktop and mobile game layouts
 
 ### The Oracle
 
@@ -88,7 +89,7 @@ The SQLite-backed service supports:
 - Dashboard summary metrics
 - Responsive dashboard views
 
-Open the local dashboard at:
+Open the dashboard locally at:
 
 ```text
 http://127.0.0.1:8000/dashboard
@@ -111,7 +112,7 @@ ORACLE NAV replaces the original flat minimap with a local isometric mini-maze.
 - **Pink `ENEMY` marker:** monster inside the local threat radius
 - **Pink directional marker:** nearby monster outside the visible local map
 
-The exit route uses cached breadth-first search. The route is recalculated when the player enters a new grid cell or when the destination changes. Only a short route segment is exposed so navigation remains useful without revealing the entire labyrinth.
+The exit route uses cached breadth-first search. The route recalculates when the player enters a new grid cell or the destination changes. Only a short route segment is exposed, keeping navigation useful without revealing the entire labyrinth.
 
 ---
 
@@ -146,7 +147,7 @@ The joystick and look zone support simultaneous multi-touch input. Mobile input 
 - Landscape is the recommended gameplay orientation.
 - Controls use device safe-area insets.
 - Touch targets are designed to remain finger-sized.
-- The release target is a sustained 30 FPS or better on supported mobile devices.
+- The release target is sustained gameplay at 30 FPS or better on supported mobile devices.
 
 ---
 
@@ -231,13 +232,13 @@ source .venv/bin/activate
 uvicorn app.main:app --host 0.0.0.0 --port 8000
 ```
 
-Open:
+Open the game:
 
 ```text
 http://127.0.0.1:8000/
 ```
 
-Dashboard:
+Open the dashboard:
 
 ```text
 http://127.0.0.1:8000/dashboard
@@ -259,7 +260,7 @@ Retrieve the local address using the interface reported by the previous command:
 ipconfig getifaddr en1
 ```
 
-Replace `en1` when another interface is reported, then open:
+Replace `en1` if another interface is reported, then open:
 
 ```text
 http://IMAC_IP:8000/
@@ -271,7 +272,7 @@ Close older game tabs before testing so multiple telemetry loops do not remain a
 
 ## API overview
 
-The exact OpenAPI contract is available from the running FastAPI application:
+The running FastAPI application exposes the exact OpenAPI contract at:
 
 ```text
 http://127.0.0.1:8000/docs
@@ -323,7 +324,7 @@ ok
 - Boot input accepts mouse focus
 - DESCEND and Enter start a run
 - Keyboard movement and mouse look work
-- Wall collision and wall sliding work
+- Wall collision and sliding work
 - ORACLE NAV displays and toggles with `M`
 - Route, exit, compass, and monster indicators render
 - Death and restart work
@@ -444,7 +445,7 @@ Please review the repository license and contribution standards before submittin
 
 ---
 
-<img src="https://capsule-render.vercel.app/api?type=waving&height=180&text=THE%20LABYRINTH%20REMEMBERS&fontSize=40&fontColor=ffffff&color=0:000000,100:8B0000" alt="The Labyrinth Remembers" />
+<img src="https://capsule-render.vercel.app/api?type=waving&height=180&text=THE%20LABYRINTH%20REMEMBERS&fontSize=40&fontColor=ffffff&color=0:000000,100:8B0000" alt="The Labyrinth Remembers">
 
 ### The Oracle never sleeps
 ### Every choice is remembered
