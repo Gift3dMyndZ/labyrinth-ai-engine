@@ -719,3 +719,143 @@ canvas#game {
 #bootScreen .start-button {
   touch-action: manipulation;
 }
+
+/* Mobile movement and touch-look controls */
+.mobile-controls {
+  display: none;
+}
+
+@media (pointer: coarse) {
+  html,
+  body {
+    overscroll-behavior: none;
+  }
+
+  body.game-active {
+    overflow: hidden;
+    touch-action: none;
+  }
+
+  body.game-active .mobile-controls {
+    position: fixed;
+    inset: 0;
+    z-index: 70;
+    display: block;
+    pointer-events: none;
+    touch-action: none;
+  }
+
+  .move-joystick {
+    position: absolute;
+    left: calc(20px + env(safe-area-inset-left));
+    bottom: calc(22px + env(safe-area-inset-bottom));
+
+    width: 132px;
+    height: 132px;
+
+    border: 2px solid rgba(0, 234, 255, 0.72);
+    border-radius: 50%;
+
+    background:
+      radial-gradient(
+        circle,
+        rgba(0, 234, 255, 0.15),
+        rgba(2, 8, 18, 0.72) 68%
+      );
+
+    box-shadow:
+      0 0 18px rgba(0, 234, 255, 0.22),
+      inset 0 0 20px rgba(0, 234, 255, 0.12);
+
+    pointer-events: auto;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .move-joystick::before,
+  .move-joystick::after {
+    content: "";
+    position: absolute;
+    pointer-events: none;
+    background: rgba(0, 234, 255, 0.22);
+  }
+
+  .move-joystick::before {
+    top: 50%;
+    left: 14px;
+    right: 14px;
+    height: 1px;
+  }
+
+  .move-joystick::after {
+    top: 14px;
+    bottom: 14px;
+    left: 50%;
+    width: 1px;
+  }
+
+  .move-joystick-knob {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+
+    width: 58px;
+    height: 58px;
+
+    border: 2px solid #ffe066;
+    border-radius: 50%;
+    background: rgba(255, 224, 102, 0.24);
+
+    box-shadow:
+      0 0 14px rgba(255, 224, 102, 0.55),
+      inset 0 0 12px rgba(255, 255, 255, 0.15);
+
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+
+  .look-zone {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 82px;
+    width: 52%;
+
+    pointer-events: auto;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .look-zone::after {
+    content: "SWIPE TO LOOK";
+    position: absolute;
+    right: calc(18px + env(safe-area-inset-right));
+    bottom: calc(72px + env(safe-area-inset-bottom));
+
+    color: rgba(178, 108, 255, 0.72);
+    font-family: "Courier New", monospace;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+
+    pointer-events: none;
+  }
+
+  .mobile-map-toggle {
+    z-index: 100;
+  }
+}
+
+@media (pointer: coarse) and (orientation: portrait) {
+  .move-joystick {
+    width: 118px;
+    height: 118px;
+  }
+
+  .move-joystick-knob {
+    width: 52px;
+    height: 52px;
+  }
+}

@@ -55,6 +55,18 @@
   const startButton = document.getElementById("startButton");
   const mobileMapToggle =
     document.getElementById("mobileMapToggle");
+
+  const mobileControls =
+    document.getElementById("mobileControls");
+
+  const moveJoystick =
+    document.getElementById("moveJoystick");
+
+  const moveJoystickKnob =
+    document.getElementById("moveJoystickKnob");
+
+  const lookZone =
+    document.getElementById("lookZone");
   /* =========================================================
      GAME STATE
   ========================================================= */
@@ -73,6 +85,14 @@ let bootAudioStarted = false;
   let floorReached  = 1;
   let zBuffer       = [];
   let minimapVisible = true;
+
+  const mobileInput = {
+    movePointerId: null,
+    lookPointerId: null,
+    moveX: 0,
+    moveY: 0,
+    previousLookX: 0,
+  };
   let animFrameId   = null;
   let lastTime      = 0;
   let sessionId     = Date.now().toString(36) + Math.random().toString(36).slice(2);
@@ -388,6 +408,294 @@ if (mobileMapToggle) {
   );
 }
 
+function resetMoveJoystick() {
+  mobileInput.movePointerId = null;
+  mobileInput.moveX = 0;
+  mobileInput.moveY = 0;
+
+  if (moveJoystickKnob) {
+    moveJoystickKnob.style.transform =
+      "translate(-50%, -50%)";
+  }
+}
+
+function resetLookInput() {
+  mobileInput.lookPointerId = null;
+  mobileInput.previousLookX = 0;
+}
+
+function resetMobileInput() {
+  resetMoveJoystick();
+  resetLookInput();
+}
+
+function setMobileControlsActive(active) {
+  const controlsActive = Boolean(active);
+
+  document.body.classList.toggle(
+    "game-active",
+    controlsActive
+  );
+
+  if (mobileControls) {
+    mobileControls.setAttribute(
+      "aria-hidden",
+      String(!controlsActive)
+    );
+  }
+
+  if (!controlsActive) {
+    resetMobileInput();
+  }
+}
+
+function updateMoveJoystick(event) {
+  if (!moveJoystick || !moveJoystickKnob) {
+    return;
+  }
+
+  const bounds =
+    moveJoystick.getBoundingClientRect();
+
+  const centerX =
+    bounds.left + bounds.width / 2;
+
+  const centerY =
+    bounds.top + bounds.height / 2;
+
+  const maxDistance =
+    bounds.width * 0.34;
+
+  let deltaX =
+    event.clientX - centerX;
+
+  let deltaY =
+    event.clientY - centerY;
+
+  const distance =
+    Math.hypot(deltaX, deltaY);
+
+  if (distance > maxDistance) {
+    const scale =
+      maxDistance / distance;
+
+    deltaX *= scale;
+    deltaY *= scale;
+  }
+  const normalizedX =
+    deltaX / maxDistance;
+
+  const normalizedY =
+    deltaY / maxDistance;
+
+  const deadZone = 0.20;
+
+  mobileInput.moveX =
+    Math.abs(normalizedX) >= deadZone
+      ? normalizedX
+      : 0;
+
+  mobileInput.moveY =
+    Math.abs(normalizedY) >= deadZone
+      ? normalizedY
+      : 0;
+
+  moveJoystickKnob.style.transform =
+    `translate(
+      calc(-50% + ${deltaX}px),
+      calc(-50% + ${deltaY}px)
+    )`;
+}
+
+if (moveJoystick) {
+  moveJoystick.addEventListener(
+    "pointerdown",
+    event => {
+      if (
+        gameState !== "playing" ||
+        mobileInput.movePointerId !== null
+      ) {
+        return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      mobileInput.movePointerId =
+        event.pointerId;
+
+      moveJoystick.setPointerCapture(
+        event.pointerId
+      );
+
+      updateMoveJoystick(event);
+    }
+  );
+
+  moveJoystick.addEventListener(
+    "pointermove",
+    event => {
+      if (
+        event.pointerId !==
+        mobileInput.movePointerId
+      ) {
+        return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      updateMoveJoystick(event);
+    }
+  );
+
+  const finishMovePointer = event => {
+    if (
+      event.pointerId !==
+      mobileInput.movePointerId
+    ) {
+      return;
+    }
+
+    if (
+      moveJoystick.hasPointerCapture(
+        event.pointerId
+      )
+    ) {
+      moveJoystick.releasePointerCapture(
+        event.pointerId
+      );
+    }
+
+    resetMoveJoystick();
+  };
+
+  moveJoystick.addEventListener(
+    "pointerup",
+    finishMovePointer
+  );
+
+  moveJoystick.addEventListener(
+    "pointercancel",
+    finishMovePointer
+  );
+
+  moveJoystick.addEventListener(
+    "lostpointercapture",
+    finishMovePointer
+  );
+}
+
+if (lookZone) {
+  lookZone.addEventListener(
+    "pointerdown",
+    event => {
+      if (
+        gameState !== "playing" ||
+        mobileInput.lookPointerId !== null
+      ) {
+        return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      mobileInput.lookPointerId =
+        event.pointerId;
+
+      mobileInput.previousLookX =
+        event.clientX;
+
+      lookZone.setPointerCapture(
+        event.pointerId
+      );
+    }
+  );
+
+  lookZone.addEventListener(
+    "pointermove",
+    event => {
+      if (
+        event.pointerId !==
+        mobileInput.lookPointerId
+      ) {
+        return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      const deltaX =
+        event.clientX -
+        mobileInput.previousLookX;
+
+      mobileInput.previousLookX =
+        event.clientX;
+
+      if (Math.abs(deltaX) >= 1) {
+        player.angle +=
+          deltaX *
+          CFG.MOUSE_SENS *
+          1.35;
+      }
+    }
+  );
+
+  const finishLookPointer = event => {
+    if (
+      event.pointerId !==
+      mobileInput.lookPointerId
+    ) {
+      return;
+    }
+
+    if (
+      lookZone.hasPointerCapture(
+        event.pointerId
+      )
+    ) {
+      lookZone.releasePointerCapture(
+        event.pointerId
+      );
+    }
+
+    resetLookInput();
+  };
+
+  lookZone.addEventListener(
+    "pointerup",
+    finishLookPointer
+  );
+
+  lookZone.addEventListener(
+    "pointercancel",
+    finishLookPointer
+  );
+
+  lookZone.addEventListener(
+    "lostpointercapture",
+    finishLookPointer
+  );
+}
+window.addEventListener(
+  "blur",
+  resetMobileInput
+);
+
+window.addEventListener(
+  "orientationchange",
+  resetMobileInput
+);
+
+document.addEventListener(
+  "visibilitychange",
+  () => {
+    if (document.hidden) {
+      resetMobileInput();
+    }
+  }
+);
+
 document.addEventListener("keydown", e => {
     keys[e.key.toLowerCase()] = true;
 
@@ -461,42 +769,120 @@ document.addEventListener("click", () => {
   ========================================================= */
 
   function updatePlayer() {
-    let dx = 0, dy = 0;
+    let keyboardForward = 0;
 
-    if (keys["w"] || keys["arrowup"]) {
-      dx += Math.cos(player.angle) * CFG.MOVE;
-      dy += Math.sin(player.angle) * CFG.MOVE;
-    }
-    if (keys["s"] || keys["arrowdown"]) {
-      dx -= Math.cos(player.angle) * CFG.MOVE;
-      dy -= Math.sin(player.angle) * CFG.MOVE;
-    }
-    if (keys["a"] || keys["arrowleft"])  player.angle -= CFG.ROT;
-    if (keys["d"] || keys["arrowright"]) player.angle += CFG.ROT;
-
-    if (keys["q"]) {
-      dx += Math.cos(player.angle - Math.PI / 2) * CFG.MOVE;
-      dy += Math.sin(player.angle - Math.PI / 2) * CFG.MOVE;
-    }
-    if (keys["e"]) {
-      dx += Math.cos(player.angle + Math.PI / 2) * CFG.MOVE;
-      dy += Math.sin(player.angle + Math.PI / 2) * CFG.MOVE;
+    if (
+      keys["w"] ||
+      keys["arrowup"]
+    ) {
+      keyboardForward += 1;
     }
 
-    if (canMove(player.x + dx, player.y + dy)) {
-      player.x += dx; player.y += dy;
-    } else if (canMove(player.x + dx, player.y)) {
-      player.x += dx;
-    } else if (canMove(player.x, player.y + dy)) {
-      player.y += dy;
+    if (
+      keys["s"] ||
+      keys["arrowdown"]
+    ) {
+      keyboardForward -= 1;
     }
 
-    tele.cellsVisited.add(Math.floor(player.x) + "," + Math.floor(player.y));
+    if (
+      keys["a"] ||
+      keys["arrowleft"]
+    ) {
+      player.angle -= CFG.ROT;
+    }
+
+    if (
+      keys["d"] ||
+      keys["arrowright"]
+    ) {
+      player.angle += CFG.ROT;
+    }
+
+    const forwardInput =
+      keyboardForward -
+      mobileInput.moveY;
+
+    const strafeInput =
+      mobileInput.moveX;
+
+    const inputMagnitude = Math.hypot(
+      forwardInput,
+      strafeInput
+    );
+
+    if (inputMagnitude > 0) {
+      const normalization =
+        inputMagnitude > 1
+          ? 1 / inputMagnitude
+          : 1;
+
+      const normalizedForward =
+        forwardInput * normalization;
+
+      const normalizedStrafe =
+        strafeInput * normalization;
+
+      const forwardX =
+        Math.cos(player.angle) *
+        normalizedForward;
+
+      const forwardY =
+        Math.sin(player.angle) *
+        normalizedForward;
+
+      const strafeX =
+        Math.cos(
+          player.angle + Math.PI / 2
+        ) * normalizedStrafe;
+
+      const strafeY =
+        Math.sin(
+          player.angle + Math.PI / 2
+        ) * normalizedStrafe;
+
+      const dx =
+        (forwardX + strafeX) *
+        CFG.MOVE;
+
+      const dy =
+        (forwardY + strafeY) *
+        CFG.MOVE;
+
+      if (
+        canMove(
+          player.x + dx,
+          player.y + dy
+        )
+      ) {
+        player.x += dx;
+        player.y += dy;
+      } else if (
+        canMove(
+          player.x + dx,
+          player.y
+        )
+      ) {
+        player.x += dx;
+      } else if (
+        canMove(
+          player.x,
+          player.y + dy
+        )
+      ) {
+        player.y += dy;
+      }
+    }
+
+    player.angle = Math.atan2(
+      Math.sin(player.angle),
+      Math.cos(player.angle)
+    );
+
+    tele.cellsVisited.add(
+      `${Math.floor(player.x)},${Math.floor(player.y)}`
+    );
   }
-
-  /* =========================================================
-     MONSTER AI — learns from player behavior
-  ========================================================= */
 
   function updateMonster() {
     const dx = player.x - monster.x;
@@ -575,6 +961,7 @@ document.addEventListener("click", () => {
 
     if (dist < 0.5) {
       gameState = "dead";
+      setMobileControlsActive(false);
       sendFinalTelemetry("killed");
     }
   }
@@ -1998,6 +2385,7 @@ ctx.restore();
     const gd = Math.sqrt((goalX+0.5-player.x)**2 + (goalY+0.5-player.y)**2);
     if (gd < 1.0) {
       gameState = "escaped";
+      setMobileControlsActive(false);
       sendFinalTelemetry("escaped");
     }
 
@@ -2014,6 +2402,7 @@ ctx.restore();
   ========================================================= */
 
   function startGame() {
+    setMobileControlsActive(true);
     if (animFrameId) cancelAnimationFrame(animFrameId);
 
     const continuingRun = gameState === "escaped";
