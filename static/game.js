@@ -309,14 +309,57 @@ if (playerNameInput) {
       : displayName;
 }
 
-if (startButton) {
-  startButton.addEventListener("click", () => {
-    if (gameState === "boot") {
-      capturePlayerIdentity();
-      playBootAudio();
-      startGame();
+let bootStartInProgress = false;
+
+function beginGameFromBoot() {
+  if (
+    gameState !== "boot" ||
+    bootStartInProgress
+  ) {
+    return;
+  }
+
+  bootStartInProgress = true;
+
+  capturePlayerIdentity();
+  playBootAudio();
+
+  if (playerNameInput) {
+    playerNameInput.blur();
+  }
+
+  startGame();
+
+  window.setTimeout(() => {
+    bootStartInProgress = false;
+  }, 500);
+}
+
+if (playerNameInput) {
+  playerNameInput.addEventListener(
+    "pointerdown",
+    event => {
+      event.stopPropagation();
     }
-  });
+  );
+
+  playerNameInput.addEventListener(
+    "click",
+    event => {
+      event.stopPropagation();
+    }
+  );
+}
+
+if (startButton) {
+  startButton.addEventListener(
+    "pointerdown",
+    event => {
+      event.preventDefault();
+      event.stopPropagation();
+      beginGameFromBoot();
+    }
+  );
 }
 
 function setMinimapVisible(visible) {
@@ -362,8 +405,7 @@ document.addEventListener("keydown", e => {
 
     if (e.key === "Enter") {
       if (gameState === "boot") {
-        capturePlayerIdentity();
-        startGame();
+        beginGameFromBoot();
       } else if (
         gameState === "dead" ||
         gameState === "escaped"
