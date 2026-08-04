@@ -21,7 +21,7 @@
     WALL_HEIGHT:    1.2,
     MONSTER_SPEED:  0.02,
     TELEMETRY_MS:   5000,
-    API:            "/api/telemetry",
+    API:            "/api/telemetry/log",
   };
 
   /* =========================================================
