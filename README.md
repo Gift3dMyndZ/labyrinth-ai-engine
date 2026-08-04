@@ -29,7 +29,7 @@
 
 # Labyrinth of Tartarus
 
-**Labyrinth of Tartarus** is a browser-based first-person raycasting experience backed by FastAPI and SQLite. A procedural labyrinth, an adaptive monster, behavioral telemetry, persistent run history, an executive dashboard, and mobile-ready controls combine into a simulation designed around sustained player pressure.
+**Labyrinth of Tartarus** is a browser-based first-person raycasting experience backed by FastAPI and SQLite. A procedural labyrinth, an adaptive monster, behavioral telemetry, persistent run intelligence, an executive command dashboard, and mobile-ready controls combine into a polished simulation platform designed around sustained player pressure.
 
 The client uses vanilla JavaScript and HTML5 Canvas. The service uses Python, FastAPI, WebSockets, and SQLite. No frontend framework or separate build step is required.
 
@@ -77,7 +77,43 @@ Periodic telemetry is throttled to approximately one request every five seconds.
 
 > Gameplay telemetry is currently client-reported. It should not be treated as authoritative competitive scoring without additional server-side validation.
 
-### Persistence and executive dashboard
+## Executive Command Dashboard
+
+The executive dashboard is the command surface for evaluating player behavior, run outcomes, operational health, and the effect of The Oracle across completed sessions.
+
+### Executive overview
+
+The dashboard presents decision-ready information rather than raw event noise:
+
+- **Portfolio summary:** total runs, completed outcomes, average survival, and progression signals
+- **Leaderboard intelligence:** top performance records with player identity and run context
+- **Recent-run review:** completed sessions, device class, survival time, score, floor, and outcome
+- **Behavioral telemetry:** fear, aggression, curiosity, difficulty adaptation, and Oracle mutations
+- **Operational visibility:** persisted run records and responsive desktop or mobile layouts
+
+### VIP dashboard experience
+
+The dashboard is intended to feel like an executive command center for the Tartarus simulation:
+
+- High-contrast infernal visual hierarchy
+- Concise KPI presentation
+- Fast review of recent performance
+- Clear separation of identity, outcome, progression, and behavioral signals
+- Responsive presentation for leadership demonstrations and live project showcases
+
+Open the executive dashboard locally:
+
+```text
+http://127.0.0.1:8000/dashboard
+```
+
+Open the local API contract:
+
+```text
+http://127.0.0.1:8000/docs
+```
+
+### Persistence layer
 
 The SQLite-backed service supports:
 
@@ -89,11 +125,7 @@ The SQLite-backed service supports:
 - Dashboard summary metrics
 - Responsive dashboard views
 
-Open the dashboard locally at:
-
-```text
-http://127.0.0.1:8000/dashboard
-```
+> Dashboard and leaderboard results originate from client-reported gameplay telemetry. Competitive or externally audited scoring requires additional server-authoritative validation.
 
 ---
 
@@ -321,6 +353,8 @@ ok
 
 ### Desktop acceptance checklist
 
+- Executive dashboard loads at `/dashboard`
+- Summary metrics and recent-run records render
 - Boot input accepts mouse focus
 - DESCEND and Enter start a run
 - Keyboard movement and mouse look work
@@ -388,7 +422,7 @@ Runtime databases should remain outside version control in production workflows 
 - FastAPI backend and WebSocket adaptation
 - SQLite persistence and migrations
 - Player identity and run persistence
-- Executive dashboard
+- Executive command dashboard and run intelligence
 - Isometric ORACLE NAV
 - Cached route guidance
 - Exit compass and beacon
