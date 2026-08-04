@@ -1528,6 +1528,211 @@ ctx.fillText(
 ctx.restore();
 ctx.restore();
 
+  /*
+     EXIT BEACON
+     Appears when the exit is inside the local map radius.
+  */
+  const exitCellX = Math.floor(goalX);
+  const exitCellY = Math.floor(goalY);
+
+  const exitInsideLocalMap =
+    Math.abs(exitCellX - playerCellX) <= radius &&
+    Math.abs(exitCellY - playerCellY) <= radius;
+
+  if (exitInsideLocalMap) {
+    const exitCenter = project(
+      exitCellX,
+      exitCellY,
+      wallHeight * 0.25
+    );
+
+    const exitPulse =
+      0.65 +
+      0.35 *
+        Math.sin(performance.now() / 180);
+
+    const exitRadius =
+      Math.max(3.5, tileWidth * 0.16);
+
+    ctx.save();
+
+    ctx.globalAlpha = exitPulse;
+    ctx.fillStyle = "#39ff88";
+    ctx.strokeStyle = "#effff6";
+    ctx.lineWidth = 1.5;
+    ctx.shadowColor = "#39ff88";
+    ctx.shadowBlur = 12;
+
+    ctx.beginPath();
+
+    ctx.arc(
+      exitCenter.x,
+      exitCenter.y - tileHeight * 0.7,
+      exitRadius,
+      0,
+      Math.PI * 2
+    );
+
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = "#39ff88";
+    ctx.strokeStyle = "rgba(0, 0, 0, 0.9)";
+    ctx.lineWidth = 3;
+
+    ctx.font =
+      `bold ${Math.max(
+        8,
+        Math.floor(panelSize * 0.045)
+      )}px "Courier New", monospace`;
+
+    ctx.textAlign = "center";
+    ctx.textBaseline = "bottom";
+
+    const exitLabelY =
+      exitCenter.y -
+      tileHeight -
+      exitRadius;
+
+    ctx.strokeText(
+      "EXIT",
+      exitCenter.x,
+      exitLabelY
+    );
+
+    ctx.fillText(
+      "EXIT",
+      exitCenter.x,
+      exitLabelY
+    );
+
+    ctx.restore();
+  }
+
+  /*
+     EXIT COMPASS
+     Rotates relative to the player's facing direction.
+  */
+  const exitWorldAngle = Math.atan2(
+    goalY - player.y,
+    goalX - player.x
+  );
+
+  const relativeExitAngle = Math.atan2(
+    Math.sin(exitWorldAngle - player.angle),
+    Math.cos(exitWorldAngle - player.angle)
+  );
+
+  const compassX =
+    panelX + panelSize - 22;
+
+  const compassY =
+    panelY + 22;
+
+  ctx.save();
+
+  ctx.translate(
+    compassX,
+    compassY
+  );
+
+  ctx.rotate(relativeExitAngle);
+
+  ctx.fillStyle = "#ff9a3d";
+  ctx.strokeStyle = "#fff0c2";
+  ctx.lineWidth = 1.5;
+  ctx.shadowColor = "#ff6a1f";
+  ctx.shadowBlur = 7;
+
+  ctx.beginPath();
+  ctx.moveTo(10, 0);
+  ctx.lineTo(-6, 6);
+  ctx.lineTo(-3, 0);
+  ctx.lineTo(-6, -6);
+  ctx.closePath();
+
+  ctx.fill();
+  ctx.stroke();
+  ctx.restore();
+
+  ctx.save();
+
+  ctx.fillStyle = "#ffb35c";
+
+  ctx.font =
+    `bold ${Math.max(
+      7,
+      Math.floor(panelSize * 0.038)
+    )}px "Courier New", monospace`;
+
+  ctx.textAlign = "center";
+  ctx.textBaseline = "top";
+
+  ctx.fillText(
+    "EXIT",
+    compassX,
+    compassY + 11
+  );
+
+  ctx.restore();
+
+  /*
+     MONSTER PROXIMITY MARKER
+     Appears only while the monster is within the local radius.
+  */
+  const monsterCellX =
+    Math.floor(monster.x);
+
+  const monsterCellY =
+    Math.floor(monster.y);
+
+  const monsterInsideLocalMap =
+    Math.abs(monsterCellX - playerCellX) <= radius &&
+    Math.abs(monsterCellY - playerCellY) <= radius;
+
+  if (monsterInsideLocalMap) {
+    const monsterCenter = project(
+      monsterCellX,
+      monsterCellY,
+      wallHeight * 0.28
+    );
+
+    const monsterPulse =
+      0.5 +
+      0.5 *
+        Math.sin(performance.now() / 125);
+
+    const monsterRadius =
+      Math.max(3, tileWidth * 0.13);
+
+    ctx.save();
+
+    ctx.globalAlpha =
+      0.65 + monsterPulse * 0.35;
+
+    ctx.fillStyle = "#ff2d78";
+    ctx.strokeStyle = "#ffd0e1";
+    ctx.lineWidth = 1.5;
+    ctx.shadowColor = "#ff2d78";
+    ctx.shadowBlur =
+      8 + monsterPulse * 6;
+
+    ctx.beginPath();
+
+    ctx.arc(
+      monsterCenter.x,
+      monsterCenter.y - tileHeight * 0.3,
+      monsterRadius,
+      0,
+      Math.PI * 2
+    );
+
+    ctx.fill();
+    ctx.stroke();
+    ctx.restore();
+  }
+
   ctx.fillStyle = "#00eaff";
 
   ctx.font =
