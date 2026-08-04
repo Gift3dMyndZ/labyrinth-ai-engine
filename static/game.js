@@ -53,6 +53,8 @@
   const audioToggle = document.getElementById("audioToggle");
   const playerNameInput = document.getElementById("playerName");
   const startButton = document.getElementById("startButton");
+  const mobileMapToggle =
+    document.getElementById("mobileMapToggle");
   /* =========================================================
      GAME STATE
   ========================================================= */
@@ -315,6 +317,32 @@ if (startButton) {
       startGame();
     }
   });
+}
+
+function setMinimapVisible(visible) {
+  minimapVisible = Boolean(visible);
+
+  if (mobileMapToggle) {
+    mobileMapToggle.textContent =
+      minimapVisible ? "MAP ON" : "MAP OFF";
+
+    mobileMapToggle.setAttribute(
+      "aria-pressed",
+      String(minimapVisible)
+    );
+  }
+}
+
+if (mobileMapToggle) {
+  mobileMapToggle.addEventListener(
+    "pointerdown",
+    event => {
+      event.preventDefault();
+      event.stopPropagation();
+
+      setMinimapVisible(!minimapVisible);
+    }
+  );
 }
 
 document.addEventListener("keydown", e => {
@@ -1687,9 +1715,13 @@ ctx.restore();
   const monsterCellY =
     Math.floor(monster.y);
 
+  const monsterGridDistance = Math.hypot(
+    monster.x - player.x,
+    monster.y - player.y
+  );
+
   const monsterInsideLocalMap =
-    Math.abs(monsterCellX - playerCellX) <= radius &&
-    Math.abs(monsterCellY - playerCellY) <= radius;
+    monsterGridDistance <= radius + 1;
 
   if (monsterInsideLocalMap) {
     const monsterCenter = project(
@@ -1704,7 +1736,7 @@ ctx.restore();
         Math.sin(performance.now() / 125);
 
     const monsterRadius =
-      Math.max(3, tileWidth * 0.13);
+      Math.max(5, tileWidth * 0.20);
 
     ctx.save();
 
@@ -1728,6 +1760,82 @@ ctx.restore();
       Math.PI * 2
     );
 
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.globalAlpha = 1;
+    ctx.shadowBlur = 6;
+    ctx.fillStyle = "#ff6b9f";
+    ctx.strokeStyle = "rgba(0, 0, 0, 0.95)";
+    ctx.lineWidth = 3;
+
+    ctx.font =
+      `bold ${Math.max(
+        8,
+        Math.floor(panelSize * 0.042)
+      )}px "Courier New", monospace`;
+
+    ctx.textAlign = "center";
+    ctx.textBaseline = "bottom";
+
+    const monsterLabelY =
+      monsterCenter.y -
+      tileHeight -
+      monsterRadius;
+
+    ctx.strokeText(
+      "ENEMY",
+      monsterCenter.x,
+      monsterLabelY
+    );
+
+    ctx.fillText(
+      "ENEMY",
+      monsterCenter.x,
+      monsterLabelY
+    );
+
+    ctx.restore();
+  }
+
+  const monsterThreatDistance = Math.hypot(
+    monster.x - player.x,
+    monster.y - player.y
+  );
+
+  if (
+    !monsterInsideLocalMap &&
+    monsterThreatDistance <= radius + 4
+  ) {
+    const monsterWorldAngle = Math.atan2(
+      monster.y - player.y,
+      monster.x - player.x
+    );
+
+    const relativeMonsterAngle = Math.atan2(
+      Math.sin(monsterWorldAngle - player.angle),
+      Math.cos(monsterWorldAngle - player.angle)
+    );
+
+    const threatX = panelX + 22;
+    const threatY = panelY + 22;
+
+    ctx.save();
+    ctx.translate(threatX, threatY);
+    ctx.rotate(relativeMonsterAngle);
+
+    ctx.fillStyle = "#ff2d78";
+    ctx.strokeStyle = "#ffd0e1";
+    ctx.lineWidth = 1.5;
+    ctx.shadowColor = "#ff2d78";
+    ctx.shadowBlur = 8;
+
+    ctx.beginPath();
+    ctx.moveTo(9, 0);
+    ctx.lineTo(-5, 5);
+    ctx.lineTo(-3, 0);
+    ctx.lineTo(-5, -5);
+    ctx.closePath();
     ctx.fill();
     ctx.stroke();
     ctx.restore();
