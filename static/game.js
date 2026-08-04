@@ -1070,6 +1070,98 @@ document.addEventListener("click", () => {
      MINIMAP
   ========================================================= */
 
+let cachedExitRoute = [];
+let cachedRoutePlayerCell = "";
+let cachedRouteGoalCell = "";
+
+
+function findExitRoute() {
+  const startX = Math.floor(player.x);
+  const startY = Math.floor(player.y);
+  const targetX = Math.floor(goalX);
+  const targetY = Math.floor(goalY);
+
+  const playerCell = `${startX},${startY}`;
+  const goalCell = `${targetX},${targetY}`;
+
+  if (
+    playerCell === cachedRoutePlayerCell &&
+    goalCell === cachedRouteGoalCell
+  ) {
+    return cachedExitRoute;
+  }
+
+  const queue = [[startX, startY]];
+  let queueIndex = 0;
+
+  const visited = new Set([playerCell]);
+  const previous = new Map();
+
+  const directions = [
+    [1, 0],
+    [-1, 0],
+    [0, 1],
+    [0, -1],
+  ];
+
+  while (queueIndex < queue.length) {
+    const [x, y] = queue[queueIndex];
+    queueIndex += 1;
+
+    if (x === targetX && y === targetY) {
+      const route = [];
+      let current = goalCell;
+
+      while (current) {
+        const [routeX, routeY] =
+          current.split(",").map(Number);
+
+        route.push({
+          x: routeX,
+          y: routeY,
+        });
+
+        current = previous.get(current);
+      }
+
+      cachedExitRoute = route.reverse();
+      cachedRoutePlayerCell = playerCell;
+      cachedRouteGoalCell = goalCell;
+
+      return cachedExitRoute;
+    }
+
+    for (const [dx, dy] of directions) {
+      const nextX = x + dx;
+      const nextY = y + dy;
+      const nextCell = `${nextX},${nextY}`;
+
+      const insideMap =
+        nextX >= 0 &&
+        nextX < CFG.GRID &&
+        nextY >= 0 &&
+        nextY < CFG.GRID;
+
+      if (
+        insideMap &&
+        map[nextY][nextX] === 0 &&
+        !visited.has(nextCell)
+      ) {
+        visited.add(nextCell);
+        previous.set(nextCell, `${x},${y}`);
+        queue.push([nextX, nextY]);
+      }
+    }
+  }
+
+  cachedExitRoute = [];
+  cachedRoutePlayerCell = playerCell;
+  cachedRouteGoalCell = goalCell;
+
+  return cachedExitRoute;
+}
+
+
 function renderMinimap(W, H) {
   const coarsePointer =
     window.matchMedia("(pointer: coarse)").matches;
@@ -1099,6 +1191,15 @@ function renderMinimap(W, H) {
 
   const centerY =
     panelY + panelSize * 0.56;
+
+  const visibleRoute =
+    findExitRoute().slice(1, 9);
+
+  const routeCells = new Set(
+    visibleRoute.map(
+      cell => `${cell.x},${cell.y}`
+    )
+  );
 
   function project(
     gridX,
@@ -1313,10 +1414,17 @@ function renderMinimap(W, H) {
       if (map[mapY][mapX] === 1) {
         drawWall(mapX, mapY);
       } else {
+        const routeCell =
+          routeCells.has(`${mapX},${mapY}`);
+
         drawDiamond(
           project(mapX, mapY),
-          "rgba(8, 40, 52, 0.74)",
-          "rgba(0, 124, 154, 0.50)"
+          routeCell
+            ? "rgba(255, 128, 28, 0.82)"
+            : "rgba(8, 40, 52, 0.74)",
+          routeCell
+            ? "rgba(255, 220, 120, 0.96)"
+            : "rgba(0, 124, 154, 0.50)"
         );
       }
     }
