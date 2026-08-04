@@ -18,6 +18,29 @@ if not os.path.isabs(DB_PATH) and os.environ.get("RENDER"):
 _local = threading.local()
 
 
+def get_table_columns(conn, table_name: str) -> set:
+    """Return the existing column names for a SQLite table."""
+    rows = conn.execute(f"PRAGMA table_info({table_name})").fetchall()
+    return {row["name"] for row in rows}
+
+
+def ensure_column(
+    conn,
+    table_name: str,
+    column_name: str,
+    column_definition: str,
+):
+    """Add a column when an older database does not contain it."""
+    existing_columns = get_table_columns(conn, table_name)
+
+    if column_name not in existing_columns:
+        conn.execute(
+            f"ALTER TABLE {table_name} "
+            f"ADD COLUMN {column_name} {column_definition}"
+        )
+        print(f"[DB] Added {table_name}.{column_name}")
+
+
 def get_connection():
     if not hasattr(_local, "conn") or _local.conn is None:
         # Ensure directory exists
@@ -47,11 +70,18 @@ def init_db():
         );
 
         CREATE TABLE IF NOT EXISTS leaderboard (
-            id              INTEGER PRIMARY KEY AUTOINCREMENT,
-            timestamp       TEXT    NOT NULL,
-            survival_time   REAL    NOT NULL,
-            difficulty_mod  REAL    DEFAULT 1.0,
-            score           REAL    NOT NULL DEFAULT 0
+            id               INTEGER PRIMARY KEY AUTOINCREMENT,
+            timestamp        TEXT    NOT NULL,
+            session_id       TEXT,
+            display_name     TEXT    NOT NULL DEFAULT 'Unknown Wanderer',
+            survival_time    REAL    NOT NULL,
+            difficulty_mod   REAL    NOT NULL DEFAULT 1.0,
+            score            REAL    NOT NULL DEFAULT 0,
+            outcome          TEXT    NOT NULL DEFAULT 'unknown',
+            floor_reached    INTEGER NOT NULL DEFAULT 1,
+            device_type      TEXT    NOT NULL DEFAULT 'unknown',
+            oracle_mutations INTEGER NOT NULL DEFAULT 0,
+            validated        INTEGER NOT NULL DEFAULT 0
         );
 
         CREATE TABLE IF NOT EXISTS replay_buffer (
@@ -71,6 +101,54 @@ def init_db():
         CREATE INDEX IF NOT EXISTS idx_replay_cluster
             ON replay_buffer(cluster_id);
     """)
+    ensure_column(conn, "leaderboard", "session_id", "TEXT")
+    ensure_column(
+        conn,
+        "leaderboard",
+        "display_name",
+        "TEXT NOT NULL DEFAULT 'Unknown Wanderer'",
+    )
+    ensure_column(
+        conn,
+        "leaderboard",
+        "outcome",
+        "TEXT NOT NULL DEFAULT 'unknown'",
+    )
+    ensure_column(
+        conn,
+        "leaderboard",
+        "floor_reached",
+        "INTEGER NOT NULL DEFAULT 1",
+    )
+    ensure_column(
+        conn,
+        "leaderboard",
+        "device_type",
+        "TEXT NOT NULL DEFAULT 'unknown'",
+    )
+    ensure_column(
+        conn,
+        "leaderboard",
+        "oracle_mutations",
+        "INTEGER NOT NULL DEFAULT 0",
+    )
+    ensure_column(
+        conn,
+        "leaderboard",
+        "validated",
+        "INTEGER NOT NULL DEFAULT 0",
+    )
+
+    conn.execute("""
+        CREATE INDEX IF NOT EXISTS idx_leaderboard_timestamp
+        ON leaderboard(timestamp DESC)
+    """)
+
+    conn.execute("""
+        CREATE INDEX IF NOT EXISTS idx_leaderboard_session
+        ON leaderboard(session_id)
+    """)
+
     conn.commit()
     print("[DB] Tables initialized")
 
