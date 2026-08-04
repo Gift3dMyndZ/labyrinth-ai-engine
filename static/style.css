@@ -694,3 +694,28 @@ canvas#game {
     background: rgba(2, 8, 18, 0.9);
   }
 }
+
+/* Boot screen pointer focus */
+#bootScreen .shadow-layer,
+#bootScreen .shadow-person {
+  pointer-events: none;
+}
+
+#bootScreen .player-name-label,
+#bootScreen .player-name-input,
+#bootScreen .start-button {
+  position: relative;
+  z-index: 30;
+  pointer-events: auto;
+}
+
+#bootScreen .player-name-input {
+  user-select: text;
+  -webkit-user-select: text;
+  touch-action: manipulation;
+  caret-color: #ffe066;
+}
+
+#bootScreen .start-button {
+  touch-action: manipulation;
+}
