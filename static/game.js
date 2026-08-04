@@ -356,7 +356,7 @@ document.addEventListener("keydown", e => {
       e.key.toLowerCase() === "m" &&
       gameState === "playing"
     ) {
-      minimapVisible = !minimapVisible;
+      setMinimapVisible(!minimapVisible);
       e.preventDefault();
     }
 

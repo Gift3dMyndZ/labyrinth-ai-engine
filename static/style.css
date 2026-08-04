@@ -652,3 +652,45 @@ canvas#game {
     0 0 20px rgba(255, 178, 30, 0.78),
     0 0 38px rgba(255, 62, 8, 0.54);
 }
+
+/* Mobile mini-maze toggle */
+.mobile-map-toggle {
+  display: none;
+}
+
+@media (pointer: coarse) {
+  .mobile-map-toggle {
+    position: fixed;
+    right: calc(14px + env(safe-area-inset-right));
+    bottom: calc(14px + env(safe-area-inset-bottom));
+    z-index: 90;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-width: 96px;
+    min-height: 50px;
+    padding: 0 16px;
+
+    border: 1px solid #00eaff;
+    border-radius: 999px;
+
+    color: #071014;
+    background: #00eaff;
+
+    font-family: "Courier New", monospace;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .mobile-map-toggle[aria-pressed="false"] {
+    color: #00eaff;
+    background: rgba(2, 8, 18, 0.9);
+  }
+}
