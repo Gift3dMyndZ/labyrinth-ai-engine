@@ -70,6 +70,7 @@ let bootAudioStarted = false;
   let score         = 0;
   let floorReached  = 1;
   let zBuffer       = [];
+  let minimapVisible = true;
   let animFrameId   = null;
   let lastTime      = 0;
   let sessionId     = Date.now().toString(36) + Math.random().toString(36).slice(2);
@@ -321,6 +322,14 @@ document.addEventListener("keydown", e => {
 
     if (gameState === "boot") {
       playBootAudio();
+    }
+
+    if (
+      e.key.toLowerCase() === "m" &&
+      gameState === "playing"
+    ) {
+      minimapVisible = !minimapVisible;
+      e.preventDefault();
     }
 
     if (e.key === "Enter") {
@@ -1062,7 +1071,9 @@ document.addEventListener("click", () => {
       }
     }
 
-    renderMinimap(W, H);
+    if (minimapVisible) {
+      renderMinimap(W, H);
+    }
     ctx.restore();
   }
 
