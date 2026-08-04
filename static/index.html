@@ -22,7 +22,21 @@
 
   <h2>ΤΑΡΤΑΡΟΣ</h2>
   <p>LABYRINTH OF TARTARUS</p>
-  <p>Press ENTER to descend</p>
+  <label class="player-name-label" for="playerName">
+    WANDERER NAME
+  </label>
+  <input
+    id="playerName"
+    class="player-name-input"
+    type="text"
+    maxlength="32"
+    autocomplete="nickname"
+    placeholder="Unknown Wanderer"
+  >
+  <p>Press ENTER or tap DESCEND</p>
+  <button id="startButton" class="start-button" type="button">
+    DESCEND
+  </button>
 </div>
 
   <!-- GAME CONTAINER -->

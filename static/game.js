@@ -51,6 +51,8 @@
   const canvas        = document.getElementById("game");
   const ctx           = canvas.getContext("2d");
   const audioToggle = document.getElementById("audioToggle");
+  const playerNameInput = document.getElementById("playerName");
+  const startButton = document.getElementById("startButton");
   /* =========================================================
      GAME STATE
   ========================================================= */
@@ -71,6 +73,43 @@ let bootAudioStarted = false;
   let animFrameId   = null;
   let lastTime      = 0;
   let sessionId     = Date.now().toString(36) + Math.random().toString(36).slice(2);
+  let displayName = localStorage.getItem("tartarusDisplayName") || "Unknown Wanderer";
+  let oracleMutationCount = 0;
+
+  function detectDeviceType() {
+    const coarsePointer =
+      window.matchMedia("(pointer: coarse)").matches;
+
+    const shortestSide = Math.min(
+      window.innerWidth,
+      window.innerHeight
+    );
+
+    if (coarsePointer && shortestSide >= 700) {
+      return "tablet";
+    }
+
+    if (coarsePointer) {
+      return "mobile";
+    }
+
+    return "desktop";
+  }
+
+  function capturePlayerIdentity() {
+    const enteredName = playerNameInput
+      ? playerNameInput.value.trim()
+      : "";
+
+    displayName = (
+      enteredName || "Unknown Wanderer"
+    ).slice(0, 32);
+
+    localStorage.setItem(
+      "tartarusDisplayName",
+      displayName
+    );
+  }
 
   /* =========================================================
      MONSTER STATE
@@ -260,6 +299,23 @@ let bootAudioStarted = false;
   ========================================================= */
 
 
+if (playerNameInput) {
+  playerNameInput.value =
+    displayName === "Unknown Wanderer"
+      ? ""
+      : displayName;
+}
+
+if (startButton) {
+  startButton.addEventListener("click", () => {
+    if (gameState === "boot") {
+      capturePlayerIdentity();
+      playBootAudio();
+      startGame();
+    }
+  });
+}
+
 document.addEventListener("keydown", e => {
     keys[e.key.toLowerCase()] = true;
 
@@ -268,8 +324,15 @@ document.addEventListener("keydown", e => {
     }
 
     if (e.key === "Enter") {
-      if (gameState === "boot") startGame();
-      else if (gameState === "dead" || gameState === "escaped") startGame();
+      if (gameState === "boot") {
+        capturePlayerIdentity();
+        startGame();
+      } else if (
+        gameState === "dead" ||
+        gameState === "escaped"
+      ) {
+        startGame();
+      }
     }
 });
 
@@ -489,8 +552,11 @@ document.addEventListener("click", () => {
           difficulty_modifier: monster.difficultyMod,
           outcome:             gameState === "playing" ? "ongoing" : gameState,
           session_id:          sessionId,
+          display_name:        displayName,
+          device_type:         detectDeviceType(),
           floor_reached:       floorReached,
           maze_size:           CFG.GRID,
+          oracle_mutations:    oracleMutationCount,
         }),
       });
       if (res.ok) {
@@ -511,7 +577,13 @@ document.addEventListener("click", () => {
         body: JSON.stringify({
           fear_level: v.fear_level, aggression: v.aggression, curiosity: v.curiosity,
           survival_time: survivalTime, difficulty_modifier: monster.difficultyMod,
-          outcome, session_id: sessionId, floor_reached: floorReached, maze_size: CFG.GRID,
+          outcome,
+          session_id: sessionId,
+          display_name: displayName,
+          device_type: detectDeviceType(),
+          floor_reached: floorReached,
+          maze_size: CFG.GRID,
+          oracle_mutations: oracleMutationCount,
         }),
       });
     } catch (e) { /* silent */ }
@@ -1137,9 +1209,16 @@ ctx.fillRect(ox + x * cs, oy + y * cs, Math.ceil(cs), Math.ceil(cs));
   function startGame() {
     if (animFrameId) cancelAnimationFrame(animFrameId);
 
-    if (gameState === "escaped") {
+    const continuingRun = gameState === "escaped";
+
+    if (continuingRun) {
       floorReached++;
     } else {
+      sessionId =
+        Date.now().toString(36) +
+        Math.random().toString(36).slice(2);
+
+      oracleMutationCount = 0;
       floorReached = 1;
       monster.difficultyMod = 1.0;
       monster.fearWeight = 0;

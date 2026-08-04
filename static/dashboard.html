@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover"
+  >
+  <meta name="theme-color" content="#080106">
+  <title>Tartarus Dashboard</title>
+  <link rel="stylesheet" href="/static/dashboard.css">
+</head>
+<body>
+  <main class="dashboard">
+    <header class="dashboard-header">
+      <div>
+        <p class="eyebrow">ORACLE OPERATIONS</p>
+        <h1>LABYRINTH OF TARTARUS</h1>
+        <p class="subtitle">Player performance dashboard</p>
+      </div>
+
+      <nav class="actions" aria-label="Dashboard navigation">
+        /
+          ENTER LABYRINTH
+        </a>
+        <button id="refreshButton" class="button" type="button">
+          REFRESH
+        </button>
+      </nav>
+    </header>
+
+    <p id="status" class="status" role="status">
+      Connecting to the Oracle...
+    </p>
+
+    <section class="metrics" aria-label="Run metrics">
+      <article class="metric">
+        <span>Total Runs</span>
+        <strong id="totalRuns">0</strong>
+      </article>
+
+      <article class="metric">
+        <span>Completion Rate</span>
+        <strong id="completionRate">0%</strong>
+      </article>
+
+      <article class="metric">
+        <span>Highest Score</span>
+        <strong id="highestScore">0</strong>
+      </article>
+
+      <article class="metric">
+        <span>Average Floor</span>
+        <strong id="averageFloor">0.0</strong>
+      </article>
+
+      <article class="metric">
+        <span>Deepest Floor</span>
+        <strong id="deepestFloor">0</strong>
+      </article>
+
+      <article class="metric metric-oracle">
+        <span>Oracle Mutations</span>
+        <strong id="oracleMutations">0</strong>
+      </article>
+    </section>
+
+    <section class="panel">
+      <header class="panel-header">
+        <div>
+          <p class="eyebrow">LIVE ACTIVITY</p>
+          <h2>Recent Players</h2>
+        </div>
+        <span id="lastUpdated">Not updated</span>
+      </header>
+
+      <div id="emptyState" class="empty-state" hidden>
+        No completed runs have been recorded.
+      </div>
+
+      <div class="table-wrapper">
+        <table id="recentRunsTable" hidden>
+          <thead>
+            <tr>
+              <th>Player</th>
+              <th>Score</th>
+              <th>Floor</th>
+              <th>Outcome</th>
+              <th>Duration</th>
+              <th>Device</th>
+              <th>Oracle</th>
+            </tr>
+          </thead>
+          <tbody id="recentRunsBody"></tbody>
+        </table>
+      </div>
+
+      <div id="recentRunCards" class="run-cards" hidden></div>
+    </section>
+
+    <section class="panel">
+      <header class="panel-header">
+        <div>
+          <p class="eyebrow">RANKINGS</p>
+          <h2>Top Scores</h2>
+        </div>
+      </header>
+
+      <ol id="leaderboard" class="leaderboard"></ol>
+    </section>
+  </main>
+
+  <script src="/static/dashboard.js"></script>
+</body>
+</html>
