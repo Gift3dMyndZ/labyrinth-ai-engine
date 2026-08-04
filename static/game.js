@@ -537,7 +537,21 @@ document.addEventListener("click", () => {
     };
   }
 
+  let lastTelemetrySentAt = 0;
+  const TELEMETRY_MIN_INTERVAL_MS = 5000;
+
   async function sendTelemetry() {
+    const now = performance.now();
+
+    if (
+      now - lastTelemetrySentAt <
+      TELEMETRY_MIN_INTERVAL_MS
+    ) {
+      return;
+    }
+
+    lastTelemetrySentAt = now;
+
     const v = computeTelemetry();
     localAdapt(v);
     try {
