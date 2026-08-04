@@ -21,7 +21,7 @@
     WALL_HEIGHT:    1.2,
     MONSTER_SPEED:  0.02,
     TELEMETRY_MS:   5000,
-    API:            "/api/telemetry",
+    API:            "/api/telemetry/log",
   };
 
   /* =========================================================
@@ -53,6 +53,20 @@
   const audioToggle = document.getElementById("audioToggle");
   const playerNameInput = document.getElementById("playerName");
   const startButton = document.getElementById("startButton");
+  const mobileMapToggle =
+    document.getElementById("mobileMapToggle");
+
+  const mobileControls =
+    document.getElementById("mobileControls");
+
+  const moveJoystick =
+    document.getElementById("moveJoystick");
+
+  const moveJoystickKnob =
+    document.getElementById("moveJoystickKnob");
+
+  const lookZone =
+    document.getElementById("lookZone");
   /* =========================================================
      GAME STATE
   ========================================================= */
@@ -70,6 +84,15 @@ let bootAudioStarted = false;
   let score         = 0;
   let floorReached  = 1;
   let zBuffer       = [];
+  let minimapVisible = true;
+
+  const mobileInput = {
+    movePointerId: null,
+    lookPointerId: null,
+    moveX: 0,
+    moveY: 0,
+    previousLookX: 0,
+  };
   let animFrameId   = null;
   let lastTime      = 0;
   let sessionId     = Date.now().toString(36) + Math.random().toString(36).slice(2);
@@ -306,15 +329,372 @@ if (playerNameInput) {
       : displayName;
 }
 
-if (startButton) {
-  startButton.addEventListener("click", () => {
-    if (gameState === "boot") {
-      capturePlayerIdentity();
-      playBootAudio();
-      startGame();
-    }
-  });
+let bootStartInProgress = false;
+
+function beginGameFromBoot() {
+  if (
+    gameState !== "boot" ||
+    bootStartInProgress
+  ) {
+    return;
+  }
+
+  bootStartInProgress = true;
+
+  capturePlayerIdentity();
+  playBootAudio();
+
+  if (playerNameInput) {
+    playerNameInput.blur();
+  }
+
+  startGame();
+
+  window.setTimeout(() => {
+    bootStartInProgress = false;
+  }, 500);
 }
+
+if (playerNameInput) {
+  playerNameInput.addEventListener(
+    "pointerdown",
+    event => {
+      event.stopPropagation();
+    }
+  );
+
+  playerNameInput.addEventListener(
+    "click",
+    event => {
+      event.stopPropagation();
+    }
+  );
+}
+
+if (startButton) {
+  startButton.addEventListener(
+    "pointerdown",
+    event => {
+      event.preventDefault();
+      event.stopPropagation();
+      beginGameFromBoot();
+    }
+  );
+}
+
+function setMinimapVisible(visible) {
+  minimapVisible = Boolean(visible);
+
+  if (mobileMapToggle) {
+    mobileMapToggle.textContent =
+      minimapVisible ? "MAP ON" : "MAP OFF";
+
+    mobileMapToggle.setAttribute(
+      "aria-pressed",
+      String(minimapVisible)
+    );
+  }
+}
+
+if (mobileMapToggle) {
+  mobileMapToggle.addEventListener(
+    "pointerdown",
+    event => {
+      event.preventDefault();
+      event.stopPropagation();
+
+      setMinimapVisible(!minimapVisible);
+    }
+  );
+}
+
+function resetMoveJoystick() {
+  mobileInput.movePointerId = null;
+  mobileInput.moveX = 0;
+  mobileInput.moveY = 0;
+
+  if (moveJoystickKnob) {
+    moveJoystickKnob.style.transform =
+      "translate(-50%, -50%)";
+  }
+}
+
+function resetLookInput() {
+  mobileInput.lookPointerId = null;
+  mobileInput.previousLookX = 0;
+}
+
+function resetMobileInput() {
+  resetMoveJoystick();
+  resetLookInput();
+}
+
+function setMobileControlsActive(active) {
+  const controlsActive = Boolean(active);
+
+  document.body.classList.toggle(
+    "game-active",
+    controlsActive
+  );
+
+  if (mobileControls) {
+    mobileControls.setAttribute(
+      "aria-hidden",
+      String(!controlsActive)
+    );
+  }
+
+  if (!controlsActive) {
+    resetMobileInput();
+  }
+}
+
+function updateMoveJoystick(event) {
+  if (!moveJoystick || !moveJoystickKnob) {
+    return;
+  }
+
+  const bounds =
+    moveJoystick.getBoundingClientRect();
+
+  const centerX =
+    bounds.left + bounds.width / 2;
+
+  const centerY =
+    bounds.top + bounds.height / 2;
+
+  const maxDistance =
+    bounds.width * 0.34;
+
+  let deltaX =
+    event.clientX - centerX;
+
+  let deltaY =
+    event.clientY - centerY;
+
+  const distance =
+    Math.hypot(deltaX, deltaY);
+
+  if (distance > maxDistance) {
+    const scale =
+      maxDistance / distance;
+
+    deltaX *= scale;
+    deltaY *= scale;
+  }
+  const normalizedX =
+    deltaX / maxDistance;
+
+  const normalizedY =
+    deltaY / maxDistance;
+
+  const deadZone = 0.20;
+
+  mobileInput.moveX =
+    Math.abs(normalizedX) >= deadZone
+      ? normalizedX
+      : 0;
+
+  mobileInput.moveY =
+    Math.abs(normalizedY) >= deadZone
+      ? normalizedY
+      : 0;
+
+  moveJoystickKnob.style.transform =
+    `translate(
+      calc(-50% + ${deltaX}px),
+      calc(-50% + ${deltaY}px)
+    )`;
+}
+
+if (moveJoystick) {
+  moveJoystick.addEventListener(
+    "pointerdown",
+    event => {
+      if (
+        gameState !== "playing" ||
+        mobileInput.movePointerId !== null
+      ) {
+        return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      mobileInput.movePointerId =
+        event.pointerId;
+
+      moveJoystick.setPointerCapture(
+        event.pointerId
+      );
+
+      updateMoveJoystick(event);
+    }
+  );
+
+  moveJoystick.addEventListener(
+    "pointermove",
+    event => {
+      if (
+        event.pointerId !==
+        mobileInput.movePointerId
+      ) {
+        return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      updateMoveJoystick(event);
+    }
+  );
+
+  const finishMovePointer = event => {
+    if (
+      event.pointerId !==
+      mobileInput.movePointerId
+    ) {
+      return;
+    }
+
+    if (
+      moveJoystick.hasPointerCapture(
+        event.pointerId
+      )
+    ) {
+      moveJoystick.releasePointerCapture(
+        event.pointerId
+      );
+    }
+
+    resetMoveJoystick();
+  };
+
+  moveJoystick.addEventListener(
+    "pointerup",
+    finishMovePointer
+  );
+
+  moveJoystick.addEventListener(
+    "pointercancel",
+    finishMovePointer
+  );
+
+  moveJoystick.addEventListener(
+    "lostpointercapture",
+    finishMovePointer
+  );
+}
+
+if (lookZone) {
+  lookZone.addEventListener(
+    "pointerdown",
+    event => {
+      if (
+        gameState !== "playing" ||
+        mobileInput.lookPointerId !== null
+      ) {
+        return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      mobileInput.lookPointerId =
+        event.pointerId;
+
+      mobileInput.previousLookX =
+        event.clientX;
+
+      lookZone.setPointerCapture(
+        event.pointerId
+      );
+    }
+  );
+
+  lookZone.addEventListener(
+    "pointermove",
+    event => {
+      if (
+        event.pointerId !==
+        mobileInput.lookPointerId
+      ) {
+        return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      const deltaX =
+        event.clientX -
+        mobileInput.previousLookX;
+
+      mobileInput.previousLookX =
+        event.clientX;
+
+      if (Math.abs(deltaX) >= 1) {
+        player.angle +=
+          deltaX *
+          CFG.MOUSE_SENS *
+          1.35;
+      }
+    }
+  );
+
+  const finishLookPointer = event => {
+    if (
+      event.pointerId !==
+      mobileInput.lookPointerId
+    ) {
+      return;
+    }
+
+    if (
+      lookZone.hasPointerCapture(
+        event.pointerId
+      )
+    ) {
+      lookZone.releasePointerCapture(
+        event.pointerId
+      );
+    }
+
+    resetLookInput();
+  };
+
+  lookZone.addEventListener(
+    "pointerup",
+    finishLookPointer
+  );
+
+  lookZone.addEventListener(
+    "pointercancel",
+    finishLookPointer
+  );
+
+  lookZone.addEventListener(
+    "lostpointercapture",
+    finishLookPointer
+  );
+}
+window.addEventListener(
+  "blur",
+  resetMobileInput
+);
+
+window.addEventListener(
+  "orientationchange",
+  resetMobileInput
+);
+
+document.addEventListener(
+  "visibilitychange",
+  () => {
+    if (document.hidden) {
+      resetMobileInput();
+    }
+  }
+);
 
 document.addEventListener("keydown", e => {
     keys[e.key.toLowerCase()] = true;
@@ -323,10 +703,17 @@ document.addEventListener("keydown", e => {
       playBootAudio();
     }
 
+    if (
+      e.key.toLowerCase() === "m" &&
+      gameState === "playing"
+    ) {
+      setMinimapVisible(!minimapVisible);
+      e.preventDefault();
+    }
+
     if (e.key === "Enter") {
       if (gameState === "boot") {
-        capturePlayerIdentity();
-        startGame();
+        beginGameFromBoot();
       } else if (
         gameState === "dead" ||
         gameState === "escaped"
@@ -382,42 +769,120 @@ document.addEventListener("click", () => {
   ========================================================= */
 
   function updatePlayer() {
-    let dx = 0, dy = 0;
+    let keyboardForward = 0;
 
-    if (keys["w"] || keys["arrowup"]) {
-      dx += Math.cos(player.angle) * CFG.MOVE;
-      dy += Math.sin(player.angle) * CFG.MOVE;
-    }
-    if (keys["s"] || keys["arrowdown"]) {
-      dx -= Math.cos(player.angle) * CFG.MOVE;
-      dy -= Math.sin(player.angle) * CFG.MOVE;
-    }
-    if (keys["a"] || keys["arrowleft"])  player.angle -= CFG.ROT;
-    if (keys["d"] || keys["arrowright"]) player.angle += CFG.ROT;
-
-    if (keys["q"]) {
-      dx += Math.cos(player.angle - Math.PI / 2) * CFG.MOVE;
-      dy += Math.sin(player.angle - Math.PI / 2) * CFG.MOVE;
-    }
-    if (keys["e"]) {
-      dx += Math.cos(player.angle + Math.PI / 2) * CFG.MOVE;
-      dy += Math.sin(player.angle + Math.PI / 2) * CFG.MOVE;
+    if (
+      keys["w"] ||
+      keys["arrowup"]
+    ) {
+      keyboardForward += 1;
     }
 
-    if (canMove(player.x + dx, player.y + dy)) {
-      player.x += dx; player.y += dy;
-    } else if (canMove(player.x + dx, player.y)) {
-      player.x += dx;
-    } else if (canMove(player.x, player.y + dy)) {
-      player.y += dy;
+    if (
+      keys["s"] ||
+      keys["arrowdown"]
+    ) {
+      keyboardForward -= 1;
     }
 
-    tele.cellsVisited.add(Math.floor(player.x) + "," + Math.floor(player.y));
+    if (
+      keys["a"] ||
+      keys["arrowleft"]
+    ) {
+      player.angle -= CFG.ROT;
+    }
+
+    if (
+      keys["d"] ||
+      keys["arrowright"]
+    ) {
+      player.angle += CFG.ROT;
+    }
+
+    const forwardInput =
+      keyboardForward -
+      mobileInput.moveY;
+
+    const strafeInput =
+      mobileInput.moveX;
+
+    const inputMagnitude = Math.hypot(
+      forwardInput,
+      strafeInput
+    );
+
+    if (inputMagnitude > 0) {
+      const normalization =
+        inputMagnitude > 1
+          ? 1 / inputMagnitude
+          : 1;
+
+      const normalizedForward =
+        forwardInput * normalization;
+
+      const normalizedStrafe =
+        strafeInput * normalization;
+
+      const forwardX =
+        Math.cos(player.angle) *
+        normalizedForward;
+
+      const forwardY =
+        Math.sin(player.angle) *
+        normalizedForward;
+
+      const strafeX =
+        Math.cos(
+          player.angle + Math.PI / 2
+        ) * normalizedStrafe;
+
+      const strafeY =
+        Math.sin(
+          player.angle + Math.PI / 2
+        ) * normalizedStrafe;
+
+      const dx =
+        (forwardX + strafeX) *
+        CFG.MOVE;
+
+      const dy =
+        (forwardY + strafeY) *
+        CFG.MOVE;
+
+      if (
+        canMove(
+          player.x + dx,
+          player.y + dy
+        )
+      ) {
+        player.x += dx;
+        player.y += dy;
+      } else if (
+        canMove(
+          player.x + dx,
+          player.y
+        )
+      ) {
+        player.x += dx;
+      } else if (
+        canMove(
+          player.x,
+          player.y + dy
+        )
+      ) {
+        player.y += dy;
+      }
+    }
+
+    player.angle = Math.atan2(
+      Math.sin(player.angle),
+      Math.cos(player.angle)
+    );
+
+    tele.cellsVisited.add(
+      `${Math.floor(player.x)},${Math.floor(player.y)}`
+    );
   }
-
-  /* =========================================================
-     MONSTER AI — learns from player behavior
-  ========================================================= */
 
   function updateMonster() {
     const dx = player.x - monster.x;
@@ -496,6 +961,7 @@ document.addEventListener("click", () => {
 
     if (dist < 0.5) {
       gameState = "dead";
+      setMobileControlsActive(false);
       sendFinalTelemetry("killed");
     }
   }
@@ -537,7 +1003,21 @@ document.addEventListener("click", () => {
     };
   }
 
+  let lastTelemetrySentAt = 0;
+  const TELEMETRY_MIN_INTERVAL_MS = 5000;
+
   async function sendTelemetry() {
+    const now = performance.now();
+
+    if (
+      now - lastTelemetrySentAt <
+      TELEMETRY_MIN_INTERVAL_MS
+    ) {
+      return;
+    }
+
+    lastTelemetrySentAt = now;
+
     const v = computeTelemetry();
     localAdapt(v);
     try {
@@ -1048,7 +1528,9 @@ document.addEventListener("click", () => {
       }
     }
 
-    renderMinimap(W, H);
+    if (minimapVisible) {
+      renderMinimap(W, H);
+    }
     ctx.restore();
   }
 
@@ -1056,45 +1538,757 @@ document.addEventListener("click", () => {
      MINIMAP
   ========================================================= */
 
+let cachedExitRoute = [];
+let cachedRoutePlayerCell = "";
+let cachedRouteGoalCell = "";
+
+
+function findExitRoute() {
+  const startX = Math.floor(player.x);
+  const startY = Math.floor(player.y);
+  const targetX = Math.floor(goalX);
+  const targetY = Math.floor(goalY);
+
+  const playerCell = `${startX},${startY}`;
+  const goalCell = `${targetX},${targetY}`;
+
+  if (
+    playerCell === cachedRoutePlayerCell &&
+    goalCell === cachedRouteGoalCell
+  ) {
+    return cachedExitRoute;
+  }
+
+  const queue = [[startX, startY]];
+  let queueIndex = 0;
+
+  const visited = new Set([playerCell]);
+  const previous = new Map();
+
+  const directions = [
+    [1, 0],
+    [-1, 0],
+    [0, 1],
+    [0, -1],
+  ];
+
+  while (queueIndex < queue.length) {
+    const [x, y] = queue[queueIndex];
+    queueIndex += 1;
+
+    if (x === targetX && y === targetY) {
+      const route = [];
+      let current = goalCell;
+
+      while (current) {
+        const [routeX, routeY] =
+          current.split(",").map(Number);
+
+        route.push({
+          x: routeX,
+          y: routeY,
+        });
+
+        current = previous.get(current);
+      }
+
+      cachedExitRoute = route.reverse();
+      cachedRoutePlayerCell = playerCell;
+      cachedRouteGoalCell = goalCell;
+
+      return cachedExitRoute;
+    }
+
+    for (const [dx, dy] of directions) {
+      const nextX = x + dx;
+      const nextY = y + dy;
+      const nextCell = `${nextX},${nextY}`;
+
+      const insideMap =
+        nextX >= 0 &&
+        nextX < CFG.GRID &&
+        nextY >= 0 &&
+        nextY < CFG.GRID;
+
+      if (
+        insideMap &&
+        map[nextY][nextX] === 0 &&
+        !visited.has(nextCell)
+      ) {
+        visited.add(nextCell);
+        previous.set(nextCell, `${x},${y}`);
+        queue.push([nextX, nextY]);
+      }
+    }
+  }
+
+  cachedExitRoute = [];
+  cachedRoutePlayerCell = playerCell;
+  cachedRouteGoalCell = goalCell;
+
+  return cachedExitRoute;
+}
+
+
 function renderMinimap(W, H) {
-const size = Math.floor(Math.min(W, H) * 0.17);
-const ox = W - size - 10;
-const oy = H - size - 10;
- const cs = size / CFG.GRID;
+  const coarsePointer =
+    window.matchMedia("(pointer: coarse)").matches;
 
-ctx.globalAlpha = 0.45;
-ctx.fillStyle = "#000814";
-ctx.fillRect(ox, oy, size, size);
+  const panelSize = Math.floor(
+    Math.min(W, H) *
+    (coarsePointer ? 0.28 : 0.24)
+  );
 
- for (let y = 0; y < CFG.GRID; y++) { for (let x = 0; x < CFG.GRID; x++) { if (map[y][x] === 1) {
- ctx.fillStyle = "#00eaffcc";
-ctx.fillRect(ox + x * cs, oy + y * cs, Math.ceil(cs), Math.ceil(cs));
- }
- }
- }
+  const margin = coarsePointer ? 14 : 18;
+  const panelX = W - panelSize - margin;
+  const panelY = H - panelSize - margin;
 
- ctx.globalAlpha = 0.9;
+  const radius = coarsePointer ? 4 : 6;
 
- ctx.fillStyle = "#ffffff";
- ctx.fillRect(ox + player.x*cs - 2, oy + player.y*cs - 2, 4, 4);
+  const tileWidth =
+    panelSize / (radius * 2 + 3);
 
- ctx.strokeStyle = "#ffffff";
-  ctx.lineWidth = 1;
- ctx.beginPath();
- ctx.moveTo(ox + player.x*cs, oy + player.y*cs);
- ctx.lineTo(ox + (player.x + Math.cos(player.angle)*2.5)*cs,
- oy + (player.y + Math.sin(player.angle)*2.5)*cs);
- ctx.stroke();
+  const tileHeight = tileWidth * 0.5;
+  const wallHeight = tileHeight * 1.45;
 
- const mp = 0.5 + 0.5 * Math.sin(performance.now() / 180);
- ctx.fillStyle = `rgba(255,0,140,${mp})`;
- ctx.fillRect(ox + monster.x*cs - 2, oy + monster.y*cs - 2, 4, 4);
+  const playerCellX = Math.floor(player.x);
+  const playerCellY = Math.floor(player.y);
 
- ctx.fillStyle = "#39ff14";
- ctx.fillRect(ox + goalX*cs - 2, oy + goalY*cs - 2, 4, 4);
+  const centerX =
+    panelX + panelSize * 0.5;
 
- ctx.globalAlpha = 1;
- }
+  const centerY =
+    panelY + panelSize * 0.56;
+
+  const visibleRoute =
+    findExitRoute().slice(1, 9);
+
+  const routeCells = new Set(
+    visibleRoute.map(
+      cell => `${cell.x},${cell.y}`
+    )
+  );
+
+  function project(
+    gridX,
+    gridY,
+    elevation = 0
+  ) {
+    const relativeX =
+      gridX - playerCellX;
+
+    const relativeY =
+      gridY - playerCellY;
+
+    return {
+      x:
+        centerX +
+        (relativeX - relativeY) *
+          tileWidth *
+          0.5,
+
+      y:
+        centerY +
+        (relativeX + relativeY) *
+          tileHeight *
+          0.5 -
+        elevation,
+    };
+  }
+
+  function drawDiamond(
+    center,
+    fillStyle,
+    strokeStyle
+  ) {
+    ctx.beginPath();
+
+    ctx.moveTo(
+      center.x,
+      center.y - tileHeight * 0.5
+    );
+
+    ctx.lineTo(
+      center.x + tileWidth * 0.5,
+      center.y
+    );
+
+    ctx.lineTo(
+      center.x,
+      center.y + tileHeight * 0.5
+    );
+
+    ctx.lineTo(
+      center.x - tileWidth * 0.5,
+      center.y
+    );
+
+    ctx.closePath();
+
+    ctx.fillStyle = fillStyle;
+    ctx.fill();
+
+    ctx.strokeStyle = strokeStyle;
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+
+  function drawWall(gridX, gridY) {
+    const base = project(gridX, gridY);
+
+    const top = project(
+      gridX,
+      gridY,
+      wallHeight
+    );
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+      top.x - tileWidth * 0.5,
+      top.y
+    );
+
+    ctx.lineTo(
+      top.x,
+      top.y + tileHeight * 0.5
+    );
+
+    ctx.lineTo(
+      base.x,
+      base.y + tileHeight * 0.5
+    );
+
+    ctx.lineTo(
+      base.x - tileWidth * 0.5,
+      base.y
+    );
+
+    ctx.closePath();
+
+    ctx.fillStyle =
+      "rgba(0, 96, 118, 0.84)";
+
+    ctx.fill();
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+      top.x,
+      top.y + tileHeight * 0.5
+    );
+
+    ctx.lineTo(
+      top.x + tileWidth * 0.5,
+      top.y
+    );
+
+    ctx.lineTo(
+      base.x + tileWidth * 0.5,
+      base.y
+    );
+
+    ctx.lineTo(
+      base.x,
+      base.y + tileHeight * 0.5
+    );
+
+    ctx.closePath();
+
+    ctx.fillStyle =
+      "rgba(0, 52, 74, 0.90)";
+
+    ctx.fill();
+
+    drawDiamond(
+      top,
+      "rgba(0, 220, 255, 0.92)",
+      "rgba(160, 250, 255, 0.96)"
+    );
+  }
+
+  ctx.save();
+
+  ctx.fillStyle =
+    "rgba(2, 8, 18, 0.86)";
+
+  ctx.strokeStyle =
+    "rgba(0, 234, 255, 0.78)";
+
+  ctx.lineWidth = 1.5;
+
+  ctx.fillRect(
+    panelX,
+    panelY,
+    panelSize,
+    panelSize
+  );
+
+  ctx.strokeRect(
+    panelX,
+    panelY,
+    panelSize,
+    panelSize
+  );
+
+  ctx.save();
+  ctx.beginPath();
+
+  ctx.rect(
+    panelX + 2,
+    panelY + 2,
+    panelSize - 4,
+    panelSize - 4
+  );
+
+  ctx.clip();
+
+  for (
+    let diagonal = -radius * 2;
+    diagonal <= radius * 2;
+    diagonal += 1
+  ) {
+    for (
+      let relativeY = -radius;
+      relativeY <= radius;
+      relativeY += 1
+    ) {
+      const relativeX =
+        diagonal - relativeY;
+
+      if (
+        Math.abs(relativeX) > radius ||
+        Math.abs(relativeY) > radius
+      ) {
+        continue;
+      }
+
+      const mapX =
+        playerCellX + relativeX;
+
+      const mapY =
+        playerCellY + relativeY;
+
+      const insideMap =
+        mapX >= 0 &&
+        mapX < CFG.GRID &&
+        mapY >= 0 &&
+        mapY < CFG.GRID;
+
+      if (!insideMap) {
+        continue;
+      }
+
+      if (map[mapY][mapX] === 1) {
+        drawWall(mapX, mapY);
+      } else {
+        const routeCell =
+          routeCells.has(`${mapX},${mapY}`);
+
+        drawDiamond(
+          project(mapX, mapY),
+          routeCell
+            ? "rgba(255, 128, 28, 0.82)"
+            : "rgba(8, 40, 52, 0.74)",
+          routeCell
+            ? "rgba(255, 220, 120, 0.96)"
+            : "rgba(0, 124, 154, 0.50)"
+        );
+      }
+    }
+  }
+
+  const playerCenter = project(
+    playerCellX,
+    playerCellY,
+    wallHeight * 0.35
+  );
+
+  const markerSize = Math.max(
+    5,
+    tileWidth * 0.26
+  );
+
+  ctx.save();
+
+  ctx.translate(
+    playerCenter.x,
+    playerCenter.y
+  );
+
+  ctx.rotate(
+    player.angle + Math.PI / 4
+  );
+
+ctx.fillStyle = "#ffe066";
+ctx.strokeStyle = "#ffffff";
+ctx.lineWidth = 2;
+ctx.shadowColor = "#00eaff";
+ctx.shadowBlur = 10;
+
+  ctx.beginPath();
+  ctx.moveTo(markerSize, 0);
+
+  ctx.lineTo(
+    -markerSize * 0.7,
+    markerSize * 0.55
+  );
+
+  ctx.lineTo(
+    -markerSize * 0.35,
+    0
+  );
+
+  ctx.lineTo(
+    -markerSize * 0.7,
+    -markerSize * 0.55
+  );
+
+ctx.closePath();
+ctx.fill();
+ctx.stroke();
+
+ctx.restore();
+
+ctx.save();
+
+ctx.fillStyle = "#ffe066";
+ctx.strokeStyle = "rgba(0, 0, 0, 0.9)";
+ctx.lineWidth = 3;
+
+ctx.font =
+  `bold ${Math.max(
+    9,
+    Math.floor(panelSize * 0.05)
+  )}px "Courier New", monospace`;
+
+ctx.textAlign = "center";
+ctx.textBaseline = "bottom";
+
+const playerLabelY =
+  playerCenter.y -
+  markerSize -
+  6;
+
+ctx.strokeText(
+  "YOU",
+  playerCenter.x,
+  playerLabelY
+);
+
+ctx.fillText(
+  "YOU",
+  playerCenter.x,
+  playerLabelY
+);
+
+ctx.restore();
+ctx.restore();
+
+  /*
+     EXIT BEACON
+     Appears when the exit is inside the local map radius.
+  */
+  const exitCellX = Math.floor(goalX);
+  const exitCellY = Math.floor(goalY);
+
+  const exitInsideLocalMap =
+    Math.abs(exitCellX - playerCellX) <= radius &&
+    Math.abs(exitCellY - playerCellY) <= radius;
+
+  if (exitInsideLocalMap) {
+    const exitCenter = project(
+      exitCellX,
+      exitCellY,
+      wallHeight * 0.25
+    );
+
+    const exitPulse =
+      0.65 +
+      0.35 *
+        Math.sin(performance.now() / 180);
+
+    const exitRadius =
+      Math.max(3.5, tileWidth * 0.16);
+
+    ctx.save();
+
+    ctx.globalAlpha = exitPulse;
+    ctx.fillStyle = "#39ff88";
+    ctx.strokeStyle = "#effff6";
+    ctx.lineWidth = 1.5;
+    ctx.shadowColor = "#39ff88";
+    ctx.shadowBlur = 12;
+
+    ctx.beginPath();
+
+    ctx.arc(
+      exitCenter.x,
+      exitCenter.y - tileHeight * 0.7,
+      exitRadius,
+      0,
+      Math.PI * 2
+    );
+
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = "#39ff88";
+    ctx.strokeStyle = "rgba(0, 0, 0, 0.9)";
+    ctx.lineWidth = 3;
+
+    ctx.font =
+      `bold ${Math.max(
+        8,
+        Math.floor(panelSize * 0.045)
+      )}px "Courier New", monospace`;
+
+    ctx.textAlign = "center";
+    ctx.textBaseline = "bottom";
+
+    const exitLabelY =
+      exitCenter.y -
+      tileHeight -
+      exitRadius;
+
+    ctx.strokeText(
+      "EXIT",
+      exitCenter.x,
+      exitLabelY
+    );
+
+    ctx.fillText(
+      "EXIT",
+      exitCenter.x,
+      exitLabelY
+    );
+
+    ctx.restore();
+  }
+
+  /*
+     EXIT COMPASS
+     Rotates relative to the player's facing direction.
+  */
+  const exitWorldAngle = Math.atan2(
+    goalY - player.y,
+    goalX - player.x
+  );
+
+  const relativeExitAngle = Math.atan2(
+    Math.sin(exitWorldAngle - player.angle),
+    Math.cos(exitWorldAngle - player.angle)
+  );
+
+  const compassX =
+    panelX + panelSize - 22;
+
+  const compassY =
+    panelY + 22;
+
+  ctx.save();
+
+  ctx.translate(
+    compassX,
+    compassY
+  );
+
+  ctx.rotate(relativeExitAngle);
+
+  ctx.fillStyle = "#ff9a3d";
+  ctx.strokeStyle = "#fff0c2";
+  ctx.lineWidth = 1.5;
+  ctx.shadowColor = "#ff6a1f";
+  ctx.shadowBlur = 7;
+
+  ctx.beginPath();
+  ctx.moveTo(10, 0);
+  ctx.lineTo(-6, 6);
+  ctx.lineTo(-3, 0);
+  ctx.lineTo(-6, -6);
+  ctx.closePath();
+
+  ctx.fill();
+  ctx.stroke();
+  ctx.restore();
+
+  ctx.save();
+
+  ctx.fillStyle = "#ffb35c";
+
+  ctx.font =
+    `bold ${Math.max(
+      7,
+      Math.floor(panelSize * 0.038)
+    )}px "Courier New", monospace`;
+
+  ctx.textAlign = "center";
+  ctx.textBaseline = "top";
+
+  ctx.fillText(
+    "EXIT",
+    compassX,
+    compassY + 11
+  );
+
+  ctx.restore();
+
+  /*
+     MONSTER PROXIMITY MARKER
+     Appears only while the monster is within the local radius.
+  */
+  const monsterCellX =
+    Math.floor(monster.x);
+
+  const monsterCellY =
+    Math.floor(monster.y);
+
+  const monsterGridDistance = Math.hypot(
+    monster.x - player.x,
+    monster.y - player.y
+  );
+
+  const monsterInsideLocalMap =
+    monsterGridDistance <= radius + 1;
+
+  if (monsterInsideLocalMap) {
+    const monsterCenter = project(
+      monsterCellX,
+      monsterCellY,
+      wallHeight * 0.28
+    );
+
+    const monsterPulse =
+      0.5 +
+      0.5 *
+        Math.sin(performance.now() / 125);
+
+    const monsterRadius =
+      Math.max(5, tileWidth * 0.20);
+
+    ctx.save();
+
+    ctx.globalAlpha =
+      0.65 + monsterPulse * 0.35;
+
+    ctx.fillStyle = "#ff2d78";
+    ctx.strokeStyle = "#ffd0e1";
+    ctx.lineWidth = 1.5;
+    ctx.shadowColor = "#ff2d78";
+    ctx.shadowBlur =
+      8 + monsterPulse * 6;
+
+    ctx.beginPath();
+
+    ctx.arc(
+      monsterCenter.x,
+      monsterCenter.y - tileHeight * 0.3,
+      monsterRadius,
+      0,
+      Math.PI * 2
+    );
+
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.globalAlpha = 1;
+    ctx.shadowBlur = 6;
+    ctx.fillStyle = "#ff6b9f";
+    ctx.strokeStyle = "rgba(0, 0, 0, 0.95)";
+    ctx.lineWidth = 3;
+
+    ctx.font =
+      `bold ${Math.max(
+        8,
+        Math.floor(panelSize * 0.042)
+      )}px "Courier New", monospace`;
+
+    ctx.textAlign = "center";
+    ctx.textBaseline = "bottom";
+
+    const monsterLabelY =
+      monsterCenter.y -
+      tileHeight -
+      monsterRadius;
+
+    ctx.strokeText(
+      "ENEMY",
+      monsterCenter.x,
+      monsterLabelY
+    );
+
+    ctx.fillText(
+      "ENEMY",
+      monsterCenter.x,
+      monsterLabelY
+    );
+
+    ctx.restore();
+  }
+
+  const monsterThreatDistance = Math.hypot(
+    monster.x - player.x,
+    monster.y - player.y
+  );
+
+  if (
+    !monsterInsideLocalMap &&
+    monsterThreatDistance <= radius + 4
+  ) {
+    const monsterWorldAngle = Math.atan2(
+      monster.y - player.y,
+      monster.x - player.x
+    );
+
+    const relativeMonsterAngle = Math.atan2(
+      Math.sin(monsterWorldAngle - player.angle),
+      Math.cos(monsterWorldAngle - player.angle)
+    );
+
+    const threatX = panelX + 22;
+    const threatY = panelY + 22;
+
+    ctx.save();
+    ctx.translate(threatX, threatY);
+    ctx.rotate(relativeMonsterAngle);
+
+    ctx.fillStyle = "#ff2d78";
+    ctx.strokeStyle = "#ffd0e1";
+    ctx.lineWidth = 1.5;
+    ctx.shadowColor = "#ff2d78";
+    ctx.shadowBlur = 8;
+
+    ctx.beginPath();
+    ctx.moveTo(9, 0);
+    ctx.lineTo(-5, 5);
+    ctx.lineTo(-3, 0);
+    ctx.lineTo(-5, -5);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  ctx.fillStyle = "#00eaff";
+
+  ctx.font =
+    `${Math.max(
+      9,
+      Math.floor(panelSize * 0.055)
+    )}px "Courier New", monospace`;
+
+  ctx.textAlign = "left";
+  ctx.textBaseline = "top";
+
+  ctx.fillText(
+    "ORACLE NAV",
+    panelX + 8,
+    panelY + 7
+  );
+
+  ctx.restore();
+}
 
   /* =========================================================
      OVERLAY SCREENS
@@ -1191,6 +2385,7 @@ ctx.fillRect(ox + x * cs, oy + y * cs, Math.ceil(cs), Math.ceil(cs));
     const gd = Math.sqrt((goalX+0.5-player.x)**2 + (goalY+0.5-player.y)**2);
     if (gd < 1.0) {
       gameState = "escaped";
+      setMobileControlsActive(false);
       sendFinalTelemetry("escaped");
     }
 
@@ -1207,6 +2402,7 @@ ctx.fillRect(ox + x * cs, oy + y * cs, Math.ceil(cs), Math.ceil(cs));
   ========================================================= */
 
   function startGame() {
+    setMobileControlsActive(true);
     if (animFrameId) cancelAnimationFrame(animFrameId);
 
     const continuingRun = gameState === "escaped";

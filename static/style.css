@@ -569,3 +569,293 @@ canvas#game {
   outline: 3px solid rgba(0, 234, 255, 0.55);
   outline-offset: 3px;
 }
+
+/* Multicolor infernal shadow figures */
+#bootScreen .shadow-person {
+  opacity: 0.9;
+  will-change: transform, filter;
+}
+
+/* Left outer figure: purple */
+#bootScreen .shadow-one {
+  filter:
+    drop-shadow(0 0 6px rgba(186, 85, 255, 0.98))
+    drop-shadow(0 0 15px rgba(130, 40, 255, 0.78))
+    drop-shadow(0 0 30px rgba(82, 20, 190, 0.55));
+}
+
+/* Left inner figure: red */
+#bootScreen .shadow-two {
+  filt*r:
+    drop-shadow(0 0 6px rgba(255, 64, 40, 0.98))
+    drop-shadow(0 0 15px rgba(255, 22, 35, 0.78))
+    drop-shadow(0 0 30px rgba(175, 0, 36, 0.55));
+}
+
+/* Central figure: yellow and orange */
+#bootScreen .shadow-three {
+  filter:
+    drop-shadow(0 0 7px rgba(255, 238, 92, 1))
+    drop-shadow(0 0 17px rgba(255, 175, 30, 0.88))
+    drop-shadow(0 0 34px rgba(255, 75, 10, 0.62));
+}
+
+/* Right inner figure: red */
+#bootScreen .shadow-four {
+  filter:
+    drop-shadow(0 0 6px rgba(255, 64, 40, 0.98))
+    drop-shadow(0 0 15px rgba(255, 22, 35, 0.78))
+    drop-shadow(0 0 30px rgba(175, 0, 36, 0.55));
+}
+
+/* Right outer figure: purple */
+#bootScreen .shadow-five {
+  filter:
+    drop-shadow(0 0 6px rgba(186, 85, 255, 0.98))
+    drop-shadow(0 0 15px rgba(130, 40, 255, 0.78))
+    drop-shadow(0 0 30px rgba(82, 20, 190, 0.55));
+}
+
+/* Preserve dark silhouette centers */
+#bootScreen .shadow-person::before,
+#bootScreen .shadow-person::after {
+  background-color: rgba(7, 0, 10, 0.96);
+}
+
+/* Colored edge treatment for the purple figures */
+#bootScreen .shadow-one::before,
+#bootScreen .shadow-one::after,
+#bootScreen .shadow-five::before,
+#bootScreen .shadow-five::after {
+  box-shadow:
+    0 0 7px rgba(190, 90, 255, 0.9),
+    0 0 18px rgba(115, 35, 255, 0.66),
+    0 0 32px rgba(70, 15, 175, 0.44);
+}
+
+/* Colored edge treatment for the red figures */
+#bootScreen .shadow-two::before,
+#bootScreen .shadow-two::after,
+#bootScreen .shadow-four::before,
+#bootScreen .shadow-four::after {
+  box-shadow:
+    0 0 7px rgba(255, 75, 42, 0.92),
+    0 0 18px rgba(255, 20, 30, 0.68),
+    0 0 32px rgba(165, 0, 40, 0.46);
+}
+
+/* Brightest edge treatment for the central figure */
+#bootScreen .shadow-three::before,
+#bootScreen .shadow-three::after {
+  box-shadow:
+    0 0 8px rgba(255, 245, 120, 0.98),
+    0 0 20px rgba(255, 178, 30, 0.78),
+    0 0 38px rgba(255, 62, 8, 0.54);
+}
+
+/* Mobile mini-maze toggle */
+.mobile-map-toggle {
+  display: none;
+}
+
+@media (pointer: coarse) {
+  .mobile-map-toggle {
+    position: fixed;
+    right: calc(14px + env(safe-area-inset-right));
+    bottom: calc(14px + env(safe-area-inset-bottom));
+    z-index: 90;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-width: 96px;
+    min-height: 50px;
+    padding: 0 16px;
+
+    border: 1px solid #00eaff;
+    border-radius: 999px;
+
+    color: #071014;
+    background: #00eaff;
+
+    font-family: "Courier New", monospace;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .mobile-map-toggle[aria-pressed="false"] {
+    color: #00eaff;
+    background: rgba(2, 8, 18, 0.9);
+  }
+}
+
+/* Boot screen pointer focus */
+#bootScreen .shadow-layer,
+#bootScreen .shadow-person {
+  pointer-events: none;
+}
+
+#bootScreen .player-name-label,
+#bootScreen .player-name-input,
+#bootScreen .start-button {
+  position: relative;
+  z-index: 30;
+  pointer-events: auto;
+}
+
+#bootScreen .player-name-input {
+  user-select: text;
+  -webkit-user-select: text;
+  touch-action: manipulation;
+  caret-color: #ffe066;
+}
+
+#bootScreen .start-button {
+  touch-action: manipulation;
+}
+
+/* Mobile movement and touch-look controls */
+.mobile-controls {
+  display: none;
+}
+
+@media (pointer: coarse) {
+  html,
+  body {
+    overscroll-behavior: none;
+  }
+
+  body.game-active {
+    overflow: hidden;
+    touch-action: none;
+  }
+
+  body.game-active .mobile-controls {
+    position: fixed;
+    inset: 0;
+    z-index: 70;
+    display: block;
+    pointer-events: none;
+    touch-action: none;
+  }
+
+  .move-joystick {
+    position: absolute;
+    left: calc(20px + env(safe-area-inset-left));
+    bottom: calc(22px + env(safe-area-inset-bottom));
+
+    width: 132px;
+    height: 132px;
+
+    border: 2px solid rgba(0, 234, 255, 0.72);
+    border-radius: 50%;
+
+    background:
+      radial-gradient(
+        circle,
+        rgba(0, 234, 255, 0.15),
+        rgba(2, 8, 18, 0.72) 68%
+      );
+
+    box-shadow:
+      0 0 18px rgba(0, 234, 255, 0.22),
+      inset 0 0 20px rgba(0, 234, 255, 0.12);
+
+    pointer-events: auto;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .move-joystick::before,
+  .move-joystick::after {
+    content: "";
+    position: absolute;
+    pointer-events: none;
+    background: rgba(0, 234, 255, 0.22);
+  }
+
+  .move-joystick::before {
+    top: 50%;
+    left: 14px;
+    right: 14px;
+    height: 1px;
+  }
+
+  .move-joystick::after {
+    top: 14px;
+    bottom: 14px;
+    left: 50%;
+    width: 1px;
+  }
+
+  .move-joystick-knob {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+
+    width: 58px;
+    height: 58px;
+
+    border: 2px solid #ffe066;
+    border-radius: 50%;
+    background: rgba(255, 224, 102, 0.24);
+
+    box-shadow:
+      0 0 14px rgba(255, 224, 102, 0.55),
+      inset 0 0 12px rgba(255, 255, 255, 0.15);
+
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+
+  .look-zone {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 82px;
+    width: 52%;
+
+    pointer-events: auto;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .look-zone::after {
+    content: "SWIPE TO LOOK";
+    position: absolute;
+    right: calc(18px + env(safe-area-inset-right));
+    bottom: calc(72px + env(safe-area-inset-bottom));
+
+    color: rgba(178, 108, 255, 0.72);
+    font-family: "Courier New", monospace;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+
+    pointer-events: none;
+  }
+
+  .mobile-map-toggle {
+    z-index: 100;
+  }
+}
+
+@media (pointer: coarse) and (orientation: portrait) {
+  .move-joystick {
+    width: 118px;
+    height: 118px;
+  }
+
+  .move-joystick-knob {
+    width: 52px;
+    height: 52px;
+  }
+}
