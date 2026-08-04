@@ -569,3 +569,86 @@ canvas#game {
   outline: 3px solid rgba(0, 234, 255, 0.55);
   outline-offset: 3px;
 }
+
+/* Multicolor infernal shadow figures */
+#bootScreen .shadow-person {
+  opacity: 0.9;
+  will-change: transform, filter;
+}
+
+/* Left outer figure: purple */
+#bootScreen .shadow-one {
+  filter:
+    drop-shadow(0 0 6px rgba(186, 85, 255, 0.98))
+    drop-shadow(0 0 15px rgba(130, 40, 255, 0.78))
+    drop-shadow(0 0 30px rgba(82, 20, 190, 0.55));
+}
+
+/* Left inner figure: red */
+#bootScreen .shadow-two {
+  filt*r:
+    drop-shadow(0 0 6px rgba(255, 64, 40, 0.98))
+    drop-shadow(0 0 15px rgba(255, 22, 35, 0.78))
+    drop-shadow(0 0 30px rgba(175, 0, 36, 0.55));
+}
+
+/* Central figure: yellow and orange */
+#bootScreen .shadow-three {
+  filter:
+    drop-shadow(0 0 7px rgba(255, 238, 92, 1))
+    drop-shadow(0 0 17px rgba(255, 175, 30, 0.88))
+    drop-shadow(0 0 34px rgba(255, 75, 10, 0.62));
+}
+
+/* Right inner figure: red */
+#bootScreen .shadow-four {
+  filter:
+    drop-shadow(0 0 6px rgba(255, 64, 40, 0.98))
+    drop-shadow(0 0 15px rgba(255, 22, 35, 0.78))
+    drop-shadow(0 0 30px rgba(175, 0, 36, 0.55));
+}
+
+/* Right outer figure: purple */
+#bootScreen .shadow-five {
+  filter:
+    drop-shadow(0 0 6px rgba(186, 85, 255, 0.98))
+    drop-shadow(0 0 15px rgba(130, 40, 255, 0.78))
+    drop-shadow(0 0 30px rgba(82, 20, 190, 0.55));
+}
+
+/* Preserve dark silhouette centers */
+#bootScreen .shadow-person::before,
+#bootScreen .shadow-person::after {
+  background-color: rgba(7, 0, 10, 0.96);
+}
+
+/* Colored edge treatment for the purple figures */
+#bootScreen .shadow-one::before,
+#bootScreen .shadow-one::after,
+#bootScreen .shadow-five::before,
+#bootScreen .shadow-five::after {
+  box-shadow:
+    0 0 7px rgba(190, 90, 255, 0.9),
+    0 0 18px rgba(115, 35, 255, 0.66),
+    0 0 32px rgba(70, 15, 175, 0.44);
+}
+
+/* Colored edge treatment for the red figures */
+#bootScreen .shadow-two::before,
+#bootScreen .shadow-two::after,
+#bootScreen .shadow-four::before,
+#bootScreen .shadow-four::after {
+  box-shadow:
+    0 0 7px rgba(255, 75, 42, 0.92),
+    0 0 18px rgba(255, 20, 30, 0.68),
+    0 0 32px rgba(165, 0, 40, 0.46);
+}
+
+/* Brightest edge treatment for the central figure */
+#bootScreen .shadow-three::before,
+#bootScreen .shadow-three::after {
+  box-shadow:
+    0 0 8px rgba(255, 245, 120, 0.98),
+    0 0 20px rgba(255, 178, 30, 0.78),
+    0 0 38px rgba(255, 62, 8, 0.54);
+}
