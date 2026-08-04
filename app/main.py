@@ -31,6 +31,11 @@ def serve_index():
     return FileResponse(BASE_DIR / "static" / "index.html")
 
 
+@app.get("/dashboard", include_in_schema=False)
+def serve_dashboard():
+    return FileResponse(BASE_DIR / "static" / "dashboard.html")
+
+
 # ✅ API routes only
 app.include_router(game.router)
 app.include_router(telemetry.router)
