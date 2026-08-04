@@ -1057,44 +1057,363 @@ document.addEventListener("click", () => {
   ========================================================= */
 
 function renderMinimap(W, H) {
-const size = Math.floor(Math.min(W, H) * 0.17);
-const ox = W - size - 10;
-const oy = H - size - 10;
- const cs = size / CFG.GRID;
+  const coarsePointer =
+    window.matchMedia("(pointer: coarse)").matches;
 
-ctx.globalAlpha = 0.45;
-ctx.fillStyle = "#000814";
-ctx.fillRect(ox, oy, size, size);
+  const panelSize = Math.floor(
+    Math.min(W, H) *
+    (coarsePointer ? 0.28 : 0.24)
+  );
 
- for (let y = 0; y < CFG.GRID; y++) { for (let x = 0; x < CFG.GRID; x++) { if (map[y][x] === 1) {
- ctx.fillStyle = "#00eaffcc";
-ctx.fillRect(ox + x * cs, oy + y * cs, Math.ceil(cs), Math.ceil(cs));
- }
- }
- }
+  const margin = coarsePointer ? 14 : 18;
+  const panelX = W - panelSize - margin;
+  const panelY = H - panelSize - margin;
 
- ctx.globalAlpha = 0.9;
+  const radius = coarsePointer ? 4 : 6;
 
- ctx.fillStyle = "#ffffff";
- ctx.fillRect(ox + player.x*cs - 2, oy + player.y*cs - 2, 4, 4);
+  const tileWidth =
+    panelSize / (radius * 2 + 3);
 
- ctx.strokeStyle = "#ffffff";
-  ctx.lineWidth = 1;
- ctx.beginPath();
- ctx.moveTo(ox + player.x*cs, oy + player.y*cs);
- ctx.lineTo(ox + (player.x + Math.cos(player.angle)*2.5)*cs,
- oy + (player.y + Math.sin(player.angle)*2.5)*cs);
- ctx.stroke();
+  const tileHeight = tileWidth * 0.5;
+  const wallHeight = tileHeight * 1.45;
 
- const mp = 0.5 + 0.5 * Math.sin(performance.now() / 180);
- ctx.fillStyle = `rgba(255,0,140,${mp})`;
- ctx.fillRect(ox + monster.x*cs - 2, oy + monster.y*cs - 2, 4, 4);
+  const playerCellX = Math.floor(player.x);
+  const playerCellY = Math.floor(player.y);
 
- ctx.fillStyle = "#39ff14";
- ctx.fillRect(ox + goalX*cs - 2, oy + goalY*cs - 2, 4, 4);
+  const centerX =
+    panelX + panelSize * 0.5;
 
- ctx.globalAlpha = 1;
- }
+  const centerY =
+    panelY + panelSize * 0.56;
+
+  function project(
+    gridX,
+    gridY,
+    elevation = 0
+  ) {
+    const relativeX =
+      gridX - playerCellX;
+
+    const relativeY =
+      gridY - playerCellY;
+
+    return {
+      x:
+        centerX +
+        (relativeX - relativeY) *
+          tileWidth *
+          0.5,
+
+      y:
+        centerY +
+        (relativeX + relativeY) *
+          tileHeight *
+          0.5 -
+        elevation,
+    };
+  }
+
+  function drawDiamond(
+    center,
+    fillStyle,
+    strokeStyle
+  ) {
+    ctx.beginPath();
+
+    ctx.moveTo(
+      center.x,
+      center.y - tileHeight * 0.5
+    );
+
+    ctx.lineTo(
+      center.x + tileWidth * 0.5,
+      center.y
+    );
+
+    ctx.lineTo(
+      center.x,
+      center.y + tileHeight * 0.5
+    );
+
+    ctx.lineTo(
+      center.x - tileWidth * 0.5,
+      center.y
+    );
+
+    ctx.closePath();
+
+    ctx.fillStyle = fillStyle;
+    ctx.fill();
+
+    ctx.strokeStyle = strokeStyle;
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+
+  function drawWall(gridX, gridY) {
+    const base = project(gridX, gridY);
+
+    const top = project(
+      gridX,
+      gridY,
+      wallHeight
+    );
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+      top.x - tileWidth * 0.5,
+      top.y
+    );
+
+    ctx.lineTo(
+      top.x,
+      top.y + tileHeight * 0.5
+    );
+
+    ctx.lineTo(
+      base.x,
+      base.y + tileHeight * 0.5
+    );
+
+    ctx.lineTo(
+      base.x - tileWidth * 0.5,
+      base.y
+    );
+
+    ctx.closePath();
+
+    ctx.fillStyle =
+      "rgba(0, 96, 118, 0.84)";
+
+    ctx.fill();
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+      top.x,
+      top.y + tileHeight * 0.5
+    );
+
+    ctx.lineTo(
+      top.x + tileWidth * 0.5,
+      top.y
+    );
+
+    ctx.lineTo(
+      base.x + tileWidth * 0.5,
+      base.y
+    );
+
+    ctx.lineTo(
+      base.x,
+      base.y + tileHeight * 0.5
+    );
+
+    ctx.closePath();
+
+    ctx.fillStyle =
+      "rgba(0, 52, 74, 0.90)";
+
+    ctx.fill();
+
+    drawDiamond(
+      top,
+      "rgba(0, 220, 255, 0.92)",
+      "rgba(160, 250, 255, 0.96)"
+    );
+  }
+
+  ctx.save();
+
+  ctx.fillStyle =
+    "rgba(2, 8, 18, 0.86)";
+
+  ctx.strokeStyle =
+    "rgba(0, 234, 255, 0.78)";
+
+  ctx.lineWidth = 1.5;
+
+  ctx.fillRect(
+    panelX,
+    panelY,
+    panelSize,
+    panelSize
+  );
+
+  ctx.strokeRect(
+    panelX,
+    panelY,
+    panelSize,
+    panelSize
+  );
+
+  ctx.save();
+  ctx.beginPath();
+
+  ctx.rect(
+    panelX + 2,
+    panelY + 2,
+    panelSize - 4,
+    panelSize - 4
+  );
+
+  ctx.clip();
+
+  for (
+    let diagonal = -radius * 2;
+    diagonal <= radius * 2;
+    diagonal += 1
+  ) {
+    for (
+      let relativeY = -radius;
+      relativeY <= radius;
+      relativeY += 1
+    ) {
+      const relativeX =
+        diagonal - relativeY;
+
+      if (
+        Math.abs(relativeX) > radius ||
+        Math.abs(relativeY) > radius
+      ) {
+        continue;
+      }
+
+      const mapX =
+        playerCellX + relativeX;
+
+      const mapY =
+        playerCellY + relativeY;
+
+      const insideMap =
+        mapX >= 0 &&
+        mapX < CFG.GRID &&
+        mapY >= 0 &&
+        mapY < CFG.GRID;
+
+      if (!insideMap) {
+        continue;
+      }
+
+      if (map[mapY][mapX] === 1) {
+        drawWall(mapX, mapY);
+      } else {
+        drawDiamond(
+          project(mapX, mapY),
+          "rgba(8, 40, 52, 0.74)",
+          "rgba(0, 124, 154, 0.50)"
+        );
+      }
+    }
+  }
+
+  const playerCenter = project(
+    playerCellX,
+    playerCellY,
+    wallHeight * 0.35
+  );
+
+  const markerSize = Math.max(
+    5,
+    tileWidth * 0.26
+  );
+
+  ctx.save();
+
+  ctx.translate(
+    playerCenter.x,
+    playerCenter.y
+  );
+
+  ctx.rotate(
+    player.angle + Math.PI / 4
+  );
+
+ctx.fillStyle = "#ffe066";
+ctx.strokeStyle = "#ffffff";
+ctx.lineWidth = 2;
+ctx.shadowColor = "#00eaff";
+ctx.shadowBlur = 10;
+
+  ctx.beginPath();
+  ctx.moveTo(markerSize, 0);
+
+  ctx.lineTo(
+    -markerSize * 0.7,
+    markerSize * 0.55
+  );
+
+  ctx.lineTo(
+    -markerSize * 0.35,
+    0
+  );
+
+  ctx.lineTo(
+    -markerSize * 0.7,
+    -markerSize * 0.55
+  );
+
+ctx.closePath();
+ctx.fill();
+ctx.stroke();
+
+ctx.restore();
+
+ctx.save();
+
+ctx.fillStyle = "#ffe066";
+ctx.strokeStyle = "rgba(0, 0, 0, 0.9)";
+ctx.lineWidth = 3;
+
+ctx.font =
+  `bold ${Math.max(
+    9,
+    Math.floor(panelSize * 0.05)
+  )}px "Courier New", monospace`;
+
+ctx.textAlign = "center";
+ctx.textBaseline = "bottom";
+
+const playerLabelY =
+  playerCenter.y -
+  markerSize -
+  6;
+
+ctx.strokeText(
+  "YOU",
+  playerCenter.x,
+  playerLabelY
+);
+
+ctx.fillText(
+  "YOU",
+  playerCenter.x,
+  playerLabelY
+);
+
+ctx.restore();
+ctx.restore();
+
+  ctx.fillStyle = "#00eaff";
+
+  ctx.font =
+    `${Math.max(
+      9,
+      Math.floor(panelSize * 0.055)
+    )}px "Courier New", monospace`;
+
+  ctx.textAlign = "left";
+  ctx.textBaseline = "top";
+
+  ctx.fillText(
+    "ORACLE NAV",
+    panelX + 8,
+    panelY + 7
+  );
+
+  ctx.restore();
+}
 
   /* =========================================================
      OVERLAY SCREENS
