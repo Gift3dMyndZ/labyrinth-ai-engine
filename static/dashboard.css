@@ -295,3 +295,28 @@ th {
     transition: none !important;
   }
 }
+
+.run-context-banner {
+  margin: 18px;
+  padding: 18px 22px;
+  border: 1px solid rgba(255, 224, 102, 0.45);
+  border-radius: 18px;
+  color: #ffe066;
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255, 45, 120, 0.18),
+      rgba(0, 234, 255, 0.08)
+    );
+  font-family: "Courier New", monospace;
+}
+
+.run-context-banner h2 {
+  margin: 0 0 8px;
+  color: #ffe066;
+}
+
+.run-context-banner p {
+  margin: 0;
+  color: #f5eaff;
+}

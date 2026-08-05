@@ -200,3 +200,49 @@ window.setInterval(() => {
     refreshDashboard();
   }
 }, 15000);
+
+function renderRunContextBanner() {
+  const params = new URLSearchParams(
+    window.location.search
+  );
+
+  const score = params.get("score");
+  const survival = params.get("survival");
+  const floor = params.get("floor");
+  const outcome = params.get("outcome");
+
+  if (
+    !score &&
+    !survival &&
+    !floor &&
+    !outcome
+  ) {
+    return;
+  }
+
+  if (
+    document.getElementById("runContextBanner")
+  ) {
+    return;
+  }
+
+  const banner =
+    document.createElement("section");
+
+  banner.id = "runContextBanner";
+  banner.className = "run-context-banner";
+
+  banner.innerHTML = `
+    <h2>Latest Run Summary</h2>
+    <p>
+      Outcome: <strong>${outcome || "—"}</strong>
+      • Score: <strong>${score || "—"}</strong>
+      • Survival: <strong>${survival || "—"}s</strong>
+      • Floor: <strong>${floor || "—"}</strong>
+    </p>
+  `;
+
+  document.body.prepend(banner);
+}
+
+renderRunContextBanner();

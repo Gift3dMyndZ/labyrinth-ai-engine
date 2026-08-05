@@ -859,3 +859,57 @@ canvas#game {
     height: 52px;
   }
 }
+
+/* Death-screen executive dashboard action */
+.death-dashboard-button {
+  display: none;
+}
+
+.death-dashboard-button.visible {
+  position: fixed;
+  left: 50%;
+  bottom: calc(34px + env(safe-area-inset-bottom));
+  z-index: 140;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 280px;
+  min-height: 56px;
+  padding: 0 22px;
+
+  border: 1px solid #ffe066;
+  border-radius: 999px;
+
+  color: #0b0710;
+  background:
+    linear-gradient(
+      135deg,
+      #ffe066,
+      #ff9a3d
+    );
+
+  box-shadow:
+    0 0 18px rgba(255, 224, 102, 0.55),
+    0 0 38px rgba(255, 45, 120, 0.22);
+
+  font-family: "Courier New", monospace;
+  font-size: 0.82rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+
+  cursor: pointer;
+  transform: translateX(-50%);
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+@media (max-width: 560px) {
+  .death-dashboard-button.visible {
+    width: calc(100vw - 32px);
+    min-width: 0;
+    font-size: 0.72rem;
+  }
+}

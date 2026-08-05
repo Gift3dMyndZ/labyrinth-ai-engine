@@ -67,6 +67,9 @@
 
   const lookZone =
     document.getElementById("lookZone");
+
+  const deathDashboardButton =
+    document.getElementById("deathDashboardButton");
   /* =========================================================
      GAME STATE
   ========================================================= */
@@ -696,6 +699,58 @@ document.addEventListener(
   }
 );
 
+function buildExecutiveDashboardUrl() {
+  const params = new URLSearchParams({
+    v: "death-summary",
+    score: String(score),
+    survival: survivalTime.toFixed(1),
+    floor: String(floorReached),
+    outcome: gameState,
+  });
+
+  return `/dashboard?${params.toString()}`;
+}
+
+function openExecutiveDashboard() {
+  window.location.href =
+    buildExecutiveDashboardUrl();
+}
+
+function setDeathDashboardButtonVisible(visible) {
+  if (!deathDashboardButton) {
+    return;
+  }
+
+  const shouldShow = Boolean(visible);
+
+  deathDashboardButton.classList.toggle(
+    "visible",
+    shouldShow
+  );
+
+  deathDashboardButton.setAttribute(
+    "aria-hidden",
+    String(!shouldShow)
+  );
+
+  if (shouldShow) {
+    deathDashboardButton.textContent =
+      `VIEW EXECUTIVE DASHBOARD • SCORE ${score}`;
+  }
+}
+
+if (deathDashboardButton) {
+  deathDashboardButton.addEventListener(
+    "pointerdown",
+    event => {
+      event.preventDefault();
+      event.stopPropagation();
+
+      openExecutiveDashboard();
+    }
+  );
+}
+
 document.addEventListener("keydown", e => {
     keys[e.key.toLowerCase()] = true;
 
@@ -709,6 +764,15 @@ document.addEventListener("keydown", e => {
     ) {
       setMinimapVisible(!minimapVisible);
       e.preventDefault();
+    }
+
+    if (
+      e.key.toLowerCase() === "d" &&
+      gameState === "dead"
+    ) {
+      e.preventDefault();
+      openExecutiveDashboard();
+      return;
     }
 
     if (e.key === "Enter") {
@@ -962,6 +1026,12 @@ document.addEventListener("click", () => {
     if (dist < 0.5) {
       gameState = "dead";
       setMobileControlsActive(false);
+      setDeathDashboardButtonVisible(true);
+
+      if (document.pointerLockElement) {
+        document.exitPointerLock();
+      }
+
       sendFinalTelemetry("killed");
     }
   }
@@ -2316,7 +2386,14 @@ ctx.restore();
 
     const bk = 0.5 + 0.5 * Math.sin(performance.now() / 400);
     ctx.fillStyle = `rgba(0,234,255,${bk})`;
-    ctx.fillText("Press ENTER to descend again", W/2, H*0.68);
+    ctx.fillText("Press ENTER to descend again", W/2, H*0.66);
+
+    ctx.fillStyle = "#ffe066";
+    ctx.fillText(
+      "Press D or tap VIEW DASHBOARD for run intelligence",
+      W/2,
+      H*0.73
+    );
     ctx.restore();
   }
 
@@ -2386,6 +2463,7 @@ ctx.restore();
     if (gd < 1.0) {
       gameState = "escaped";
       setMobileControlsActive(false);
+      setDeathDashboardButtonVisible(false);
       sendFinalTelemetry("escaped");
     }
 
@@ -2402,6 +2480,7 @@ ctx.restore();
   ========================================================= */
 
   function startGame() {
+    setDeathDashboardButtonVisible(false);
     setMobileControlsActive(true);
     if (animFrameId) cancelAnimationFrame(animFrameId);
 
